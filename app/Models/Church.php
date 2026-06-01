@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Church extends Model
 {
-    protected $fillable = ['name', 'location', 'district_id'];
+    protected $fillable = ['name', 'location', 'district_id', 'status'];
 
     public function district()
     {
