@@ -1,0 +1,50 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class District extends Model
+{
+    protected $fillable = ['conference_id', 'name'];
+
+    public function conference()
+    {
+        return $this->belongsTo(Conference::class);
+    }
+
+    public function churches()
+    {
+        return $this->hasMany(Church::class);
+    }
+
+    public function users()
+    {
+        return $this->hasMany(User::class);
+    }
+
+    public function events()
+    {
+        return $this->hasMany(DistrictEvent::class);
+    }
+
+    public function tasks()
+    {
+        return $this->hasMany(DistrictTask::class);
+    }
+
+    public function resources()
+    {
+        return $this->hasMany(DistrictResource::class);
+    }
+
+    public function bulletins()
+    {
+        return $this->hasMany(DistrictBulletin::class);
+    }
+
+    public function appraisals()
+    {
+        return $this->hasMany(DistrictAppraisal::class);
+    }
+}

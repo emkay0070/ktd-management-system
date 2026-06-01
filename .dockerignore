@@ -1,0 +1,34 @@
+# System files
+.DS_Store
+Thumbs.db
+
+# Dependencies
+node_modules
+vendor
+
+# Environment variables
+.env
+.env.testing
+
+# Cache and build files
+public/build
+public/hot
+bootstrap/cache/*
+storage/framework/cache/data/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/logs/*
+
+# Testing
+phpunit.xml
+tests
+
+# Git
+.git
+.gitignore
+.github
+
+# Other
+docker-compose.yml
+Dockerfile
+.dockerignore

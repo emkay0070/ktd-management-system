@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: ktd-management-system
+    env: docker
+    dockerContext: .
+    dockerfilePath: Dockerfile
+    plan: free # Use Render's free tier
+    envVars:
+      - key: APP_KEY
+        sync: false
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_URL
+        fromDatabase:
+          name: ktd-db
+          property: connectionString
+      - key: APP_URL
+        fromContext: op.service.url
+      - key: SESSION_DRIVER
+        value: database
+      - key: CACHE_STORE
+        value: database
+      - key: LOG_CHANNEL
+        value: errorlog
+
+databases:
+  - name: ktd-db
+    databaseName: ktd_db
+    plan: free # Note: Render free DBs expire after 90 days
+    user: ktd_user
