@@ -14,18 +14,18 @@ export default function Welcome({ auth }) {
     }, []);
 
     return (
-        <div className="min-h-screen flex flex-col bg-[#0a0a0c] text-[#f0efff] selection:bg-burgundy-500/30 selection:text-white">
+        <div className="min-h-screen flex flex-col selection:bg-burgundy-500/30 selection:text-white" style={{ backgroundColor: '#0a0a0c', color: '#f0efff' }}>
             <Head title="EmPFC - Pathfinder Central" />
 
             {/* Top Navigation */}
-            <header className="flex items-center justify-between px-8 py-6 border-b border-white/5 backdrop-blur-md sticky top-0 z-50 bg-[#0a0a0c]/80">
+            <header className="flex items-center justify-between px-8 py-6 border-b border-white/5 backdrop-blur-md sticky top-0 z-50" style={{ backgroundColor: 'rgba(10, 10, 12, 0.8)' }}>
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-burgundy-600 to-burgundy-800 flex items-center justify-center shadow-[0_0_20px_rgba(155,34,38,0.4)] text-gold-400 border border-white/10">
                         <Tent size={22} />
                     </div>
                     <div>
                         <div className="text-lg font-black text-white leading-none tracking-tight">EmPFC</div>
-                        <div className="text-[10px] color-[#e8ba3a] font-bold letter-spacing-[0.1em] uppercase">COMMAND CENTER</div>
+                        <div className="text-[10px] font-bold tracking-widest uppercase" style={{ color: '#e8ba3a' }}>COMMAND CENTER</div>
                     </div>
                 </div>
 
@@ -64,16 +64,16 @@ export default function Welcome({ auth }) {
                         The Central <span className="text-transparent bg-clip-text bg-gradient-to-r from-burgundy-400 to-gold-400">Pathfinder</span> & Leadership Portal
                     </h1>
                     
-                    <p className="text-lg md:text-xl text-[#a8a8c8] mb-12 max-w-2xl leading-relaxed font-medium">
+                    <p className="text-lg md:text-xl mb-12 max-w-2xl leading-relaxed font-medium" style={{ color: '#a8a8c8' }}>
                         Unified management for the SDA Pathfinder movement. From club directors to parents, co-ordinate the mission with precision.
                     </p>
 
                     {!auth.user && (
-                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full max-w-md animate-fade-in-delayed">
-                            <Link href={route('register')} className="btn btn--primary btn--lg w-full">
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-delayed" style={{ width: '100%', maxWidth: '448px' }}>
+                            <Link href={route('register')} className="btn btn--primary btn--lg w-full" style={{ justifyContent: 'center' }}>
                                 Get Started Today <ArrowRight size={18} className="ml-2" />
                             </Link>
-                            <Link href={route('login')} className="btn btn--secondary btn--lg w-full">
+                            <Link href={route('login')} className="btn btn--secondary btn--lg w-full" style={{ justifyContent: 'center' }}>
                                 Sign In
                             </Link>
                         </div>
@@ -94,12 +94,12 @@ export default function Welcome({ auth }) {
                             { role: 'Pathfinders', icon: Star, desc: 'Access your records, class assignments, and district certifications.' },
                             { role: 'Parents', icon: Users, desc: 'One-click family linking to track your children across the district.' }
                         ].map((feat, i) => (
-                            <div key={feat.role} className="group p-8 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/[0.08] hover:border-burgundy-500/30 transition-all duration-300">
-                                <div className="w-12 h-12 rounded-2xl bg-burgundy-900/50 flex items-center justify-center text-burgundy-400 mb-6 group-hover:scale-110 group-hover:bg-burgundy-500 group-hover:text-white transition-all">
+                            <div key={feat.role} className="group p-8 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/[0.08] transition-all duration-300">
+                                <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-6 transition-all" style={{ backgroundColor: 'rgba(59, 10, 10, 0.5)', color: '#d46b70' }}>
                                     <feat.icon size={24} />
                                 </div>
                                 <h4 className="text-lg font-bold text-white mb-3 uppercase tracking-tight">{feat.role}</h4>
-                                <p className="text-sm text-[#6b6b88] leading-relaxed line-clamp-3 font-medium">
+                                <p className="text-sm leading-relaxed font-medium" style={{ color: '#6b6b88' }}>
                                     {feat.desc}
                                 </p>
                             </div>
