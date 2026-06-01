@@ -29,6 +29,11 @@ Route::get('/', function () {
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/onboarding', [\App\Http\Controllers\OnboardingController::class, 'index'])->name('onboarding.index');
+    Route::post('/onboarding', [\App\Http\Controllers\OnboardingController::class, 'store'])->name('onboarding.store');
+});
+
+Route::middleware(['auth', 'verified', 'onboarded'])->group(function () {
     Route::get('/dashboard/{section?}', [DashboardController::class, 'index'])->name('dashboard');
 
     // District view (read-only)

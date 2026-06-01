@@ -66,7 +66,7 @@ class RegisteredUserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'status' => 'active', // Identity is active
+            'status' => 'pending_onboarding', // Identity needs onboarding
             'church_id' => $churchId,
             'avatar_path' => $avatarPath,
         ]);

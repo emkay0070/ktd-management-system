@@ -27,7 +27,15 @@ class User extends Authenticatable
         'avatar_path',
     ];
 
-    protected $appends = ['avatar_url', 'role_names', 'permission_names'];
+    protected $appends = ['avatar_url', 'role_names', 'permission_names', 'role'];
+
+    /**
+     * Fallback for legacy $user->role checks.
+     */
+    public function getRoleAttribute(): string
+    {
+        return $this->active_context;
+    }
 
     /**
      * Active context role (for multi-role switcher). Stored in session.
