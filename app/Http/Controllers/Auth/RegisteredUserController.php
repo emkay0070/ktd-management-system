@@ -19,10 +19,16 @@ class RegisteredUserController extends Controller
     /**
      * Display the registration view.
      */
-    public function create(): Response
+    public function create(?string $intent = null): Response
     {
+        $validIntents = ['pathfinder', 'parent', 'leader', 'district'];
+        if ($intent && !in_array($intent, $validIntents)) {
+            return redirect()->route('register');
+        }
+
         return Inertia::render('Auth/Register', [
             'churches' => \App\Models\Church::orderBy('name')->get(['id', 'name', 'location']),
+            'intent' => $intent,
         ]);
     }
 

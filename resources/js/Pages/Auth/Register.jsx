@@ -1,28 +1,31 @@
 import { useEffect, useState, useMemo } from 'react';
 import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { Shield, GraduationCap, Users, UserCircle, Search, Plus, Check, ChevronRight, Image as ImageIcon } from 'lucide-react';
+import { Search, Plus, Check, ChevronRight, UserCircle, Users, Shield, GraduationCap, ArrowLeft } from 'lucide-react';
 
-export default function Register({ churches = [] }) {
-    const [step, setStep] = useState(1);
+export default function Register({ churches = [], intent = null }) {
     const [churchSearch, setChurchSearch] = useState('');
     const [showChurchDropdown, setShowChurchDropdown] = useState(false);
+
+    // Map intent to database role names
+    const roleMapping = {
+        'pathfinder': 'pathfinder',
+        'parent': 'parent',
+        'leader': 'director',
+        'district': 'district_official'
+    };
+
+    const dbRole = intent ? (roleMapping[intent] || 'observer') : 'observer';
 
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         email: '',
         password: '',
         password_confirmation: '',
-        role: 'director', // Default
+        role: dbRole,
         church_id: '',
         new_church_name: '',
-        is_master_guide: false,
-        club_role: '',
-        avatar: null,
     });
 
     useEffect(() => {
@@ -57,221 +60,246 @@ export default function Register({ churches = [] }) {
         post(route('register'));
     };
 
-    const roles = [
-        { id: 'pathfinder', label: 'I am a Pathfinder', icon: UserCircle, desc: 'Joining a local club' },
-        { id: 'parent', label: 'I am a Parent/Guardian', icon: Users, desc: 'Managing children' },
-        { id: 'director', label: 'I am a Club Leader', icon: Shield, desc: 'Director or Master Guide' },
-        { id: 'district_official', label: 'District/Conference official', icon: GraduationCap, desc: 'Higher level oversight' },
-        { id: 'observer', label: 'I’m just exploring / Other', icon: Search, desc: 'Not listed above' },
-    ];
+    // Selection View if no intent is provided
+    if (!intent) {
+        const intentOptions = [
+            { id: 'pathfinder', label: 'I\'m joining a club', icon: UserCircle, desc: 'Find your club, track classes, and manage your pathfinder journey.', color: 'text-burgundy-400' },
+            { id: 'parent', label: 'I\'m registering my child', icon: Users, desc: 'Track your children, view events, and manage club payments.', color: 'text-blue-400' },
+            { id: 'leader', label: 'I\'m managing a club', icon: Shield, desc: 'Manage members, track attendance, and run camp registrations.', color: 'text-gold-400' },
+            { id: 'district', label: 'I\'m a district/conference officer', icon: GraduationCap, desc: 'Monitor clubs, view reports, and approve leadership requests.', color: 'text-purple-400' },
+        ];
+
+        return (
+            <GuestLayout>
+                <Head title="Join EmPFC" />
+                <div className="mb-8 text-center">
+                    <h1 className="text-3xl font-black text-white mb-3">Join the Platform</h1>
+                    <p className="text-sm text-gray-400 max-w-md mx-auto">Select how you will be using EmPFC to get a tailored onboarding experience.</p>
+                </div>
+
+                <div className="space-y-4">
+                    {intentOptions.map((opt) => (
+                        <Link
+                            key={opt.id}
+                            href={route('register', { intent: opt.id })}
+                            className="flex items-start gap-4 p-5 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-left group"
+                        >
+                            <div className={`p-3 rounded-xl bg-white/5 ${opt.color} group-hover:scale-110 transition-transform`}>
+                                <opt.icon size={24} />
+                            </div>
+                            <div className="flex-1 pt-1">
+                                <div className="font-bold text-white text-lg tracking-tight mb-1">{opt.label}</div>
+                                <div className="text-xs text-gray-400 leading-relaxed">{opt.desc}</div>
+                            </div>
+                            <div className="pt-2 text-gray-600 group-hover:text-white transition-colors">
+                                <ChevronRight size={20} />
+                            </div>
+                        </Link>
+                    ))}
+                </div>
+
+                <div className="mt-8 text-center">
+                    <Link href={route('login')} className="text-xs font-bold text-gray-500 hover:text-white transition-colors uppercase tracking-widest">
+                        Already have an account? Sign In
+                    </Link>
+                </div>
+            </GuestLayout>
+        );
+    }
+
+    // Specific Intent Configs
+    const intentConfig = {
+        pathfinder: {
+            title: 'Club Member Registration',
+            subtitle: 'Create your account to start your journey.',
+            benefits: ['Find your club', 'Choose age group', 'Track classes'],
+        },
+        parent: {
+            title: 'Parent / Guardian Account',
+            subtitle: 'Create an account to manage your family.',
+            benefits: ['Track your children', 'Receive announcements', 'Manage payments'],
+        },
+        leader: {
+            title: 'Club Leader Registration',
+            subtitle: 'Request management access for your club.',
+            benefits: ['Manage members', 'Track attendance', 'Generate reports'],
+        },
+        district: {
+            title: 'District / Conference Registration',
+            subtitle: 'Register for higher-level oversight.',
+            benefits: ['Monitor clubs', 'Track membership', 'View district reports'],
+        }
+    };
+
+    const currentConfig = intentConfig[intent] || intentConfig.pathfinder;
 
     return (
         <GuestLayout>
-            <Head title="Join EmPFC" />
+            <Head title={`Register - ${currentConfig.title}`} />
 
-            <div className="mb-8">
-                <h1 className="text-2xl font-black text-white mb-2">Join the Platform</h1>
-                <p className="text-sm text-gray-400">Step {step} of 2: {step === 1 ? 'Select your purpose' : 'Account details'}</p>
-                <div className="flex gap-2 mt-4">
-                    <div className={`h-1 flex-1 rounded-full ${step >= 1 ? 'bg-burgundy-500' : 'bg-white/10'}`}></div>
-                    <div className={`h-1 flex-1 rounded-full ${step >= 2 ? 'bg-burgundy-500' : 'bg-white/10'}`}></div>
-                </div>
+            <div className="mb-6">
+                <Link href={route('register')} className="inline-flex items-center gap-2 text-xs font-bold text-gray-500 hover:text-white transition-colors uppercase tracking-widest mb-6">
+                    <ArrowLeft size={14} /> Back to options
+                </Link>
+                <h1 className="text-2xl font-black text-white mb-2">{currentConfig.title}</h1>
+                <p className="text-sm text-gray-400">{currentConfig.subtitle}</p>
             </div>
 
-            <form onSubmit={submit} className="mt-8">
-                {step === 1 && (
-                    <div className="space-y-4">
-                        <div className="flex flex-col gap-3">
-                            {roles.map((role) => (
-                                <button
-                                    key={role.id}
-                                    type="button"
-                                    onClick={() => setData('role', role.id)}
-                                    className={`flex items-center gap-4 p-5 rounded-2xl border transition-all text-left ${
-                                        data.role === role.id 
-                                            ? 'bg-burgundy-500\/10 border-burgundy-500 shadow-xl' 
-                                            : 'bg-white/5 border-white/10 hover:bg-white/10'
-                                    }`}
-                                >
-                                    <div className={`p-3 rounded-xl ${data.role === role.id ? 'bg-burgundy-500 text-white' : 'bg-white/10 text-gray-500'}`}>
-                                        <role.icon size={20} />
-                                    </div>
-                                    <div className="flex-1">
-                                        <div className="font-bold text-white text-sm tracking-tight">{role.label}</div>
-                                        <div className="text-[11px] text-gray-500 font-medium">{role.desc}</div>
-                                    </div>
-                                    {data.role === role.id && (
-                                        <div className="h-6 w-6 bg-burgundy-500 rounded-full flex items-center justify-center text-white scale-110">
-                                            <Check size={14} strokeWidth={4} />
-                                        </div>
-                                    )}
-                                </button>
-                            ))}
-                        </div>
+            {/* Value Proposition Box */}
+            <div className="mb-8 p-4 bg-burgundy-500/10 border border-burgundy-500/20 rounded-2xl">
+                <div className="text-[10px] font-black uppercase tracking-widest text-burgundy-400 mb-3">What you can do:</div>
+                <ul className="space-y-2">
+                    {currentConfig.benefits.map((benefit, i) => (
+                        <li key={i} className="flex items-center gap-2 text-sm text-gray-300">
+                            <Check size={14} className="text-burgundy-500" /> {benefit}
+                        </li>
+                    ))}
+                </ul>
+            </div>
 
-                        <button 
-                            type="button" 
-                            className="w-full mt-6 py-4 bg-burgundy-500 hover:bg-burgundy-400 text-white font-black uppercase tracking-widest text-xs rounded-xl shadow-xl transition-all flex items-center justify-center gap-2"
-                            onClick={() => setStep(2)}
-                        >
-                            Continue <ChevronRight size={16} />
-                        </button>
+            <form onSubmit={submit} className="space-y-6">
+                {/* Basic Info */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div className="space-y-1.5">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Full Name</label>
+                        <input
+                            id="name"
+                            value={data.name}
+                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:border-burgundy-500 focus:bg-white/10 transition-all outline-none"
+                            onChange={(e) => setData('name', e.target.value)}
+                            placeholder="Enter full name"
+                            required
+                        />
+                        <InputError message={errors.name} className="mt-1" />
                     </div>
-                )}
+                    <div className="space-y-1.5">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Email Address</label>
+                        <input
+                            id="email"
+                            type="email"
+                            value={data.email}
+                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:border-burgundy-500 focus:bg-white/10 transition-all outline-none"
+                            onChange={(e) => setData('email', e.target.value)}
+                            placeholder="your@email.com"
+                            required
+                        />
+                        <InputError message={errors.email} className="mt-1" />
+                    </div>
+                </div>
 
-                {step === 2 && (
-                    <div className="space-y-6">
-                        {/* Basic Info */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                            <div className="space-y-1.5">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Full Name</label>
-                                <input
-                                    id="name"
-                                    value={data.name}
-                                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:border-burgundy-500 focus:bg-white/10 transition-all outline-none"
-                                    onChange={(e) => setData('name', e.target.value)}
-                                    placeholder="Enter full name"
-                                    required
-                                />
-                                <InputError message={errors.name} className="mt-1" />
-                            </div>
-                            <div className="space-y-1.5">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Email Address</label>
-                                <input
-                                    id="email"
-                                    type="email"
-                                    value={data.email}
-                                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:border-burgundy-500 focus:bg-white/10 transition-all outline-none"
-                                    onChange={(e) => setData('email', e.target.value)}
-                                    placeholder="your@email.com"
-                                    required
-                                />
-                                <InputError message={errors.email} className="mt-1" />
-                            </div>
-                        </div>
-
-                        {/* Church Search */}
-                        <div className="relative space-y-1.5">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Local Church / Club</label>
-                            <div className="relative">
-                                <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600" />
-                                <input
-                                    value={churchSearch}
-                                    placeholder="Search your church or region..."
-                                    className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:border-burgundy-500 focus:bg-white/10 transition-all outline-none"
-                                    onChange={(e) => {
-                                        setChurchSearch(e.target.value);
-                                        setShowChurchDropdown(true);
-                                    }}
-                                />
+                {/* Church Search (Always needed for linking) */}
+                <div className="relative space-y-1.5">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">
+                        {intent === 'district' ? 'Primary Church / District Base' : 'Local Church / Club'}
+                    </label>
+                    <div className="relative">
+                        <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600" />
+                        <input
+                            value={churchSearch}
+                            placeholder="Search your church or region..."
+                            className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:border-burgundy-500 focus:bg-white/10 transition-all outline-none"
+                            onChange={(e) => {
+                                setChurchSearch(e.target.value);
+                                setShowChurchDropdown(true);
+                            }}
+                        />
+                    </div>
+                    
+                    {showChurchDropdown && (churchSearch.length > 0) && (
+                        <div className="absolute z-50 w-full mt-2 bg-surface-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-xl">
+                            <div className="max-h-60 overflow-y-auto">
+                                {filteredChurches.map(church => (
+                                    <button
+                                        key={church.id}
+                                        type="button"
+                                        className="w-full px-5 py-4 text-left hover:bg-white/5 border-b border-white/5 transition-colors flex justify-between items-center group"
+                                        onClick={() => handleSelectChurch(church)}
+                                    >
+                                        <div>
+                                            <div className="text-sm font-bold text-white group-hover:text-gold-500 transition-colors">{church.name}</div>
+                                            <div className="text-[10px] text-gray-600 uppercase font-black tracking-widest mt-0.5">{church.location || 'Uganda, Central'}</div>
+                                        </div>
+                                        <ChevronRight size={14} className="text-gray-700" />
+                                    </button>
+                                ))}
                             </div>
                             
-                            {showChurchDropdown && (churchSearch.length > 0) && (
-                                <div className="absolute z-50 w-full mt-2 bg-surface-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-xl">
-                                    <div className="max-h-60 overflow-y-auto">
-                                        {filteredChurches.map(church => (
-                                            <button
-                                                key={church.id}
-                                                type="button"
-                                                className="w-full px-5 py-4 text-left hover:bg-white/5 border-b border-white/5 transition-colors flex justify-between items-center group"
-                                                onClick={() => handleSelectChurch(church)}
-                                            >
-                                                <div>
-                                                    <div className="text-sm font-bold text-white group-hover:text-gold-500 transition-colors">{church.name}</div>
-                                                    <div className="text-[10px] text-gray-600 uppercase font-black tracking-widest mt-0.5">{church.location || 'Uganda, Central'}</div>
-                                                </div>
-                                                <ChevronRight size={14} className="text-gray-700" />
-                                            </button>
-                                        ))}
-                                    </div>
-                                    
-                                    <button
-                                        type="button"
-                                        className="w-full px-5 py-4 text-left bg-burgundy-500\/10 hover:bg-burgundy-500\/20 transition-all flex items-center gap-4"
-                                        onClick={handleAddNewChurch}
-                                    >
-                                        <div className="h-8 w-8 bg-burgundy-500 rounded-lg flex items-center justify-center text-white">
-                                            <Plus size={16} />
-                                        </div>
-                                        <div>
-                                            <div className="text-sm font-black text-burgundy-400">Can't find "{churchSearch}"?</div>
-                                            <div className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Request registration for this club</div>
-                                        </div>
-                                    </button>
-                                </div>
-                            )}
-
-                            {data.church_id && (
-                                <div className="mt-3 p-3 bg-white/10 border border-white/20 rounded-xl flex items-center gap-2 text-[10px] font-black text-white uppercase tracking-widest">
-                                    <Check size={14} strokeWidth={3} /> Verified Club: {churchSearch}
-                                </div>
-                            )}
-                            {data.new_church_name && (
-                                <div className="mt-3 p-3 bg-burgundy-500\/10 border border-burgundy-500\/20 rounded-xl flex items-center gap-2 text-[10px] font-black text-burgundy-400 uppercase tracking-widest">
-                                    <Plus size={14} strokeWidth={3} /> Registration Requested: {data.new_church_name}
-                                </div>
-                            )}
-                            <InputError message={errors.church_id} className="mt-1" />
-                        </div>
-
-                        {/* Password */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                            <div className="space-y-1.5">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Create Password</label>
-                                <input
-                                    id="password"
-                                    type="password"
-                                    value={data.password}
-                                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:border-burgundy-500 transition-all outline-none"
-                                    onChange={(e) => setData('password', e.target.value)}
-                                    required
-                                />
-                                <InputError message={errors.password} className="mt-1" />
-                            </div>
-                            <div className="space-y-1.5">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Confirm Secret</label>
-                                <input
-                                    id="password_confirmation"
-                                    type="password"
-                                    value={data.password_confirmation}
-                                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:border-burgundy-500 transition-all outline-none"
-                                    onChange={(e) => setData('password_confirmation', e.target.value)}
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        {/* Footer Actions */}
-                        <div className="pt-6 border-t border-white/5 space-y-5">
-                            <div className="flex items-center justify-between">
-                                <button 
-                                    type="button" 
-                                    onClick={() => setStep(1)}
-                                    className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-white transition-colors"
-                                >
-                                    ← Back to Selection
-                                </button>
-
-                                <Link
-                                    href={route('login')}
-                                    className="text-[10px] font-black uppercase tracking-widest text-gold-500 hover:text-white transition-colors"
-                                >
-                                    Already a member?
-                                </Link>
-                            </div>
-
-                            <button 
-                                type="submit"
-                                disabled={processing}
-                                className="w-full py-5 bg-gradient-to-r from-burgundy-600 to-burgundy-700 hover:from-burgundy-500 hover:to-burgundy-600 text-white font-black uppercase tracking-[0.2em] text-xs rounded-2xl shadow-2xl transition-all border border-white/5 disabled:opacity-50"
+                            <button
+                                type="button"
+                                className="w-full px-5 py-4 text-left bg-burgundy-500\/10 hover:bg-burgundy-500\/20 transition-all flex items-center gap-4"
+                                onClick={handleAddNewChurch}
                             >
-                                {processing ? 'Initializing Profile...' : 'Complete Secure Registration'}
+                                <div className="h-8 w-8 bg-burgundy-500 rounded-lg flex items-center justify-center text-white">
+                                    <Plus size={16} />
+                                </div>
+                                <div>
+                                    <div className="text-sm font-black text-burgundy-400">Can't find "{churchSearch}"?</div>
+                                    <div className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Request registration for this club</div>
+                                </div>
                             </button>
                         </div>
-                    </div>
-                )}
-            </form>
+                    )}
 
+                    {data.church_id && (
+                        <div className="mt-3 p-3 bg-white/10 border border-white/20 rounded-xl flex items-center gap-2 text-[10px] font-black text-white uppercase tracking-widest">
+                            <Check size={14} strokeWidth={3} /> Verified: {churchSearch}
+                        </div>
+                    )}
+                    {data.new_church_name && (
+                        <div className="mt-3 p-3 bg-burgundy-500\/10 border border-burgundy-500\/20 rounded-xl flex items-center gap-2 text-[10px] font-black text-burgundy-400 uppercase tracking-widest">
+                            <Plus size={14} strokeWidth={3} /> Requesting: {data.new_church_name}
+                        </div>
+                    )}
+                    <InputError message={errors.church_id} className="mt-1" />
+                </div>
+
+                {/* Password */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div className="space-y-1.5">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Create Password</label>
+                        <input
+                            id="password"
+                            type="password"
+                            value={data.password}
+                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:border-burgundy-500 transition-all outline-none"
+                            onChange={(e) => setData('password', e.target.value)}
+                            required
+                        />
+                        <InputError message={errors.password} className="mt-1" />
+                    </div>
+                    <div className="space-y-1.5">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Confirm Secret</label>
+                        <input
+                            id="password_confirmation"
+                            type="password"
+                            value={data.password_confirmation}
+                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:border-burgundy-500 transition-all outline-none"
+                            onChange={(e) => setData('password_confirmation', e.target.value)}
+                            required
+                        />
+                    </div>
+                </div>
+
+                {/* Footer Actions */}
+                <div className="pt-6 border-t border-white/5 space-y-5">
+                    <div className="flex items-center justify-between">
+                        <Link
+                            href={route('login')}
+                            className="text-[10px] font-black uppercase tracking-widest text-gold-500 hover:text-white transition-colors"
+                        >
+                            Already a member?
+                        </Link>
+                    </div>
+
+                    <button 
+                        type="submit"
+                        disabled={processing}
+                        className="w-full py-5 bg-gradient-to-r from-burgundy-600 to-burgundy-700 hover:from-burgundy-500 hover:to-burgundy-600 text-white font-black uppercase tracking-[0.2em] text-xs rounded-2xl shadow-2xl transition-all border border-white/5 disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                        {processing ? 'Processing...' : 'Complete Registration'} <ChevronRight size={16} />
+                    </button>
+                </div>
+            </form>
         </GuestLayout>
     );
 }
