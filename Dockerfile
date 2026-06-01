@@ -59,7 +59,7 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 # Create a bash script to run startup logic (migrations, caches)
 RUN echo '#!/bin/bash\n\
 php artisan optimize\n\
-php artisan migrate --force\n\
+php artisan migrate --force || true\n\
 php artisan storage:link\n\
 chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache\n\
 apache2-foreground' > /usr/local/bin/start-container \
