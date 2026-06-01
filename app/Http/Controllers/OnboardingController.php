@@ -46,14 +46,24 @@ class OnboardingController extends Controller
                 'current_class' => 'required|string',
             ]);
 
-            Pathfinder::create([
+            $dob = \Carbon\Carbon::parse($request->dob);
+            $age = $dob->age;
+
+            $pathfinder = Pathfinder::create([
                 'user_id' => $user->id,
                 'name' => $user->name,
                 'church_id' => $user->church_id,
-                'dob' => $request->dob,
+                'age' => $age,
                 'gender' => $request->gender,
                 // Additional pathfinder fields...
             ]);
+
+            $class = \App\Models\PathfinderClass::firstOrCreate(['name' => $request->current_class]);
+            \App\Models\ClassAssignment::create([
+                'pathfinder_id' => $pathfinder->id,
+                'class_id' => $class->id,
+            ]);
+
             $user->status = 'active';
             $user->save();
         } elseif ($roleName === 'parent') {
@@ -74,7 +84,6 @@ class OnboardingController extends Controller
                 'user_id' => $user->id,
                 'full_name' => $user->name,
                 'church_id' => $user->church_id,
-                'investiture_year' => $request->investiture_year,
             ]);
             $user->status = 'active';
             $user->save();
