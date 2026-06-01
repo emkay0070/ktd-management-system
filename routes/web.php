@@ -5,6 +5,8 @@ use App\Http\Controllers\ClubOperationsController;
 use App\Http\Controllers\ClubViewerController;
 use App\Http\Controllers\CommitteeController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\VerificationController;
+
 use App\Models\Church;
 use App\Http\Controllers\DistrictCommitteeController;
 use App\Http\Controllers\DistrictEventController;
@@ -118,6 +120,17 @@ Route::middleware(['auth', 'verified', 'onboarded'])->group(function () {
     // ── Role Context Switcher ───────────────────────────────────────────────
     Route::post('/role/switch-context', [\App\Http\Controllers\RoleContextController::class, 'switch'])
         ->name('role.switch_context');
+
+    // ── Super Admin — Verification Actions ──────────────────────────────────
+    Route::post('/admin/churches/{church}/approve', [VerificationController::class, 'approveChurch'])
+        ->name('verification.churches.approve');
+    Route::post('/admin/churches/{church}/reject', [VerificationController::class, 'rejectChurch'])
+        ->name('verification.churches.reject');
+    Route::post('/admin/roles/{user}/approve', [VerificationController::class, 'approveRole'])
+        ->name('verification.roles.approve');
+    Route::post('/admin/roles/{user}/reject', [VerificationController::class, 'rejectRole'])
+        ->name('verification.roles.reject');
+
 
     // ── Church Search API (for registration wizard) ─────────────────────────
     Route::get('/api/churches/search', function (\Illuminate\Http\Request $request) {

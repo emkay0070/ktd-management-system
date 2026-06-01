@@ -28,6 +28,11 @@ export default function SetupWizard({ user, roles = [], state = {} }) {
         child_name: '',
     });
 
+    const activateAndGo = (e) => {
+        e.preventDefault();
+        post(route('onboarding.store'));
+    };
+
     const submitIntent = (e) => {
         e.preventDefault();
         post(route('dashboard')); // The service handles the status changes
@@ -164,11 +169,15 @@ export default function SetupWizard({ user, roles = [], state = {} }) {
                                 <h3 className="text-xl font-bold text-white">Setup Complete!</h3>
                                 <p className="text-sm text-gray-400">Your profile is now tailored to your involvement in the district.</p>
                             </div>
-                            <Link href={route('dashboard')} className="btn btn--primary btn--full py-5 text-base" onClick={(e) => {
-                                // In a real app, hit an endpoint to set status = 'active'
-                            }}>
-                                Go to Dashboard
-                            </Link>
+                            <form onSubmit={activateAndGo}>
+                                <button
+                                    type="submit"
+                                    disabled={processing}
+                                    className="btn btn--primary btn--full py-5 text-base disabled:opacity-50"
+                                >
+                                    {processing ? 'Loading...' : 'Go to Dashboard'}
+                                </button>
+                            </form>
                         </div>
                     )}
 
