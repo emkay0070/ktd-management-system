@@ -105,7 +105,7 @@ export default function OnboardingIndex({ role, church_status, church_name }) {
                             <p className="text-xs text-gray-400">Complete your leadership profile.</p>
                         </div>
                     </div>
-                    
+
                     <div className="space-y-1.5">
                         <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Year of Investiture (Optional)</label>
                         <input
@@ -120,9 +120,9 @@ export default function OnboardingIndex({ role, church_status, church_name }) {
             );
         }
 
-        if (role === 'director' || role === 'district_official') {
+        if (role === 'director' || role === 'district_official') { 
             const roleDisplay = role === 'director' ? 'Club Leader' : 'District Official';
-            
+
             return (
                 <div className="space-y-5">
                     <div className="flex flex-col items-center justify-center text-center p-8 bg-white/5 border border-white/10 rounded-2xl">

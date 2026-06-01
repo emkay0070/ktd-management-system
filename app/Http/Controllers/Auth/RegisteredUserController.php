@@ -91,7 +91,7 @@ class RegisteredUserController extends Controller
         }
 
         // 4. Role-specific profile initialization
-        if ($request->role === 'parent' || $request->has('is_master_guide')) {
+        if ($request->role === 'parent') {
             \App\Models\ParentProfile::create([
                 'user_id' => $user->id,
                 'is_master_guide' => $request->is_master_guide ?? false,
