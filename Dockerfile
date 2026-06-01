@@ -48,9 +48,12 @@ RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
 # Enable .htaccess overrides for Laravel routing
 RUN sed -i 's/AllowOverride None/AllowOverride All/g' /etc/apache2/apache2.conf
 
+# Set default port for Render
+ENV PORT=80
+
 # Change Apache's port configuration to listen on the dynamic $PORT provided by Render
-RUN sed -i 's/Listen 80/Listen ${PORT:-80}/g' /etc/apache2/ports.conf
-RUN sed -i 's/:80/:${PORT:-80}/g' /etc/apache2/sites-available/000-default.conf
+RUN sed -i 's/Listen 80/Listen ${PORT}/g' /etc/apache2/ports.conf
+RUN sed -i 's/:80/:${PORT}/g' /etc/apache2/sites-available/000-default.conf
 RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
 # Give the web server permissions over directories Laravel needs to write to
@@ -58,8 +61,10 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 
 # Create a bash script to run startup logic (migrations, caches)
 RUN echo '#!/bin/bash\n\
-php artisan optimize\n\
-php artisan migrate --force || true\n\
+php artisan config:cache\n\
+php artisan route:cache\n\
+php artisan view:cache\n\
+php artisan migrate --force\n\
 php artisan storage:link\n\
 chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache\n\
 apache2-foreground' > /usr/local/bin/start-container \
