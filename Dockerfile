@@ -61,6 +61,9 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 
 # Create a bash script to run startup logic (migrations, caches)
 RUN echo '#!/bin/bash\n\
+php artisan config:clear\n\
+php artisan cache:clear\n\
+php artisan view:clear\n\
 php artisan config:cache\n\
 php artisan route:cache\n\
 php artisan view:cache\n\
