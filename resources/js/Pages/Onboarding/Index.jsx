@@ -121,6 +121,8 @@ export default function OnboardingIndex({ role, church_status, church_name }) {
         }
 
         if (role === 'director' || role === 'district_official') {
+            const roleDisplay = role === 'director' ? 'Club Leader' : 'District Official';
+            
             return (
                 <div className="space-y-5">
                     <div className="flex flex-col items-center justify-center text-center p-8 bg-white/5 border border-white/10 rounded-2xl">
@@ -129,7 +131,7 @@ export default function OnboardingIndex({ role, church_status, church_name }) {
                         </div>
                         <h3 className="text-lg font-bold text-white mb-2">Pending Verification</h3>
                         <p className="text-sm text-gray-400 max-w-sm">
-                            Your account has been created successfully. Because you selected a leadership role ({role.replace('_', ' ')}), an administrator must verify and approve your status before you gain full access to the club management features.
+                            Your account has been created successfully. Because you selected a leadership role ({roleDisplay}), an administrator must verify and approve your status before you gain full access to the management features.
                         </p>
                         {church_status === 'pending_verification' && (
                             <div className="mt-4 p-3 bg-gold-500/10 border border-gold-500/20 rounded-xl text-xs text-gold-400 text-left">

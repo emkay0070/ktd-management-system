@@ -87,7 +87,13 @@ class OnboardingController extends Controller
             ]);
             $user->status = 'active';
             $user->save();
-        } elseif (in_array($roleName, ['director', 'district_official'])) {
+        } elseif ($roleName === 'director') {
+            // Note: Since 'director' covers Club Leaders (which could be Master Guides),
+            // we should also create a master guide or leader profile if needed,
+            // but for now, they just acknowledge the pending state.
+            $user->status = 'active'; // The identity is active, but the role pivot is 'pending'
+            $user->save();
+        } elseif (in_array($roleName, ['district_official'])) {
             // They just acknowledge the waiting state
             $user->status = 'active'; // The identity is active, but the role pivot is 'pending'
             $user->save();
