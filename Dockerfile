@@ -67,7 +67,7 @@ php artisan view:clear\n\
 php artisan config:cache\n\
 php artisan route:cache\n\
 php artisan view:cache\n\
-if [ "$RUN_MIGRATIONS" = "true" ]; then php artisan migrate:fresh --force; fi\n\
+if [ "$RUN_MIGRATIONS" = "true" ]; then php artisan migrate --force; fi\n\
 php artisan storage:link\n\
 chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache\n\
 apache2-foreground' > /usr/local/bin/start-container \
