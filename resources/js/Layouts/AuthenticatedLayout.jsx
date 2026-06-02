@@ -394,9 +394,9 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
                         >
                             {isCollapsed ? <ChevronRight size={18} /> : <div className="rotate-180"><ChevronRight size={18} /></div>}
                         </button>
-                        <div className="topbar__title">
-                            <h1>{header ?? 'Dashboard'}</h1>
-                            {breadcrumb && <div className="breadcrumb">{breadcrumb}</div>}
+                        <div className="topbar__title min-w-0">
+                            <h1 className="truncate">{header ?? 'Dashboard'}</h1>
+                            {breadcrumb && <div className="breadcrumb truncate">{breadcrumb}</div>}
                         </div>
                     </div>
                     <div className="topbar__actions flex items-center gap-3">
@@ -407,7 +407,7 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
                                     <div className="p-1.5 bg-burgundy-500 bg-opacity-10 rounded-lg text-burgundy-400 group-hover/btn:bg-opacity-20 transition-all">
                                         <Shield size={14} />
                                     </div>
-                                    <div className="flex flex-col items-start leading-none pr-1">
+                                    <div className="hidden sm:flex flex-col items-start leading-none pr-1">
                                         <span className="text-[9px] font-black uppercase tracking-widest mb-1" style={{ color: 'var(--clr-text-muted)' }}>Perspective</span>
                                         <span className="capitalize text-xs tracking-tight" style={{ color: 'var(--clr-text-primary)' }}>{auth.user?.active_context?.replace('_', ' ')}</span>
                                     </div>

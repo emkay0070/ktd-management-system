@@ -339,6 +339,7 @@
 
   &__title {
     flex: 1;
+    min-width: 0;
     h1 {
       font-size: var(--fs-lg);
       font-weight: var(--fw-semibold);

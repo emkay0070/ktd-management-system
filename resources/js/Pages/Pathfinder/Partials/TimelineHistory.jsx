@@ -1,5 +1,5 @@
 import React from 'react';
-import { Star, Shield, Heart, CheckCircle2, ChevronRight, UserCircle, Calendar as CalendarIcon, LucideIcon } from 'lucide-react';
+import { Star, Shield, Heart, CheckCircle2, ChevronRight, UserCircle, Calendar as CalendarIcon } from 'lucide-react';
 
 const iconMap = {
     'Star': Star,
