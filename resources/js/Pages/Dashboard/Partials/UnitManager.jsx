@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useForm, router } from '@inertiajs/react';
 import { Plus, Shield, Save, Users, ChevronLeft, Trash2, UserMinus } from 'lucide-react';
 
-export default function UnitManager({ units, picklists, readonly }) {
+export default function UnitManager({ units, picklists, readonly, embedded = false }) {
     const [view, setView] = useState('list'); // 'list' or 'manage'
     const [selectedUnitId, setSelectedUnitId] = useState(null);
 
@@ -64,36 +64,54 @@ export default function UnitManager({ units, picklists, readonly }) {
     }
 
     return (
-        <div className="flex flex-col gap-6">
+        <div className={`flex flex-col ${embedded ? '' : 'gap-6'}`}>
             {view === 'list' && (
-                <div className="panel">
-                    <div className="panel__header">
-                        <div>
-                            <h3>Club Units</h3>
-                            <p>Gender-based membership structure</p>
+                <div className={embedded ? '' : 'panel'}>
+                    {!embedded && (
+                        <div className="panel__header">
+                            <div>
+                                <h3>Club Units</h3>
+                                <p>Gender-based membership structure</p>
+                            </div>
+                            {!readonly && (
+                                <form onSubmit={submitUnit} className="p-4 lg:p-0 flex flex-col sm:flex-row gap-2 items-stretch sm:items-center bg-white/5 lg:bg-transparent rounded-lg lg:rounded-none">
+                                    <input className="h-input" placeholder="Unit name" value={unitForm.data.name} onChange={(e) => unitForm.setData('name', e.target.value)} required />
+                                    <select className="h-input" value={unitForm.data.gender} onChange={(e) => unitForm.setData('gender', e.target.value)}>
+                                        <option value="boys">Boys</option>
+                                        <option value="girls">Girls</option>
+                                    </select>
+                                    <button type="submit" className="btn btn--primary btn--sm shrink-0" disabled={unitForm.processing}>
+                                        <Plus size={14} /> Add Unit
+                                    </button>
+                                </form>
+                            )}
                         </div>
-                        {!readonly && (
-                            <form onSubmit={submitUnit} className="p-4 lg:p-0 flex flex-col sm:flex-row gap-2 items-stretch sm:items-center bg-white/5 lg:bg-transparent rounded-lg lg:rounded-none">
-                                <input className="h-input" placeholder="Unit name" value={unitForm.data.name} onChange={(e) => unitForm.setData('name', e.target.value)} required />
+                    )}
+                    
+                    {embedded && !readonly && (
+                        <div className="p-4 border-b border-white/5 bg-white/[0.02]">
+                            <form onSubmit={submitUnit} className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
+                                <input className="h-input" placeholder="New Unit Name" value={unitForm.data.name} onChange={(e) => unitForm.setData('name', e.target.value)} required />
                                 <select className="h-input" value={unitForm.data.gender} onChange={(e) => unitForm.setData('gender', e.target.value)}>
                                     <option value="boys">Boys</option>
                                     <option value="girls">Girls</option>
                                 </select>
                                 <button type="submit" className="btn btn--primary btn--sm shrink-0" disabled={unitForm.processing}>
-                                    <Plus size={14} /> Add Unit
+                                    <Plus size={14} /> Create Unit
                                 </button>
                             </form>
-                        )}
-                    </div>
-                    <div className="panel__body p-0">
+                        </div>
+                    )}
+
+                    <div className={embedded ? '' : 'panel__body p-0'}>
                         <div className="table-responsive">
                             <table className="h-table">
                                 <thead>
                                     <tr>
                                         <th style={{ width: 40 }}></th>
                                         <th>Unit Name</th>
-                                        <th>Type</th>
-                                        <th>Members</th>
+                                        <th className="hidden sm:table-cell">Type</th>
+                                        <th className="hidden sm:table-cell">Members</th>
                                         <th style={{ width: 120 }}>Actions</th>
                                     </tr>
                                 </thead>
@@ -110,12 +128,12 @@ export default function UnitManager({ units, picklists, readonly }) {
                                             <td className="cell-primary">
                                                 <div className="font-bold">{u.name}</div>
                                             </td>
-                                            <td>
+                                            <td className="hidden sm:table-cell">
                                                 <span className={`badge ${u.gender === 'boys' ? 'badge--info' : 'badge--gold'}`}>
                                                     {u.gender}
                                                 </span>
                                             </td>
-                                            <td>
+                                            <td className="hidden sm:table-cell">
                                                 <span className="font-bold text-white">{u.member_count}</span>
                                                 <span className="text-muted text-xs ml-1">members</span>
                                             </td>

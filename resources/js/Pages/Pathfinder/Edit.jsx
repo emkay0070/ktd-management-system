@@ -205,22 +205,22 @@ export default function Edit({ pathfinder, picklists }) {
                             <h3 className="form-section-title">Family & Emergency</h3>
                             <div className="form-grid-2">
                                 <div className="form-group">
-                                    <label>Father's Name</label>
+                                    <label>Father's Name <span className="text-muted font-normal">(Optional)</span></label>
                                     <input className="h-input" value={data.father_name} onChange={e => setData('father_name', e.target.value)} />
                                 </div>
                                 <div className="form-group">
-                                    <label>Mother's Name</label>
+                                    <label>Mother's Name <span className="text-muted font-normal">(Optional)</span></label>
                                     <input className="h-input" value={data.mother_name} onChange={e => setData('mother_name', e.target.value)} />
                                 </div>
                             </div>
                             <div className="form-grid-2">
                                 <div className="form-group">
-                                    <label>Primary Guardian</label>
-                                    <input className="h-input" value={data.guardian_name} onChange={e => setData('guardian_name', e.target.value)} required />
+                                    <label>Guardian Name <span className="text-muted font-normal">(if not parent)</span></label>
+                                    <input className="h-input" value={data.guardian_name} onChange={e => setData('guardian_name', e.target.value)} />
                                 </div>
                                 <div className="form-group">
-                                    <label>Emergency Contact No.</label>
-                                    <input className="h-input" value={data.guardian_phone} onChange={e => setData('guardian_phone', e.target.value)} required />
+                                    <label>Parent / Guardian Phone</label>
+                                    <input className="h-input" value={data.guardian_phone} onChange={e => setData('guardian_phone', e.target.value)} />
                                 </div>
                             </div>
                         </div>

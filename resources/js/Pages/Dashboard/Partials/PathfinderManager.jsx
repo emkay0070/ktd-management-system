@@ -1,10 +1,11 @@
 import { useState, useMemo } from 'react';
-import { Plus, UserPlus, Search, Filter, Download, ExternalLink, Eye, Edit2, Trash2 } from 'lucide-react';
+import { Plus, UserPlus, Search, Filter, Download, ExternalLink, Eye, Edit2, Trash2, Shield } from 'lucide-react';
 import { useForm, router, Link } from '@inertiajs/react';
 import ReligionCombobox from './ReligionCombobox';
+import UnitManager from './UnitManager';
 
-export default function PathfinderManager({ pathfinders, picklists, readonly }) {
-    const [view, setView] = useState('list'); // 'list' or 'register'
+export default function PathfinderManager({ pathfinders, units, picklists, readonly }) {
+    const [view, setView] = useState('list'); // 'list', 'register', or 'units'
     const [searchQuery, setSearchQuery] = useState('');
     const [genderFilter, setGenderFilter] = useState('');
     const [classFilter, setClassFilter] = useState('');
@@ -86,12 +87,15 @@ export default function PathfinderManager({ pathfinders, picklists, readonly }) 
         <div className="panel">
             <div className="panel__header">
                 <div>
-                    <h3>Pathfinders</h3>
-                    <p>Membership records and registration</p>
+                    <h3>Pathfinders Directory</h3>
+                    <p>Membership records, units, and registration</p>
                 </div>
                 <div className="flex gap-2">
-                    {view === 'list' ? (
+                    {view === 'list' && (
                         <>
+                            <button className="btn btn--secondary btn--sm" onClick={() => setView('units')}>
+                                <Shield size={14} /> Manage Units
+                            </button>
                             <button className="btn btn--secondary btn--sm" onClick={exportToCSV}>
                                 <Download size={14} /> Export CSV
                             </button>
@@ -101,7 +105,8 @@ export default function PathfinderManager({ pathfinders, picklists, readonly }) 
                                 </button>
                             )}
                         </>
-                    ) : (
+                    )}
+                    {(view === 'register' || view === 'units') && (
                         <button className="btn btn--secondary btn--sm" onClick={() => setView('list')}>
                             Back to List
                         </button>
@@ -145,13 +150,13 @@ export default function PathfinderManager({ pathfinders, picklists, readonly }) 
                             <thead>
                                 <tr>
                                     <th style={{ minWidth: 200 }}>Name</th>
-                                    <th>Gender</th>
-                                    <th>Age</th>
-                                    <th>Section</th>
+                                    <th className="hidden md:table-cell">Gender</th>
+                                    <th className="hidden md:table-cell">Age</th>
+                                    <th className="hidden md:table-cell">Section</th>
                                     <th>Class</th>
-                                    <th>Unit</th>
-                                    <th>Inducted</th>
-                                    <th>Insured</th>
+                                    <th className="hidden sm:table-cell">Unit</th>
+                                    <th className="hidden lg:table-cell">Inducted</th>
+                                    <th className="hidden lg:table-cell">Insured</th>
                                     <th style={{ width: 90 }}>Actions</th>
                                 </tr>
                             </thead>
@@ -175,17 +180,17 @@ export default function PathfinderManager({ pathfinders, picklists, readonly }) 
                                                 </div>
                                             </div>
                                         </td>
-                                        <td>{p.gender}</td>
-                                        <td>{p.age}</td>
-                                        <td>
+                                        <td className="hidden md:table-cell">{p.gender}</td>
+                                        <td className="hidden md:table-cell">{p.age}</td>
+                                        <td className="hidden md:table-cell">
                                             <span className={`badge ${p.boarding_status === 'boarding' ? 'badge--info' : 'badge--neutral'}`}>
                                                 {p.boarding_status === 'boarding' ? 'Boarder' : 'Day'}
                                             </span>
                                         </td>
                                         <td>{p.assigned_class?.name ?? '-'}</td>
-                                        <td>{p.unit?.name ?? '-'}</td>
-                                        <td>{p.is_inducted ? <span className="badge badge--success text-[10px]">Yes</span> : <span className="badge badge--warning text-[10px]">No</span>}</td>
-                                        <td>{p.insured_yearly ? <span className="badge badge--success text-[10px]">Yes</span> : <span className="badge badge--warning text-[10px]">No</span>}</td>
+                                        <td className="hidden sm:table-cell">{p.unit?.name ?? '-'}</td>
+                                        <td className="hidden lg:table-cell">{p.is_inducted ? <span className="badge badge--success text-[10px]">Yes</span> : <span className="badge badge--warning text-[10px]">No</span>}</td>
+                                        <td className="hidden lg:table-cell">{p.insured_yearly ? <span className="badge badge--success text-[10px]">Yes</span> : <span className="badge badge--warning text-[10px]">No</span>}</td>
                                         <td style={{ width: 90 }}>
                                             <div className="flex gap-2">
                                                 <Link
@@ -218,6 +223,12 @@ export default function PathfinderManager({ pathfinders, picklists, readonly }) 
                             </tbody>
                         </table>
                     </div>
+                </div>
+            )}
+
+            {view === 'units' && (
+                <div className="panel__body p-0 border-t border-white/5">
+                    <UnitManager units={units} picklists={picklists} readonly={readonly} embedded={true} />
                 </div>
             )}
 
@@ -305,21 +316,21 @@ export default function PathfinderManager({ pathfinders, picklists, readonly }) 
                                 <div className="form-section-title mt-4">Parent / Guardian</div>
                                 <div className="form-grid-2">
                                     <div className="form-group">
-                                        <label>Father Name</label>
+                                        <label>Father's Name <span className="text-muted font-normal">(Optional)</span></label>
                                         <input className="h-input" value={data.father_name} onChange={e => setData('father_name', e.target.value)} />
                                     </div>
                                     <div className="form-group">
-                                        <label>Mother Name</label>
+                                        <label>Mother's Name <span className="text-muted font-normal">(Optional)</span></label>
                                         <input className="h-input" value={data.mother_name} onChange={e => setData('mother_name', e.target.value)} />
                                     </div>
                                 </div>
                                 <div className="form-grid-2">
                                     <div className="form-group">
-                                        <label>Guardian Name</label>
+                                        <label>Guardian Name <span className="text-muted font-normal">(if not parent)</span></label>
                                         <input className="h-input" value={data.guardian_name} onChange={e => setData('guardian_name', e.target.value)} />
                                     </div>
                                     <div className="form-group">
-                                        <label>Guardian Phone</label>
+                                        <label>Parent / Guardian Phone</label>
                                         <input className="h-input" value={data.guardian_phone} onChange={e => setData('guardian_phone', e.target.value)} />
                                     </div>
                                 </div>

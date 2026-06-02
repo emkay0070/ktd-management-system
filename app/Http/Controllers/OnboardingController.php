@@ -36,6 +36,31 @@ class OnboardingController extends Controller
     {
         $user = $request->user();
         
+        // Handle church selection / creation if provided
+        if ($request->filled('new_church_name') && $request->filled('district_id')) {
+            $church = \App\Models\Church::create([
+                'name' => $request->new_church_name,
+                'district_id' => $request->district_id,
+                'status' => 'pending_verification'
+            ]);
+            $user->church_id = $church->id;
+            $user->save();
+        } elseif ($request->filled('church_id')) {
+            $user->church_id = $request->church_id;
+            $user->save();
+        }
+
+        // Handle role intent if provided
+        if ($request->filled('intent')) {
+            $role = Role::where('name', $request->intent)->first();
+            if ($role) {
+                // Remove existing pending roles
+                $user->roles()->wherePivot('status', 'pending')->detach();
+                // Attach new intent
+                $user->roles()->attach($role->id, ['status' => 'pending']);
+            }
+        }
+
         $intentRole = $user->roles()->wherePivot('status', '!=', 'revoked')->first();
         $roleName = $intentRole ? $intentRole->name : 'observer';
 

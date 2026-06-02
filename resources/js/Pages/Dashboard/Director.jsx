@@ -53,7 +53,7 @@ export default function Director({ club, registrations = [], district_events = [
             case 'overview':
                 return <DirectorOverview overview={overview} units={units} district_events={district_events} />;
             case 'pathfinders':
-                return <PathfinderManager pathfinders={pathfinders} picklists={picklists} readonly={readonly} />;
+                return <PathfinderManager pathfinders={pathfinders} units={units} picklists={picklists} readonly={readonly} />;
             case 'units':
                 return <UnitManager units={units} picklists={picklists} readonly={readonly} />;
             case 'leaders':

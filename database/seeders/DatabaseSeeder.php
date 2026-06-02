@@ -54,26 +54,32 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // Super Admin
-        User::updateOrCreate(
+        $admin = User::firstOrCreate(
             ['email' => 'admin@empfc.org'],
             [
                 'name' => 'District Admin',
                 'password' => bcrypt('password'),
-                'role' => 'super_admin',
                 'email_verified_at' => now(),
             ],
         );
+        $superAdminRole = \App\Models\Role::where('name', 'super_admin')->first();
+        if ($superAdminRole) {
+            $admin->roles()->sync([$superAdminRole->id => ['status' => 'active']]);
+        }
 
         // Church Director
-        User::updateOrCreate(
+        $director = User::firstOrCreate(
             ['email' => 'director@empfc.org'],
             [
                 'name' => 'Church Director',
                 'password' => bcrypt('password'),
-                'role' => 'director',
                 'church_id' => $church->id,
                 'email_verified_at' => now(),
             ],
         );
+        $directorRole = \App\Models\Role::where('name', 'director')->first();
+        if ($directorRole) {
+            $director->roles()->sync([$directorRole->id => ['status' => 'active']]);
+        }
     }
 }

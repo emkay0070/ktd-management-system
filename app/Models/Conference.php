@@ -6,7 +6,17 @@ use Illuminate\Database\Eloquent\Model;
 
 class Conference extends Model
 {
-    protected $fillable = ['name'];
+    protected $fillable = ['name', 'union_id'];
+
+    public function union()
+    {
+        return $this->belongsTo(Union::class);
+    }
+
+    public function zones()
+    {
+        return $this->hasMany(Zone::class);
+    }
 
     public function districts()
     {

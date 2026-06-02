@@ -69,9 +69,9 @@ class HandleInertiaRequests extends Middleware
             ];
         }
 
-        // 2. Observer with no other active role
+        // 2. Observer with no other active role AND no pending role
         $activeRoles = $user->roles()->wherePivot('status', 'active')->pluck('name')->toArray();
-        if ($activeRoles === ['observer'] || empty($activeRoles)) {
+        if (($activeRoles === ['observer'] || empty($activeRoles)) && empty($pendingRoles)) {
             $banners[] = [
                 'type'    => 'warning',
                 'icon'    => 'user',

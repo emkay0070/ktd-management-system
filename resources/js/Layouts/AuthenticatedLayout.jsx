@@ -6,15 +6,16 @@ import {
     Menu, X
 } from 'lucide-react';
 
-function NavItem({ href, icon: Icon, label, active = false, isCollapsed = false, isSidebarVisible = true }) {
+function NavItem({ href, icon: Icon, label, active = false, isCollapsed = false, isSidebarVisible = true, isMobileOpen = false }) {
+    const showLabel = isSidebarVisible || isMobileOpen;
     return (
         <Link
             href={href}
             className={`sidebar__link${active ? ' sidebar__link--active' : ''}`}
-            title={isCollapsed && !isSidebarVisible ? label : ''}
+            title={isCollapsed && !showLabel ? label : ''}
         >
             <Icon size={18} style={{ flexShrink: 0 }} />
-            {isSidebarVisible && <span>{label}</span>}
+            {showLabel && <span>{label}</span>}
         </Link>
     );
 }
@@ -68,6 +69,7 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
     const [theme, setTheme] = useState(() => localStorage.getItem('app_theme') || 'dark');
 
     const isSidebarVisible = !isCollapsed || isHovered;
+    const isMobileOpen = isMobileMenuOpen;
 
     useEffect(() => {
         document.body.setAttribute('data-theme', theme);
@@ -107,7 +109,7 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
                     <div className="logo-icon">
                         <Tent size={20} />
                     </div>
-                    {isSidebarVisible && (
+                    {(isSidebarVisible || isMobileOpen) && (
                         <div className="logo-text">
                             <span className="logo-title">EmPFC</span>
                             <span className="logo-sub">PATHFINDER</span>
@@ -119,25 +121,27 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
                 <nav className="sidebar__nav">
                     {!isCollapsed && isHovered && <div className="sidebar__hover-indicator" />}
                     
-                    {isSidebarVisible && <span className="sidebar__section-label">Overview</span>}
+                    {(isSidebarVisible || isMobileOpen) && <span className="sidebar__section-label">Overview</span>}
                     <NavItem
                         href={route('dashboard', 'overview')}
                         icon={LayoutDashboard}
                         label={isDistrictLeader ? "District Command" : "Dashboard"}
                         isCollapsed={isCollapsed}
                         isSidebarVisible={isSidebarVisible}
+                        isMobileOpen={isMobileOpen}
                         active={route().current('dashboard', { section: 'overview' }) || (route().current('dashboard') && !route().params.section)}
                     />
 
                     {isDistrictLeader && (
                         <>
-                            {isSidebarVisible && <span className="sidebar__section-label" style={{ marginTop: '12px' }}>District Management</span>}
+                            {(isSidebarVisible || isMobileOpen) && <span className="sidebar__section-label" style={{ marginTop: '12px' }}>District Management</span>}
                             <NavItem
                                 href={route('dashboard', 'clubs')}
                                 icon={Church}
                                 label="Clubs Directory"
                                 isCollapsed={isCollapsed}
                                 isSidebarVisible={isSidebarVisible}
+                                isMobileOpen={isMobileOpen}
                                 active={route().current('dashboard', { section: 'clubs' })}
                             />
                             <NavItem
@@ -146,6 +150,7 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
                                 label="Executive Committee"
                                 isCollapsed={isCollapsed}
                                 isSidebarVisible={isSidebarVisible}
+                                isMobileOpen={isMobileOpen}
                                 active={route().current('dashboard', { section: 'committee' })}
                             />
                             <NavItem
@@ -154,6 +159,7 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
                                 label="Event Scheduler"
                                 isCollapsed={isCollapsed}
                                 isSidebarVisible={isSidebarVisible}
+                                isMobileOpen={isMobileOpen}
                                 active={route().current('dashboard', { section: 'events' })}
                             />
                             <NavItem
@@ -162,6 +168,7 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
                                 label="District Missions"
                                 isCollapsed={isCollapsed}
                                 isSidebarVisible={isSidebarVisible}
+                                isMobileOpen={isMobileOpen}
                                 active={route().current('dashboard', { section: 'missions' })}
                             />
                             <NavItem
@@ -170,6 +177,7 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
                                 label="Global Roster"
                                 isCollapsed={isCollapsed}
                                 isSidebarVisible={isSidebarVisible}
+                                isMobileOpen={isMobileOpen}
                                 active={route().current('dashboard', { section: 'roster' })}
                             />
                             <NavItem
@@ -178,6 +186,7 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
                                 label="Shared Resources"
                                 isCollapsed={isCollapsed}
                                 isSidebarVisible={isSidebarVisible}
+                                isMobileOpen={isMobileOpen}
                                 active={route().current('dashboard', { section: 'resources' })}
                             />
                             <NavItem
@@ -186,6 +195,7 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
                                 label="Official Bulletins"
                                 isCollapsed={isCollapsed}
                                 isSidebarVisible={isSidebarVisible}
+                                isMobileOpen={isMobileOpen}
                                 active={route().current('dashboard', { section: 'bulletins' })}
                             />
                             <NavItem
@@ -194,6 +204,7 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
                                 label="Club Appraisals"
                                 isCollapsed={isCollapsed}
                                 isSidebarVisible={isSidebarVisible}
+                                isMobileOpen={isMobileOpen}
                                 active={route().current('dashboard', { section: 'appraisals' })}
                             />
                             <NavItem
@@ -202,6 +213,7 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
                                 label="District Pulse"
                                 isCollapsed={isCollapsed}
                                 isSidebarVisible={isSidebarVisible}
+                                isMobileOpen={isMobileOpen}
                                 active={route().current('dashboard', { section: 'pulse' })}
                             />
                             <NavItem
@@ -210,6 +222,7 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
                                 label="Treasury & Regs"
                                 isCollapsed={isCollapsed}
                                 isSidebarVisible={isSidebarVisible}
+                                isMobileOpen={isMobileOpen}
                                 active={route().current('dashboard', { section: 'camp_registrations' })}
                             />
                         </>
@@ -217,13 +230,14 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
 
                     {isSuperAdmin && (
                         <>
-                            {isSidebarVisible && <span className="sidebar__section-label" style={{ marginTop: '12px' }}>Management</span>}
+                            {(isSidebarVisible || isMobileOpen) && <span className="sidebar__section-label" style={{ marginTop: '12px' }}>Management</span>}
                             <NavItem
                                 href={route('dashboard')}
                                 icon={Church}
                                 label="Churches"
                                 isCollapsed={isCollapsed}
                                 isSidebarVisible={isSidebarVisible}
+                                isMobileOpen={isMobileOpen}
                             />
                             <NavItem
                                 href={route('dashboard')}
@@ -231,6 +245,7 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
                                 label="Pathfinders"
                                 isCollapsed={isCollapsed}
                                 isSidebarVisible={isSidebarVisible}
+                                isMobileOpen={isMobileOpen}
                             />
                             <NavItem
                                 href={route('dashboard')}
@@ -238,36 +253,31 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
                                 label="Registrations"
                                 isCollapsed={isCollapsed}
                                 isSidebarVisible={isSidebarVisible}
+                                isMobileOpen={isMobileOpen}
                             />
                         </>
                     )}
 
                     {!isSuperAdmin && !isDistrictLeader && (
                         <>
-                            {isSidebarVisible && <span className="sidebar__section-label" style={{ marginTop: '12px' }}>Local Club</span>}
+                            {(isSidebarVisible || isMobileOpen) && <span className="sidebar__section-label" style={{ marginTop: '12px' }}>Local Club</span>}
                             <NavItem
                                 href={route('dashboard', 'pathfinders')}
                                 icon={Users}
                                 label="Pathfinders"
                                 isCollapsed={isCollapsed}
                                 isSidebarVisible={isSidebarVisible}
-                                active={route().current('dashboard', { section: 'pathfinders' })}
-                            />
-                            <NavItem
-                                href={route('dashboard', 'units')}
-                                icon={Shield}
-                                label="Units"
-                                isCollapsed={isCollapsed}
-                                isSidebarVisible={isSidebarVisible}
-                                active={route().current('dashboard', { section: 'units' })}
+                                isMobileOpen={isMobileOpen}
+                                active={route().current('dashboard', { section: 'pathfinders' }) || route().current('dashboard', { section: 'units' })}
                             />
                             <NavItem
                                 href={route('dashboard', 'leaders')}
                                 icon={GraduationCap}
-                                label="Master Guides"
+                                label="Staff & Guides"
                                 isCollapsed={isCollapsed}
                                 isSidebarVisible={isSidebarVisible}
-                                active={route().current('dashboard', { section: 'leaders' })}
+                                isMobileOpen={isMobileOpen}
+                                active={route().current('dashboard', { section: 'leaders' }) || route().current('dashboard', { section: 'leadership' })}
                             />
                             <NavItem
                                 href={route('dashboard', 'attendance')}
@@ -275,15 +285,8 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
                                 label="Attendance"
                                 isCollapsed={isCollapsed}
                                 isSidebarVisible={isSidebarVisible}
+                                isMobileOpen={isMobileOpen}
                                 active={route().current('dashboard', { section: 'attendance' })}
-                            />
-                            <NavItem
-                                href={route('dashboard', 'leadership')}
-                                icon={Users}
-                                label="Leadership Staff"
-                                isCollapsed={isCollapsed}
-                                isSidebarVisible={isSidebarVisible}
-                                active={route().current('dashboard', { section: 'leadership' })}
                             />
                             <NavItem
                                 href={route('dashboard', 'missions')}
@@ -291,6 +294,7 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
                                 label="District Missions"
                                 isCollapsed={isCollapsed}
                                 isSidebarVisible={isSidebarVisible}
+                                isMobileOpen={isMobileOpen}
                                 active={route().current('dashboard', { section: 'missions' })}
                             />
                             <NavItem
@@ -299,6 +303,7 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
                                 label="Resource Library"
                                 isCollapsed={isCollapsed}
                                 isSidebarVisible={isSidebarVisible}
+                                isMobileOpen={isMobileOpen}
                                 active={route().current('dashboard', { section: 'resources' })}
                             />
                             <NavItem
@@ -307,6 +312,7 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
                                 label="Camp Portal"
                                 isCollapsed={isCollapsed}
                                 isSidebarVisible={isSidebarVisible}
+                                isMobileOpen={isMobileOpen}
                                 active={route().current('dashboard', { section: 'camp_portal' })}
                             />
                             <NavItem
@@ -315,6 +321,7 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
                                 label="Parents & Linking"
                                 isCollapsed={isCollapsed}
                                 isSidebarVisible={isSidebarVisible}
+                                isMobileOpen={isMobileOpen}
                                 active={route().current('dashboard', { section: 'parents' })}
                             />
                         </>
@@ -327,6 +334,7 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
                             label="Club Settings"
                             isCollapsed={isCollapsed}
                             isSidebarVisible={isSidebarVisible}
+                            isMobileOpen={isMobileOpen}
                             active={route().current('dashboard', { section: 'operations' })}
                         />
                     )}
@@ -336,12 +344,13 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
                         label="Profile"
                         isCollapsed={isCollapsed}
                         isSidebarVisible={isSidebarVisible}
+                        isMobileOpen={isMobileOpen}
                     />
                 </nav>
 
                 {/* User Footer */}
                 <div className="sidebar__footer">
-                    <div className={`user-card ${!isSidebarVisible ? 'user-card--collapsed' : ''}`}>
+                    <div className={`user-card ${!(isSidebarVisible || isMobileOpen) ? 'user-card--collapsed' : ''}`}>
                         <div className="avatar">
                             {user.avatar_path ? (
                                 <img src={user.avatar_url} alt="Avatar" className="w-full h-full rounded-full object-cover" />
@@ -349,7 +358,7 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
                                 initials
                             )}
                         </div>
-                        {isSidebarVisible && (
+                        {(isSidebarVisible || isMobileOpen) && (
                             <div className="user-info">
                                 <div className="user-name">{user.name}</div>
                                 <div className="user-role">
@@ -357,7 +366,7 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
                                 </div>
                             </div>
                         )}
-                        {isSidebarVisible && (
+                        {(isSidebarVisible || isMobileOpen) && (
                             <button className="logout-btn" onClick={handleLogout} title="Logout">
                                 <LogOut size={16} />
                             </button>
@@ -399,17 +408,17 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
                                         <Shield size={14} />
                                     </div>
                                     <div className="flex flex-col items-start leading-none pr-1">
-                                        <span className="text-[9px] text-gray-500 font-black uppercase tracking-widest mb-1">Perspective</span>
-                                        <span className="text-white capitalize text-xs tracking-tight">{auth.user?.active_context?.replace('_', ' ')}</span>
+                                        <span className="text-[9px] font-black uppercase tracking-widest mb-1" style={{ color: 'var(--clr-text-muted)' }}>Perspective</span>
+                                        <span className="capitalize text-xs tracking-tight" style={{ color: 'var(--clr-text-primary)' }}>{auth.user?.active_context?.replace('_', ' ')}</span>
                                     </div>
-                                    <div className="text-gray-600 transition-transform group-hover:rotate-180">
+                                    <div className="transition-transform group-hover:rotate-180" style={{ color: 'var(--clr-text-muted)' }}>
                                         <ChevronDown size={14} />
                                     </div>
                                 </button>
                                 
                                 <div className="absolute right-0 top-full mt-3 w-56 bg-surface-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden opacity-0 invisible scale-95 group-hover:opacity-100 group-hover:visible group-hover:scale-100 transition-all z-50 p-1 backdrop-blur-xl">
                                     <div className="px-4 py-3 border-b border-white/5 mb-1 bg-white/5">
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Available Channels</span>
+                                        <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: 'var(--clr-text-muted)' }}>Available Channels</span>
                                     </div>
                                     {roleNames.map(role => (
                                         <button
@@ -417,9 +426,10 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
                                             onClick={() => router.post(route('role.switch_context'), { context: role })}
                                             className={`w-full flex items-center gap-3 px-4 py-3 text-sm capitalize transition-all rounded-xl ${
                                                 auth.user?.active_context === role 
-                                                    ? 'text-gold-500 font-black bg-white/5' 
-                                                    : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                                                    ? 'font-black bg-white/5 text-gold-500' 
+                                                    : 'hover:bg-white/5'
                                             }`}
+                                            style={{ color: auth.user?.active_context === role ? 'var(--clr-gold-500)' : 'var(--clr-text-secondary)' }}
                                         >
                                             <div className={`p-1.5 rounded-lg ${auth.user?.active_context === role ? 'bg-gold-500 bg-opacity-10' : 'bg-white/5'}`}>
                                                 {role === 'super_admin' && <Star size={14} />}

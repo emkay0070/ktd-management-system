@@ -60,7 +60,7 @@ class User extends Authenticatable
     public function roles()
     {
         return $this->belongsToMany(Role::class)
-            ->withPivot('status', 'assigned_by', 'assigned_at')
+            ->withPivot('status', 'assigned_by', 'assigned_at', 'entity_type', 'entity_id')
             ->withTimestamps();
     }
 

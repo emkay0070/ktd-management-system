@@ -12,7 +12,22 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        //
+        \Illuminate\Database\Connection::resolverFor('pgsql', function ($pdo, $database, $prefix, $config) {
+            return new class($pdo, $database, $prefix, $config) extends \Illuminate\Database\PostgresConnection {
+                public function prepareBindings(array $bindings)
+                {
+                    $grammar = $this->getQueryGrammar();
+                    foreach ($bindings as $key => $value) {
+                        if ($value instanceof \DateTimeInterface) {
+                            $bindings[$key] = $value->format($grammar->getDateFormat());
+                        } elseif (is_bool($value)) {
+                            $bindings[$key] = $value ? 'true' : 'false';
+                        }
+                    }
+                    return $bindings;
+                }
+            };
+        });
     }
 
     public function boot(): void

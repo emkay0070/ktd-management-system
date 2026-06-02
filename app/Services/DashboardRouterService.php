@@ -28,15 +28,32 @@ class DashboardRouterService
                 $hasLinkedChild = $user->children()->exists() || $user->pendingLinks()->exists();
             }
 
-            return Inertia::render('Dashboard/SetupWizard', [
-                'user'  => $user->only('id', 'name', 'email', 'church_id'),
-                'roles' => \App\Models\Role::where('name', '!=', 'super_admin')->get(),
-                'state' => [
-                    'pending_roles'    => $pendingRoles,
-                    'active_roles'     => $activeRoles,
-                    'has_church'       => (bool) $user->church_id,
-                    'has_linked_child' => $hasLinkedChild,
-                ]
+            $needsSetup = !$user->hasRole('super_admin') && (
+                (empty($activeRoles) && empty($pendingRoles)) ||
+                (in_array('parent', $activeRoles) && !$hasLinkedChild)
+            );
+            if ($needsSetup) {
+                return Inertia::render('Dashboard/SetupWizard', [
+                    'user'  => $user->only('id', 'name', 'email', 'church_id'),
+                    'roles' => \App\Models\Role::where('name', '!=', 'super_admin')->get(),
+                    'state' => [
+                        'pending_roles'    => $pendingRoles,
+                        'active_roles'     => $activeRoles,
+                        'has_church'       => (bool) $user->church_id,
+                        'has_linked_child' => $hasLinkedChild,
+                    ]
+                ]);
+            }
+        }
+
+        // 1.5 Pending Leadership Role "Waiting Room"
+        $pendingRoles = $user->roles()->wherePivot('status', 'pending')->pluck('name')->toArray();
+        if (in_array('district_official', $pendingRoles) || in_array('director', $pendingRoles)) {
+            $pendingRole = in_array('district_official', $pendingRoles) ? 'district_official' : 'director';
+            return Inertia::render('Onboarding/Index', [
+                'role' => $pendingRole,
+                'church_status' => $user->church ? $user->church->status : null,
+                'church_name' => $user->church ? $user->church->name : null,
             ]);
         }
 
@@ -172,8 +189,8 @@ class DashboardRouterService
         return Inertia::render('Dashboard/Director', [
             'club' => $this->clubService->buildForChurch($church),
             'registrations' => \App\Models\Registration::where('church_id', $church->id)->with(['pathfinder', 'event'])->get(),
-            'district_events' => \App\Models\DistrictEvent::where('district_id', $church->district_id)->where('is_published', true)->get(),
-            'district_bulletins' => \App\Models\DistrictBulletin::where('district_id', $church->district_id)->where('is_active', true)->get(),
+            'district_events' => \App\Models\DistrictEvent::where('district_id', $church->district_id)->where('is_published', \DB::raw('true'))->get(),
+            'district_bulletins' => \App\Models\DistrictBulletin::where('district_id', $church->district_id)->where('is_active', \DB::raw('true'))->get(),
             'parent_link_requests' => \App\Models\PendingParentLink::whereIn('pathfinder_id', $pathfinders->pluck('id'))->where('status', 'pending')->with(['user', 'pathfinder'])->get(),
             'parents' => User::where('church_id', $church->id)->get()->filter(fn($u) => $u->hasRole('parent'))->values(),
             'section' => $section,
@@ -222,7 +239,7 @@ class DashboardRouterService
 
         return Inertia::render('Dashboard/Pathfinder', [
             'profile' => $profile,
-            'announcements' => \App\Models\DistrictBulletin::where('is_active', true)->where('district_id', $user->church?->district_id)->latest()->get(),
+            'announcements' => \App\Models\DistrictBulletin::where('is_active', \DB::raw('true'))->where('district_id', $user->church?->district_id)->latest()->get(),
             'curriculum' => $curriculum,
         ]);
     }
@@ -240,7 +257,7 @@ class DashboardRouterService
     {
         return Inertia::render('Dashboard/Observer', [
             'user' => $user->only('id', 'name', 'email'),
-            'bulletins' => \App\Models\DistrictBulletin::where('is_active', true)->latest()->take(5)->get(),
+            'bulletins' => \App\Models\DistrictBulletin::where('is_active', \DB::raw('true'))->latest()->take(5)->get(),
         ]);
     }
 }

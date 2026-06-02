@@ -6,11 +6,16 @@ use Illuminate\Database\Eloquent\Model;
 
 class District extends Model
 {
-    protected $fillable = ['conference_id', 'name'];
+    protected $fillable = ['conference_id', 'zone_id', 'name'];
 
     public function conference()
     {
         return $this->belongsTo(Conference::class);
+    }
+
+    public function zone()
+    {
+        return $this->belongsTo(Zone::class);
     }
 
     public function churches()

@@ -77,7 +77,7 @@ return new class extends Migration
 
         // 7. Update Churches with Status
         Schema::table('churches', function (Blueprint $table) {
-            $table->enum('status', ['pending_verification', 'approved'])->default('approved');
+            $table->enum('status', ['pending_verification', 'approved', 'rejected'])->default('approved');
         });
     }
 

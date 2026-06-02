@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm, Link } from '@inertiajs/react';
 import GuestLayout from '@/Layouts/GuestLayout';
 import InputError from '@/Components/InputError';
-import { Shield, Users, Star, GraduationCap, Clock, ChevronRight } from 'lucide-react';
+import { Shield, Users, Star, GraduationCap, Clock, ChevronRight, RefreshCw, LogOut } from 'lucide-react';
 
 export default function OnboardingIndex({ role, church_status, church_name }) {
     const { data, setData, post, processing, errors } = useForm({
@@ -18,51 +18,92 @@ export default function OnboardingIndex({ role, church_status, church_name }) {
         post(route('onboarding.store'));
     };
 
+    // ── Waiting Room for leadership roles ────────────────────────────────────
+    if (role === 'director' || role === 'district_official') {
+        const roleDisplay = role === 'director' ? 'Club Director' : 'District Official';
+
+        return (
+            <GuestLayout>
+                <Head title="Pending Verification — EmPFC" />
+                <div className="waiting-room">
+                    <div className="waiting-room__icon">
+                        <Clock size={32} />
+                    </div>
+                    <h2 className="waiting-room__title">Pending Verification</h2>
+                    <p className="waiting-room__desc">
+                        Your application for <span className="waiting-room__role">{roleDisplay}</span> is being reviewed by District Leadership.
+                    </p>
+
+                    {church_status === 'pending_verification' && (
+                        <div className="waiting-room__note">
+                            <strong style={{ color: 'var(--clr-gold-500)' }}>Note:</strong> The church you registered (<em>{church_name}</em>) is also pending verification by the district.
+                        </div>
+                    )}
+
+                    <div className="waiting-room__note">
+                        <Users size={14} style={{ marginBottom: 8, color: 'var(--clr-gold-500)' }} />
+                        Credentials for high-level roles require administrative background checks for district security. This usually takes 24–48 hours.
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+                        <Link href={route('dashboard')} className="waiting-room__refresh">
+                            <RefreshCw size={14} /> Refresh Status
+                        </Link>
+                        <Link href={route('logout')} method="post" as="button" className="waiting-room__refresh" style={{ color: 'var(--clr-text-muted)' }}>
+                            <LogOut size={14} /> Logout
+                        </Link>
+                    </div>
+                </div>
+            </GuestLayout>
+        );
+    }
+
+    // ── Role-specific onboarding forms ───────────────────────────────────────
     const renderRoleContent = () => {
         if (role === 'pathfinder') {
             return (
-                <div className="space-y-5">
-                    <div className="flex items-center gap-3 mb-6 p-4 bg-burgundy-500/10 border border-burgundy-500/20 rounded-xl">
-                        <Star className="text-burgundy-400" />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '1rem', background: 'rgba(155,34,38,0.06)', border: '1px solid rgba(155,34,38,0.12)', borderRadius: 12 }}>
+                        <Star style={{ color: 'var(--clr-burgundy-400)' }} />
                         <div>
-                            <h3 className="text-sm font-bold text-white">Pathfinder Setup</h3>
-                            <p className="text-xs text-gray-400">Complete your profile to get placed in the right class.</p>
+                            <h3 style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--clr-text-primary)' }}>Pathfinder Setup</h3>
+                            <p style={{ fontSize: '0.75rem', color: 'var(--clr-text-muted)' }}>Complete your profile to get placed in the right class.</p>
                         </div>
                     </div>
-                    
-                    <div className="space-y-1.5">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Date of Birth</label>
+
+                    <div>
+                        <label className="onboard-label">Date of Birth</label>
                         <input
                             type="date"
                             value={data.dob}
                             onChange={e => setData('dob', e.target.value)}
-                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:border-burgundy-500 outline-none"
+                            className="onboard-input"
                             required
                         />
                         <InputError message={errors.dob} />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Gender</label>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                        <div>
+                            <label className="onboard-label">Gender</label>
                             <select
                                 value={data.gender}
                                 onChange={e => setData('gender', e.target.value)}
-                                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:border-burgundy-500 outline-none appearance-none"
+                                className="onboard-input"
                             >
-                                <option value="Male" className="bg-surface-900 text-white">Male</option>
-                                <option value="Female" className="bg-surface-900 text-white">Female</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
                             </select>
                         </div>
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Current Class</label>
+                        <div>
+                            <label className="onboard-label">Current Class</label>
                             <select
                                 value={data.current_class}
                                 onChange={e => setData('current_class', e.target.value)}
-                                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:border-burgundy-500 outline-none appearance-none"
+                                className="onboard-input"
                             >
                                 {['Friend', 'Companion', 'Explorer', 'Ranger', 'Voyager', 'Guide'].map(c => (
-                                    <option key={c} value={c} className="bg-surface-900 text-white">{c}</option>
+                                    <option key={c} value={c}>{c}</option>
                                 ))}
                             </select>
                         </div>
@@ -73,21 +114,22 @@ export default function OnboardingIndex({ role, church_status, church_name }) {
 
         if (role === 'parent') {
             return (
-                <div className="space-y-5">
-                    <div className="flex items-center gap-3 mb-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl">
-                        <Users className="text-blue-400" />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '1rem', background: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.12)', borderRadius: 12 }}>
+                        <Users style={{ color: 'var(--clr-info)' }} />
                         <div>
-                            <h3 className="text-sm font-bold text-white">Parent Setup</h3>
-                            <p className="text-xs text-gray-400">You can link your children later from the dashboard.</p>
+                            <h3 style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--clr-text-primary)' }}>Parent Setup</h3>
+                            <p style={{ fontSize: '0.75rem', color: 'var(--clr-text-muted)' }}>You can link your children later from the dashboard.</p>
                         </div>
                     </div>
-                    
-                    <div className="space-y-1.5">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Notes (Optional)</label>
+
+                    <div>
+                        <label className="onboard-label">Notes (Optional)</label>
                         <textarea
                             value={data.children_names}
                             onChange={e => setData('children_names', e.target.value)}
-                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:border-burgundy-500 outline-none min-h-[100px]"
+                            className="onboard-input"
+                            style={{ minHeight: 100, resize: 'vertical' }}
                             placeholder="Names of children to link..."
                         />
                     </div>
@@ -97,22 +139,22 @@ export default function OnboardingIndex({ role, church_status, church_name }) {
 
         if (role === 'master_guide') {
             return (
-                <div className="space-y-5">
-                    <div className="flex items-center gap-3 mb-6 p-4 bg-gold-500/10 border border-gold-500/20 rounded-xl">
-                        <GraduationCap className="text-gold-400" />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '1rem', background: 'rgba(212,160,23,0.06)', border: '1px solid rgba(212,160,23,0.12)', borderRadius: 12 }}>
+                        <GraduationCap style={{ color: 'var(--clr-gold-400)' }} />
                         <div>
-                            <h3 className="text-sm font-bold text-white">Master Guide Profile</h3>
-                            <p className="text-xs text-gray-400">Complete your leadership profile.</p>
+                            <h3 style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--clr-text-primary)' }}>Master Guide Profile</h3>
+                            <p style={{ fontSize: '0.75rem', color: 'var(--clr-text-muted)' }}>Complete your leadership profile.</p>
                         </div>
                     </div>
 
-                    <div className="space-y-1.5">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Year of Investiture (Optional)</label>
+                    <div>
+                        <label className="onboard-label">Year of Investiture (Optional)</label>
                         <input
                             type="number"
                             value={data.investiture_year}
                             onChange={e => setData('investiture_year', e.target.value)}
-                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:border-burgundy-500 outline-none"
+                            className="onboard-input"
                             placeholder="e.g. 2018"
                         />
                     </div>
@@ -120,52 +162,30 @@ export default function OnboardingIndex({ role, church_status, church_name }) {
             );
         }
 
-        if (role === 'director' || role === 'district_official') { 
-            const roleDisplay = role === 'director' ? 'Club Leader' : 'District Official';
-
-            return (
-                <div className="space-y-5">
-                    <div className="flex flex-col items-center justify-center text-center p-8 bg-white/5 border border-white/10 rounded-2xl">
-                        <div className="h-16 w-16 bg-burgundy-500/20 rounded-full flex items-center justify-center mb-4">
-                            <Clock className="text-burgundy-400" size={32} />
-                        </div>
-                        <h3 className="text-lg font-bold text-white mb-2">Pending Verification</h3>
-                        <p className="text-sm text-gray-400 max-w-sm">
-                            Your account has been created successfully. Because you selected a leadership role ({roleDisplay}), an administrator must verify and approve your status before you gain full access to the management features.
-                        </p>
-                        {church_status === 'pending_verification' && (
-                            <div className="mt-4 p-3 bg-gold-500/10 border border-gold-500/20 rounded-xl text-xs text-gold-400 text-left">
-                                <strong>Note:</strong> The church you registered ({church_name}) is also pending verification by the district.
-                            </div>
-                        )}
-                    </div>
-                </div>
-            );
-        }
-
+        // Fallback
         return (
-            <div className="p-6 bg-white/5 border border-white/10 rounded-2xl text-center">
-                <p className="text-gray-400">You are all set! Proceed to your dashboard.</p>
+            <div style={{ padding: '1.5rem', background: 'var(--clr-surface-700)', border: '1px solid var(--clr-border)', borderRadius: 16, textAlign: 'center' }}>
+                <p style={{ color: 'var(--clr-text-muted)' }}>You are all set! Proceed to your dashboard.</p>
             </div>
         );
     };
 
     return (
         <GuestLayout>
-            <Head title="Complete Profile" />
+            <Head title="Complete Profile — EmPFC" />
 
-            <div className="mb-8">
-                <h1 className="text-2xl font-black text-white mb-2">Almost There!</h1>
-                <p className="text-sm text-gray-400">Complete your profile to get started.</p>
+            <div style={{ marginBottom: '2rem' }}>
+                <h1 style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--clr-text-primary)', marginBottom: '0.5rem' }}>Almost There!</h1>
+                <p style={{ fontSize: '0.875rem', color: 'var(--clr-text-secondary)' }}>Complete your profile to get started.</p>
             </div>
 
-            <form onSubmit={submit} className="space-y-6">
+            <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                 {renderRoleContent()}
 
                 <button 
                     type="submit"
                     disabled={processing}
-                    className="w-full py-4 bg-burgundy-500 hover:bg-burgundy-400 text-white font-black uppercase tracking-[0.2em] text-xs rounded-xl shadow-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                    className="onboard-cta"
                 >
                     {processing ? 'Processing...' : 'Complete Setup'} <ChevronRight size={16} />
                 </button>

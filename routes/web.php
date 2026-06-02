@@ -45,6 +45,9 @@ Route::middleware(['auth', 'verified', 'onboarded'])->group(function () {
     Route::post('/district/committee', [DistrictCommitteeController::class, 'store'])->name('district_committee.store');
     Route::delete('/district/committee/{user}', [DistrictCommitteeController::class, 'destroy'])->name('district_committee.destroy');
 
+    // District Club/Church Actions
+    Route::post('/district/churches', [\App\Http\Controllers\DistrictChurchController::class, 'store'])->name('district_churches.store');
+
     // District Event Scheduling Actions
     Route::post('/district/events', [DistrictEventController::class, 'store'])->name('district_events.store');
     Route::delete('/district/events/{event}', [DistrictEventController::class, 'destroy'])->name('district_events.destroy');
@@ -135,18 +138,47 @@ Route::middleware(['auth', 'verified', 'onboarded'])->group(function () {
         ->name('verification.roles.reject');
 
 
-    // ── Church Search API (for registration wizard) ─────────────────────────
-    Route::get('/api/churches/search', function (\Illuminate\Http\Request $request) {
-        $query = $request->get('q', '');
-        return \App\Models\Church::where('status', 'approved')
-            ->where(function($q) use ($query) {
-                $q->where('name', 'ilike', "%{$query}%")
-                  ->orWhere('location', 'ilike', "%{$query}%");
-            })
-            ->limit(10)
-            ->get(['id', 'name', 'location']);
-    })->name('churches.search');
 });
+
+// ── Public Hierarchy API (used by registration wizard + onboarding) ──────
+Route::get('/api/hierarchy/unions', function () {
+    return \App\Models\Union::orderBy('name')->get(['id', 'name']);
+})->name('hierarchy.unions');
+
+Route::get('/api/hierarchy/conferences', function (\Illuminate\Http\Request $request) {
+    return \App\Models\Conference::where('union_id', $request->get('union_id'))
+        ->orderBy('name')->get(['id', 'name']);
+})->name('hierarchy.conferences');
+
+Route::get('/api/hierarchy/zones', function (\Illuminate\Http\Request $request) {
+    return \App\Models\Zone::where('conference_id', $request->get('conference_id'))
+        ->orderBy('name')->get(['id', 'name']);
+})->name('hierarchy.zones');
+
+Route::get('/api/hierarchy/districts', function (\Illuminate\Http\Request $request) {
+    $query = \App\Models\District::query();
+    if ($request->has('zone_id')) $query->where('zone_id', $request->get('zone_id'));
+    if ($request->has('conference_id')) $query->where('conference_id', $request->get('conference_id'));
+    return $query->orderBy('name')->get(['id', 'name']);
+})->name('hierarchy.districts');
+
+Route::get('/api/churches/search', function (\Illuminate\Http\Request $request) {
+    $query = $request->get('q', '');
+    $districtId = $request->get('district_id');
+    
+    $churches = \App\Models\Church::where('status', 'approved')
+        ->when($districtId, fn($q) => $q->where('district_id', $districtId))
+        ->when($query, function($q) use ($query) {
+            $q->where(function($subQ) use ($query) {
+                $subQ->where('name', 'ilike', "%{$query}%")
+                     ->orWhere('location', 'ilike', "%{$query}%");
+            });
+        })
+        ->limit(20)
+        ->get(['id', 'name', 'location']);
+        
+    return $churches;
+})->name('churches.search');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

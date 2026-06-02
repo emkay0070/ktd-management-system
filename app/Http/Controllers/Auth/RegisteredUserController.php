@@ -27,7 +27,6 @@ class RegisteredUserController extends Controller
         }
 
         return Inertia::render('Auth/Register', [
-            'churches' => \App\Models\Church::orderBy('name')->get(['id', 'name', 'location']),
             'intent' => $intent,
         ]);
     }
@@ -44,6 +43,10 @@ class RegisteredUserController extends Controller
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'role' => 'required|string|in:director,pathfinder,master_guide,parent,observer,district_official',
+            'union_id' => 'nullable|exists:unions,id',
+            'conference_id' => 'nullable|exists:conferences,id',
+            'zone_id' => 'nullable|exists:zones,id',
+            'district_id' => 'nullable|exists:districts,id',
             'church_id' => 'nullable|exists:churches,id',
             'new_church_name' => 'nullable|string|max:255',
             'is_master_guide' => 'nullable|boolean',
@@ -57,6 +60,7 @@ class RegisteredUserController extends Controller
         if (!$churchId && $request->new_church_name) {
             $church = \App\Models\Church::create([
                 'name' => $request->new_church_name,
+                'district_id' => $request->district_id,
                 'status' => 'pending_verification',
             ]);
             $churchId = $church->id;
@@ -117,6 +121,6 @@ class RegisteredUserController extends Controller
         event(new Registered($user));
         Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+        return redirect(route('onboarding.index'));
     }
 }
