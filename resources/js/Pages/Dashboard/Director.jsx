@@ -57,7 +57,7 @@ export default function Director({ club, registrations = [], district_events = [
             case 'units':
                 return <UnitManager units={units} picklists={picklists} readonly={readonly} />;
             case 'leaders':
-                return <MasterGuideManager master_guides={master_guides} mg_training={mg_training} picklists={picklists} readonly={readonly} />;
+                return <MasterGuideManager master_guides={master_guides} mg_training={mg_training} picklists={picklists} readonly={readonly} committees={committees} classes={classes} derived_pathfinder_committee={derived_pathfinder_committee} />;
             case 'attendance':
                 return <AttendanceManager club={club} readonly={readonly} />;
             case 'leadership':

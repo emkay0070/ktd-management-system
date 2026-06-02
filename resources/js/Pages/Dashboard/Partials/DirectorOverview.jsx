@@ -57,7 +57,7 @@ export default function DirectorOverview({ overview, units, district_events = []
                 </div>
             )}
 
-            <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 ${fadeInUp}`} style={{ animationDelay: '100ms' }}>
+            <div className={`grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 ${fadeInUp}`} style={{ animationDelay: '100ms' }}>
                 <div className="stat-card stat-card--burgundy overflow-hidden group">
                     <div className="absolute -right-4 -top-4 w-24 h-24 bg-burgundy-500/10 rounded-full blur-2xl group-hover:bg-burgundy-500/20 transition-all duration-500" />
                     <div className="stat-icon stat-icon--burgundy"><Users size={22} /></div>

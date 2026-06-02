@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { useForm, router, Link } from '@inertiajs/react';
 import { Plus, GraduationCap, Shield, UserPlus, Search, User, Edit2, Eye, LayoutGrid, Trash2 } from 'lucide-react';
 import ReligionCombobox from './ReligionCombobox';
+import LeadershipManager from './LeadershipManager';
 
-export default function MasterGuideManager({ master_guides, mg_training, picklists, readonly }) {
+export default function MasterGuideManager({ master_guides, mg_training, picklists, readonly, committees, classes, derived_pathfinder_committee }) {
     const [view, setView] = useState('list'); // 'list' or 'register'
     const [activeTab, setActiveTab] = useState('invested'); // 'invested' or 'training'
     const [searchQuery, setSearchQuery] = useState('');
@@ -104,6 +105,12 @@ export default function MasterGuideManager({ master_guides, mg_training, picklis
                         >
                             MGT Training Tracker
                             <span className={`ml-2 px-2 py-0.5 rounded-full text-[10px] ${activeTab === 'training' ? 'bg-gold-500/20 text-gold-300' : 'bg-white/10'}`}>{mgtCandidates.length}</span>
+                        </button>
+                        <button 
+                            className={`px-6 py-4 font-bold text-xs tracking-widest uppercase transition-all ${activeTab === 'leadership' ? 'text-blue-400 border-b-2 border-blue-500 bg-blue-500/5' : 'text-muted hover:text-white hover:bg-white/5'}`}
+                            onClick={() => setActiveTab('leadership')}
+                        >
+                            Leadership Staff
                         </button>
                     </div>
 
@@ -250,6 +257,16 @@ export default function MasterGuideManager({ master_guides, mg_training, picklis
                                     </table>
                                 </div>
                             </div>
+                        )}
+
+                        {activeTab === 'leadership' && (
+                            <LeadershipManager 
+                                classes={classes} 
+                                committees={committees} 
+                                derived_pathfinder_committee={derived_pathfinder_committee} 
+                                picklists={picklists} 
+                                readonly={readonly} 
+                            />
                         )}
                     </div>
                 </div>
