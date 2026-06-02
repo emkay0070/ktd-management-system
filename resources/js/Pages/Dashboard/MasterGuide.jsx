@@ -1,8 +1,9 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head } from '@inertiajs/react';
 import { GraduationCap, BookOpen, Trophy, ClipboardCheck, Star, Users, Calendar, MapPin, CheckCircle2 } from 'lucide-react';
+import ClassRoster from './Partials/ClassRoster';
 
-export default function MasterGuideDashboard({ profile, tasks = [] }) {
+export default function MasterGuideDashboard({ profile, tasks = [], roster = [], curriculum = [] }) {
     return (
         <AuthenticatedLayout 
             header="Master Guide Portal" 
@@ -102,12 +103,8 @@ export default function MasterGuideDashboard({ profile, tasks = [] }) {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="panel__body">
-                                    <div className="p-12 text-center bg-white/5 rounded-2xl border border-dashed border-white/10">
-                                        <Users size={32} className="mx-auto text-gray-600 mb-4" />
-                                        <p className="text-gray-400 font-medium">Class roster management coming soon.</p>
-                                        <p className="text-[11px] text-gray-500 mt-2 uppercase tracking-widest font-black font-mono">Module Alpha Integrated-Pending</p>
-                                    </div>
+                                <div className="panel__body p-6">
+                                    <ClassRoster roster={roster} curriculum={curriculum} />
                                 </div>
                             </div>
 

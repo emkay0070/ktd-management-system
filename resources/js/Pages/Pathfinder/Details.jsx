@@ -5,6 +5,7 @@ import {
     User, Mail, Phone, MapPin, Calendar, Heart, Shield, 
     ChevronLeft, Edit2, FileText, CheckCircle2, AlertCircle 
 } from 'lucide-react';
+import TimelineHistory from './Partials/TimelineHistory';
 
 export default function Details({ pathfinder }) {
     return (
@@ -185,17 +186,15 @@ export default function Details({ pathfinder }) {
                             </div>
                         </div>
 
-                        {/* Recent Activity / Timeline Placeholder */}
+                        {/* Recent Activity / Timeline */}
                         <div className="panel">
                             <div className="panel__header border-b border-white/5">
                                 <h3 className="flex items-center gap-2 text-sm font-bold opacity-70">
                                     <Calendar size={16} /> Membership Timeline
                                 </h3>
                             </div>
-                            <div className="panel__body py-8 flex flex-col items-center justify-center text-center opacity-30">
-                                <div className="w-1 px-1 bg-white/5 h-12 mb-4"></div>
-                                <div className="text-xs">Timeline history feature coming soon</div>
-                                <p className="text-[10px] max-w-[200px] mt-1">This will track promotions, honors, and induction milestones.</p>
+                            <div className="panel__body">
+                                <TimelineHistory events={pathfinder.timeline_events || []} />
                             </div>
                         </div>
                     </div>

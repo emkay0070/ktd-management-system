@@ -108,4 +108,14 @@ class Pathfinder extends Model
     {
         return $this->belongsTo(Religion::class);
     }
+
+    public function timelineEvents(): HasMany
+    {
+        return $this->hasMany(TimelineEvent::class)->orderBy('event_date', 'desc');
+    }
+
+    public function progress(): HasMany
+    {
+        return $this->hasMany(CurriculumProgress::class);
+    }
 }

@@ -17,6 +17,8 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        \App\Models\Pathfinder::observe(\App\Observers\PathfinderObserver::class);
+
         if (config('app.env') === 'production') {
             URL::forceScheme('https');
         }

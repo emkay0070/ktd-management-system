@@ -211,7 +211,7 @@ class PathfinderController extends Controller
         abort_unless($user->church_id === $pathfinder->church_id, 403);
 
         return \Inertia\Inertia::render('Pathfinder/Details', [
-            'pathfinder' => $pathfinder->load(['religion', 'classAssignment.pathfinderClass', 'unitMembership.unit']),
+            'pathfinder' => $pathfinder->load(['religion', 'classAssignment.pathfinderClass', 'unitMembership.unit', 'timelineEvents']),
         ]);
     }
 

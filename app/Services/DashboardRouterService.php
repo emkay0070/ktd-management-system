@@ -182,17 +182,48 @@ class DashboardRouterService
 
     protected function renderMasterGuide(User $user, $section)
     {
+        $profile = $user->masterGuide()->with(['church', 'assignedClass', 'trainings'])->first();
+        
+        $roster = collect();
+        $curriculum = collect();
+        
+        if ($profile && $profile->assigned_class_id && $profile->church_id) {
+            $roster = \App\Models\Pathfinder::where('church_id', $profile->church_id)
+                ->whereHas('classAssignment', function($q) use ($profile) {
+                    $q->where('class_id', $profile->assigned_class_id);
+                })
+                ->with(['unitMembership.unit', 'progress.requirement'])
+                ->orderBy('name')
+                ->get();
+                
+            $curriculum = \App\Models\CurriculumRequirement::where('class_id', $profile->assigned_class_id)
+                ->orderBy('category')
+                ->get();
+        }
+
         return Inertia::render('Dashboard/MasterGuide', [
-            'profile' => $user->masterGuide()->with(['church', 'assignedClass', 'trainings'])->first(),
+            'profile' => $profile,
             'tasks' => \App\Models\DistrictTask::where('district_id', $user->church?->district_id)->get(),
+            'roster' => $roster,
+            'curriculum' => $curriculum,
         ]);
     }
 
     protected function renderPathfinder(User $user, $section)
     {
+        $profile = $user->pathfinder()->with(['assignedClass', 'unit', 'church', 'progress.requirement'])->first();
+        
+        $curriculum = collect();
+        if ($profile && $profile->classAssignment) {
+            $curriculum = \App\Models\CurriculumRequirement::where('class_id', $profile->classAssignment->class_id)
+                ->orderBy('category')
+                ->get();
+        }
+
         return Inertia::render('Dashboard/Pathfinder', [
-            'profile' => $user->pathfinder()->with(['assignedClass', 'unit', 'church'])->first(),
+            'profile' => $profile,
             'announcements' => \App\Models\DistrictBulletin::where('is_active', true)->where('district_id', $user->church?->district_id)->latest()->get(),
+            'curriculum' => $curriculum,
         ]);
     }
 

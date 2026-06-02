@@ -97,6 +97,9 @@ Route::middleware(['auth', 'verified', 'onboarded'])->group(function () {
     Route::put('/club/master-guides/{masterGuide}', [MasterGuideController::class, 'update'])->name('master_guides.update');
     Route::delete('/club/master-guides/{masterGuide}', [MasterGuideController::class, 'destroy'])->name('master_guides.destroy');
 
+    Route::post('/curriculum/{pathfinder}/signoff/{requirement}', [\App\Http\Controllers\CurriculumController::class, 'signoff'])
+        ->name('curriculum.signoff');
+
     Route::post('/club/mg-training', [MgTrainingController::class, 'store'])->name('mg_training.store');
     Route::put('/club/mg-training/{mgTraining}', [MgTrainingController::class, 'update'])->name('mg_training.update');
     Route::delete('/club/mg-training/{mgTraining}', [MgTrainingController::class, 'destroy'])->name('mg_training.destroy');

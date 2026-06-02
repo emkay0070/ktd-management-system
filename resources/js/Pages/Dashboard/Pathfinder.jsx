@@ -1,8 +1,9 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head } from '@inertiajs/react';
 import { Trophy, GraduationCap, Shield, Megaphone, CheckCircle2, Star, BookOpen, Clock } from 'lucide-react';
+import CurriculumChecklist from './Partials/CurriculumChecklist';
 
-export default function PathfinderDashboard({ profile, announcements = [] }) {
+export default function PathfinderDashboard({ profile, announcements = [], curriculum = [] }) {
     return (
         <AuthenticatedLayout 
             header="Pathfinder Dashboard" 
@@ -73,12 +74,11 @@ export default function PathfinderDashboard({ profile, announcements = [] }) {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="panel__body">
-                                    <div className="p-12 text-center bg-white/5 rounded-2xl border border-dashed border-white/10">
-                                        <BookOpen size={32} className="mx-auto text-gray-600 mb-4" />
-                                        <p className="text-gray-400 font-medium">Curriculum overview coming soon.</p>
-                                        <p className="text-[11px] text-gray-500 mt-2 uppercase tracking-widest font-black font-mono">Module Alpha Integrated-Pending</p>
-                                    </div>
+                                <div className="panel__body p-6">
+                                    <CurriculumChecklist 
+                                        curriculum={curriculum} 
+                                        progress={profile.progress || []} 
+                                    />
                                 </div>
                             </div>
 
