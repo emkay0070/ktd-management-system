@@ -184,6 +184,17 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // ── Onboarding Status Polling (JSON only) ────────────────────────────────
+    Route::get('/api/onboarding/status', function (\Illuminate\Http\Request $request) {
+        $user = $request->user();
+        $pendingRoles = $user->roles()->wherePivot('status', 'pending')->pluck('name')->toArray();
+        $hasLeadershipPending = in_array('district_official', $pendingRoles) || in_array('director', $pendingRoles);
+
+        return response()->json([
+            'approved' => !$hasLeadershipPending,
+        ]);
+    })->name('onboarding.status');
 });
 
 require __DIR__.'/auth.php';

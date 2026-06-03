@@ -2,7 +2,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link } from '@inertiajs/react';
 import { Search, Compass, ShieldCheck, Mail, Clock, ArrowRight, Info } from 'lucide-react';
 
-export default function Observer({ user, bulletins = [] }) {
+export default function Observer({ user, bulletins = [], error_message }) {
     return (
         <AuthenticatedLayout 
             header="Gateway Portal" 
@@ -11,6 +11,16 @@ export default function Observer({ user, bulletins = [] }) {
             <Head title="Observer Portal — EmPFC" />
 
             <div className="max-w-5xl mx-auto space-y-10 py-8">
+                {/* Error banner (e.g. approved but no district linked) */}
+                {error_message && (
+                    <div className="p-5 rounded-2xl border flex items-start gap-4" style={{ background: 'rgba(212, 160, 23, 0.08)', borderColor: 'rgba(212, 160, 23, 0.25)' }}>
+                        <Info size={22} className="text-gold-500 flex-shrink-0 mt-0.5" />
+                        <div>
+                            <h3 className="text-sm font-bold text-white mb-1">Action Required</h3>
+                            <p className="text-sm" style={{ color: '#a8a8c8' }}>{error_message}</p>
+                        </div>
+                    </div>
+                )}
                 {/* Hero Greeting */}
                 <div className="text-center space-y-4">
                     <h1 className="text-4xl font-black text-white tracking-tight uppercase">Welcome, {user.name}</h1>

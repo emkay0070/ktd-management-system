@@ -151,7 +151,16 @@ class DashboardRouterService
         }
         
         $district = $user->district;
-        if (!$district) return redirect()->route('onboarding.index');
+        if (!$district) {
+            // Approved district official but no district linked — show a helpful message
+            // instead of redirecting to onboarding (which would create an infinite loop
+            // since OnboardingController redirects active users back to dashboard).
+            return Inertia::render('Dashboard/Observer', [
+                'user' => $user->only('id', 'name', 'email'),
+                'bulletins' => collect(),
+                'error_message' => 'Your district official role has been approved, but your account is not yet linked to a district. Please contact your Conference Administrator to assign you to a district.',
+            ]);
+        }
 
         $churches = Church::query()
             ->where('district_id', $district->id)

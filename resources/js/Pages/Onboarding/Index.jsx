@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { Head, useForm, Link } from '@inertiajs/react';
+import { useState, useEffect, useRef } from 'react';
+import { Head, useForm, Link, router } from '@inertiajs/react';
 import GuestLayout from '@/Layouts/GuestLayout';
 import InputError from '@/Components/InputError';
-import { Shield, Users, Star, GraduationCap, Clock, ChevronRight, RefreshCw, LogOut } from 'lucide-react';
+import { Shield, Users, Star, GraduationCap, Clock, ChevronRight, RefreshCw, LogOut, Tent, CheckCircle } from 'lucide-react';
 
 export default function OnboardingIndex({ role, church_status, church_name }) {
     const { data, setData, post, processing, errors } = useForm({
@@ -17,6 +17,69 @@ export default function OnboardingIndex({ role, church_status, church_name }) {
         e.preventDefault();
         post(route('onboarding.store'));
     };
+
+    // ── Auto-polling for approval status ───────────────────────────────────
+    const [approved, setApproved] = useState(false);
+    const [polling, setPolling] = useState(false);
+    const intervalRef = useRef(null);
+
+    useEffect(() => {
+        if (role !== 'district_official' && role !== 'director') return;
+
+        const checkStatus = async () => {
+            try {
+                setPolling(true);
+                const res = await fetch('/api/onboarding/status', {
+                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    credentials: 'same-origin',
+                });
+                if (!res.ok) return;
+                const data = await res.json();
+                if (data.approved) {
+                    setApproved(true);
+                    clearInterval(intervalRef.current);
+                    // Auto-redirect after a brief celebration
+                    setTimeout(() => router.visit(route('dashboard')), 2500);
+                }
+            } catch (e) {
+                // Silently fail — network hiccups shouldn't break the UI
+            } finally {
+                setPolling(false);
+            }
+        };
+
+        // Check immediately on mount, then every 10 seconds
+        checkStatus();
+        intervalRef.current = setInterval(checkStatus, 10000);
+
+        return () => clearInterval(intervalRef.current);
+    }, [role]);
+
+    // ── Approved state — celebration screen ──────────────────────────────────
+    if (approved) {
+        const isDistrict = role === 'district_official';
+        return (
+            <GuestLayout>
+                <Head title="Approved! — EmPFC" />
+                <div className="waiting-room" style={{ borderTop: `4px solid ${isDistrict ? 'var(--clr-gold-500)' : 'var(--clr-blue-500)'}`, textAlign: 'center' }}>
+                    <div className="waiting-room__icon" style={{ background: isDistrict ? 'var(--clr-gold-500)' : 'var(--clr-blue-500)', color: 'white', animation: 'pulse 1.5s ease infinite' }}>
+                        <CheckCircle size={32} />
+                    </div>
+                    <h2 className="waiting-room__title" style={{ color: isDistrict ? 'var(--clr-gold-500)' : 'var(--clr-blue-500)' }}>You've Been Approved!</h2>
+                    <p className="waiting-room__desc">
+                        Your <strong>{isDistrict ? 'District Official' : 'Club Director'}</strong> role has been verified.
+                        Redirecting you to your dashboard…
+                    </p>
+                    <div style={{ marginTop: '1.5rem' }}>
+                        <Link href={route('dashboard')} className="waiting-room__refresh" style={{ background: isDistrict ? 'var(--clr-gold-500)' : 'var(--clr-blue-500)', color: 'white', fontWeight: 700 }}>
+                            Go to Dashboard Now →
+                        </Link>
+                    </div>
+                </div>
+                <style dangerouslySetInnerHTML={{ __html: `@keyframes pulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.1); } }` }} />
+            </GuestLayout>
+        );
+    }
 
     // ── Waiting Room for leadership roles ────────────────────────────────────
     if (role === 'district_official') {
@@ -44,13 +107,16 @@ export default function OnboardingIndex({ role, church_status, church_name }) {
                     </div>
 
                     <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap', marginTop: '1.5rem' }}>
-                        <Link href={route('dashboard')} className="waiting-room__refresh" style={{ background: 'rgba(255, 255, 255, 0.1)', color: 'white' }}>
-                            <RefreshCw size={14} /> Refresh Status
-                        </Link>
+                        <button onClick={() => router.visit(route('dashboard'))} className="waiting-room__refresh" style={{ background: 'rgba(255, 255, 255, 0.1)', color: 'white', border: 'none', cursor: 'pointer' }}>
+                            <RefreshCw size={14} className={polling ? 'animate-spin' : ''} /> {polling ? 'Checking…' : 'Refresh Status'}
+                        </button>
                         <Link href={route('logout')} method="post" as="button" className="waiting-room__refresh" style={{ color: 'var(--clr-text-muted)' }}>
                             <LogOut size={14} /> Logout
                         </Link>
                     </div>
+                    <p style={{ fontSize: '0.7rem', color: 'var(--clr-text-muted)', marginTop: '1rem', opacity: 0.6 }}>
+                        Auto-checking every 10 seconds — you'll be redirected automatically once approved.
+                    </p>
                 </div>
             </GuestLayout>
         );
@@ -81,13 +147,16 @@ export default function OnboardingIndex({ role, church_status, church_name }) {
                     </div>
 
                     <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap', marginTop: '1.5rem' }}>
-                        <Link href={route('dashboard')} className="waiting-room__refresh" style={{ background: 'rgba(255, 255, 255, 0.1)', color: 'white' }}>
-                            <RefreshCw size={14} /> Refresh Status
-                        </Link>
+                        <button onClick={() => router.visit(route('dashboard'))} className="waiting-room__refresh" style={{ background: 'rgba(255, 255, 255, 0.1)', color: 'white', border: 'none', cursor: 'pointer' }}>
+                            <RefreshCw size={14} className={polling ? 'animate-spin' : ''} /> {polling ? 'Checking…' : 'Refresh Status'}
+                        </button>
                         <Link href={route('logout')} method="post" as="button" className="waiting-room__refresh" style={{ color: 'var(--clr-text-muted)' }}>
                             <LogOut size={14} /> Logout
                         </Link>
                     </div>
+                    <p style={{ fontSize: '0.7rem', color: 'var(--clr-text-muted)', marginTop: '1rem', opacity: 0.6 }}>
+                        Auto-checking every 10 seconds — you'll be redirected automatically once approved.
+                    </p>
                 </div>
             </GuestLayout>
         );
