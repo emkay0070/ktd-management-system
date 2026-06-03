@@ -254,6 +254,11 @@ ul, ol { list-style: none; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 .fade-in { animation: fadeIn 0.35s ease-out forwards; }
 
+@keyframes toastSlideIn {
+  from { opacity: 0; transform: translateX(40px) scale(0.96); }
+  to   { opacity: 1; transform: translateX(0) scale(1); }
+}
+
 .object-cover { object-fit: cover; }
 .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }

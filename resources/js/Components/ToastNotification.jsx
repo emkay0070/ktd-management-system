@@ -1,100 +1,184 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { usePage } from '@inertiajs/react';
-import { Bell, X, CheckCircle, AlertTriangle, Info, AlertCircle } from 'lucide-react';
+import { X, CheckCircle, AlertTriangle, Info, AlertCircle } from 'lucide-react';
+
+const TOAST_CONFIGS = {
+    success: {
+        icon: CheckCircle,
+        bg: 'var(--clr-success)',
+        bgSoft: 'rgba(34, 197, 94, 0.12)',
+        border: 'rgba(34, 197, 94, 0.35)',
+        label: 'Success',
+    },
+    warning: {
+        icon: AlertTriangle,
+        bg: 'var(--clr-warning)',
+        bgSoft: 'rgba(245, 158, 11, 0.12)',
+        border: 'rgba(245, 158, 11, 0.35)',
+        label: 'Warning',
+    },
+    error: {
+        icon: AlertCircle,
+        bg: 'var(--clr-danger)',
+        bgSoft: 'rgba(239, 68, 68, 0.12)',
+        border: 'rgba(239, 68, 68, 0.35)',
+        label: 'Error',
+    },
+    info: {
+        icon: Info,
+        bg: 'var(--clr-info)',
+        bgSoft: 'rgba(59, 130, 246, 0.12)',
+        border: 'rgba(59, 130, 246, 0.35)',
+        label: 'Info',
+    },
+};
 
 export default function ToastNotification() {
     const { flash } = usePage().props;
-    const [toast, setToast] = useState(null);
-    const [minimized, setMinimized] = useState(false);
-    const [visible, setVisible] = useState(false);
+    const [toasts, setToasts] = useState([]);
 
-    useEffect(() => {
-        // Find which flash message exists
-        let newToast = null;
-        if (flash?.warning) newToast = { type: 'warning', message: flash.warning };
-        else if (flash?.error) newToast = { type: 'error', message: flash.error };
-        else if (flash?.success) newToast = { type: 'success', message: flash.success };
-        else if (flash?.info) newToast = { type: 'info', message: flash.info };
-        else if (flash?.message) newToast = { type: 'info', message: flash.message };
-
-        if (newToast) {
-            setToast(newToast);
-            setVisible(true);
-            setMinimized(false);
-        }
+    // Resolve the flash type
+    const resolveFlash = useCallback(() => {
+        if (!flash) return null;
+        if (flash.error)   return { type: 'error',   message: flash.error };
+        if (flash.warning) return { type: 'warning', message: flash.warning };
+        if (flash.success) return { type: 'success', message: flash.success };
+        if (flash.info)    return { type: 'info',    message: flash.info };
+        if (flash.message) return { type: 'success', message: flash.message };
+        return null;
     }, [flash]);
 
     useEffect(() => {
-        if (!visible) return;
+        const resolved = resolveFlash();
+        if (!resolved) return;
 
-        // Auto-minimize after 5 seconds
-        const minimizeTimer = setTimeout(() => {
-            setMinimized(true);
-        }, 5000);
+        const id = Date.now() + Math.random();
+        setToasts(prev => [...prev, { ...resolved, id }]);
 
-        // Auto-dismiss completely after 60 seconds
-        const dismissTimer = setTimeout(() => {
-            setVisible(false);
-        }, 60000);
+        // Auto-dismiss after 6 seconds
+        const timer = setTimeout(() => {
+            setToasts(prev => prev.filter(t => t.id !== id));
+        }, 6000);
 
-        return () => {
-            clearTimeout(minimizeTimer);
-            clearTimeout(dismissTimer);
-        };
-    }, [toast, visible]);
+        return () => clearTimeout(timer);
+    }, [flash]);
 
-    if (!visible || !toast) return null;
-
-    const styles = {
-        warning: 'bg-surface-800 border-l-4 border-l-amber-500 text-[var(--clr-text-primary)] border-t border-r border-b border-white/5',
-        success: 'bg-surface-800 border-l-4 border-l-green-500 text-[var(--clr-text-primary)] border-t border-r border-b border-white/5',
-        error: 'bg-surface-800 border-l-4 border-l-red-500 text-[var(--clr-text-primary)] border-t border-r border-b border-white/5',
-        info: 'bg-surface-800 border-l-4 border-l-blue-500 text-[var(--clr-text-primary)] border-t border-r border-b border-white/5',
+    const dismiss = (id) => {
+        setToasts(prev => prev.filter(t => t.id !== id));
     };
 
-    const iconColors = {
-        warning: 'text-amber-500',
-        success: 'text-green-500',
-        error: 'text-red-500',
-        info: 'text-blue-500',
-    };
-
-    const IconConfig = {
-        warning: AlertTriangle,
-        success: CheckCircle,
-        error: AlertCircle,
-        info: Info,
-    };
-
-    const Icon = IconConfig[toast.type] || Bell;
-
-    if (minimized) {
-        return (
-            <div className="fixed bottom-6 right-6 z-50 flex items-center justify-center cursor-pointer" onClick={() => setMinimized(false)}>
-                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${iconColors[toast.type].replace('text-', 'bg-')}`}></span>
-                <div className={`relative flex items-center justify-center w-12 h-12 rounded-full shadow-lg ${styles[toast.type]}`}>
-                    <Icon size={20} className={iconColors[toast.type]} />
-                </div>
-            </div>
-        );
-    }
+    if (toasts.length === 0) return null;
 
     return (
-        <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-2 fade-in duration-300">
-            <div className={`flex items-start gap-3 p-4 rounded-xl shadow-2xl min-w-[320px] max-w-sm ${styles[toast.type]}`}>
-                <div className={`shrink-0 mt-0.5 ${iconColors[toast.type]}`}>
-                    <Icon size={20} />
-                </div>
-                <div className="flex-1 text-sm font-medium leading-relaxed pr-2">
-                    {toast.message}
-                </div>
-                <button 
-                    onClick={() => setVisible(false)}
-                    className="shrink-0 text-[var(--clr-text-muted)] hover:text-[var(--clr-text-primary)] transition-colors"
-                >
-                    <X size={18} />
-                </button>
-            </div>
+        <div
+            style={{
+                position: 'fixed',
+                bottom: '24px',
+                right: '24px',
+                zIndex: 99999,
+                display: 'flex',
+                flexDirection: 'column-reverse',
+                gap: '10px',
+                pointerEvents: 'none',
+                maxWidth: '400px',
+                width: '100%',
+            }}
+        >
+            {toasts.map((toast) => {
+                const config = TOAST_CONFIGS[toast.type] || TOAST_CONFIGS.info;
+                const Icon = config.icon;
+
+                return (
+                    <div
+                        key={toast.id}
+                        style={{
+                            pointerEvents: 'auto',
+                            display: 'flex',
+                            alignItems: 'flex-start',
+                            gap: '12px',
+                            padding: '14px 16px',
+                            borderRadius: '12px',
+                            background: 'var(--clr-surface-800)',
+                            border: `1px solid ${config.border}`,
+                            borderLeft: `4px solid ${config.bg}`,
+                            boxShadow: '0 12px 40px rgba(0,0,0,0.35), 0 2px 8px rgba(0,0,0,0.2)',
+                            animation: 'toastSlideIn 0.35s cubic-bezier(0.22, 1, 0.36, 1)',
+                            minWidth: '300px',
+                        }}
+                    >
+                        {/* Icon */}
+                        <div
+                            style={{
+                                width: '32px',
+                                height: '32px',
+                                borderRadius: '8px',
+                                background: config.bgSoft,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                flexShrink: 0,
+                            }}
+                        >
+                            <Icon size={16} style={{ color: config.bg }} />
+                        </div>
+
+                        {/* Content */}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                            <div
+                                style={{
+                                    fontSize: '10px',
+                                    fontWeight: 800,
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.1em',
+                                    color: config.bg,
+                                    marginBottom: '3px',
+                                }}
+                            >
+                                {config.label}
+                            </div>
+                            <div
+                                style={{
+                                    fontSize: '13px',
+                                    fontWeight: 500,
+                                    lineHeight: 1.5,
+                                    color: 'var(--clr-text-primary)',
+                                    wordBreak: 'break-word',
+                                }}
+                            >
+                                {toast.message}
+                            </div>
+                        </div>
+
+                        {/* Dismiss */}
+                        <button
+                            onClick={() => dismiss(toast.id)}
+                            style={{
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                color: 'var(--clr-text-muted)',
+                                padding: '4px',
+                                borderRadius: '6px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                flexShrink: 0,
+                                transition: 'color 0.15s ease, background 0.15s ease',
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.color = 'var(--clr-text-primary)';
+                                e.currentTarget.style.background = 'var(--clr-surface-700)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.color = 'var(--clr-text-muted)';
+                                e.currentTarget.style.background = 'none';
+                            }}
+                        >
+                            <X size={16} />
+                        </button>
+                    </div>
+                );
+            })}
         </div>
     );
 }
