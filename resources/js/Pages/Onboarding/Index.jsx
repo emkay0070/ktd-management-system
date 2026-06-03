@@ -19,19 +19,17 @@ export default function OnboardingIndex({ role, church_status, church_name }) {
     };
 
     // ── Waiting Room for leadership roles ────────────────────────────────────
-    if (role === 'director' || role === 'district_official') {
-        const roleDisplay = role === 'director' ? 'Club Director' : 'District Official';
-
+    if (role === 'district_official') {
         return (
             <GuestLayout>
                 <Head title="Pending Verification — EmPFC" />
-                <div className="waiting-room">
-                    <div className="waiting-room__icon">
-                        <Clock size={32} />
+                <div className="waiting-room" style={{ borderTop: '4px solid var(--clr-burgundy-500)' }}>
+                    <div className="waiting-room__icon" style={{ background: 'var(--clr-burgundy-500)', color: 'white' }}>
+                        <Shield size={32} />
                     </div>
-                    <h2 className="waiting-room__title">Pending Verification</h2>
+                    <h2 className="waiting-room__title">District Headquarters</h2>
                     <p className="waiting-room__desc">
-                        Your application for <span className="waiting-room__role">{roleDisplay}</span> is being reviewed by District Leadership.
+                        Your application for <span className="waiting-room__role" style={{ color: 'var(--clr-gold-500)' }}>District Official</span> is being reviewed by Conference Leadership.
                     </p>
 
                     {church_status === 'pending_verification' && (
@@ -40,13 +38,50 @@ export default function OnboardingIndex({ role, church_status, church_name }) {
                         </div>
                     )}
 
-                    <div className="waiting-room__note">
+                    <div className="waiting-room__note" style={{ background: 'rgba(212, 160, 23, 0.05)', border: '1px solid rgba(212, 160, 23, 0.2)' }}>
                         <Users size={14} style={{ marginBottom: 8, color: 'var(--clr-gold-500)' }} />
                         Credentials for high-level roles require administrative background checks for district security. This usually takes 24–48 hours.
                     </div>
 
-                    <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-                        <Link href={route('dashboard')} className="waiting-room__refresh">
+                    <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap', marginTop: '1.5rem' }}>
+                        <Link href={route('dashboard')} className="waiting-room__refresh" style={{ background: 'rgba(255, 255, 255, 0.1)', color: 'white' }}>
+                            <RefreshCw size={14} /> Refresh Status
+                        </Link>
+                        <Link href={route('logout')} method="post" as="button" className="waiting-room__refresh" style={{ color: 'var(--clr-text-muted)' }}>
+                            <LogOut size={14} /> Logout
+                        </Link>
+                    </div>
+                </div>
+            </GuestLayout>
+        );
+    }
+
+    if (role === 'director') {
+        return (
+            <GuestLayout>
+                <Head title="Pending Verification — EmPFC" />
+                <div className="waiting-room" style={{ borderTop: '4px solid var(--clr-blue-500)' }}>
+                    <div className="waiting-room__icon" style={{ background: 'var(--clr-blue-500)', color: 'white' }}>
+                        <Tent size={32} />
+                    </div>
+                    <h2 className="waiting-room__title">Club Operations</h2>
+                    <p className="waiting-room__desc">
+                        Your application for <span className="waiting-room__role" style={{ color: 'var(--clr-cyan-400)' }}>Club Director</span> is being reviewed by District Leadership.
+                    </p>
+
+                    {church_status === 'pending_verification' && (
+                        <div className="waiting-room__note">
+                            <strong style={{ color: 'var(--clr-cyan-400)' }}>Note:</strong> The church you registered (<em>{church_name}</em>) is also pending verification.
+                        </div>
+                    )}
+
+                    <div className="waiting-room__note" style={{ background: 'rgba(59, 130, 246, 0.05)', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+                        <Clock size={14} style={{ marginBottom: 8, color: 'var(--clr-blue-400)' }} />
+                        Club leadership roles are verified by your District Director to ensure accurate local club assignments.
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap', marginTop: '1.5rem' }}>
+                        <Link href={route('dashboard')} className="waiting-room__refresh" style={{ background: 'rgba(255, 255, 255, 0.1)', color: 'white' }}>
                             <RefreshCw size={14} /> Refresh Status
                         </Link>
                         <Link href={route('logout')} method="post" as="button" className="waiting-room__refresh" style={{ color: 'var(--clr-text-muted)' }}>

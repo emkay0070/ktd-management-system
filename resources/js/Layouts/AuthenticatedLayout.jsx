@@ -90,8 +90,11 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
 
     const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
 
+    // Determine Role Theme
+    const roleTheme = isDistrictLeader ? 'district' : 'local';
+
     return (
-        <div className={`app-shell ${isCollapsed ? 'app-shell--collapsed' : ''} ${isMobileMenuOpen ? 'app-shell--mobile-open' : ''}`}>
+        <div className={`app-shell ${isCollapsed ? 'app-shell--collapsed' : ''} ${isMobileMenuOpen ? 'app-shell--mobile-open' : ''}`} data-role-theme={roleTheme}>
             <ToastNotification />
             {/* Mobile Backdrop */}
             {isMobileMenuOpen && (
@@ -110,12 +113,12 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
                 {/* Logo */}
                 <div className="sidebar__logo">
                     <div className="logo-icon">
-                        <Tent size={20} />
+                        {isDistrictLeader ? <Shield size={20} /> : <Tent size={20} />}
                     </div>
                     {(isSidebarVisible || isMobileOpen) && (
                         <div className="logo-text">
-                            <span className="logo-title">EmPFC</span>
-                            <span className="logo-sub">PATHFINDER</span>
+                            <span className="logo-title">{isDistrictLeader ? 'DISTRICT HQ' : 'LOCAL CLUB'}</span>
+                            <span className="logo-sub">{isDistrictLeader ? 'COMMAND CENTRE' : 'OPERATIONS'}</span>
                         </div>
                     )}
                 </div>

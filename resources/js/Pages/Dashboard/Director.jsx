@@ -1,6 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, usePage } from '@inertiajs/react';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Tent, Users, GraduationCap } from 'lucide-react';
 
 // Sub-components
 import DirectorOverview from './Partials/DirectorOverview';
@@ -108,8 +108,41 @@ export default function Director({ club, registrations = [], district_events = [
                 </div>
             )}
 
-            <div className="dashboard-container">
-                {renderSection()}
+            <div className="layout-content">
+                <header className="page-header relative overflow-hidden p-8 rounded-2xl mb-8 bg-surface-800 border border-white/5" style={{ background: 'linear-gradient(135deg, var(--clr-blue-700), var(--clr-blue-900))' }}>
+                    {/* Decorative field elements */}
+                    <div className="absolute right-0 top-0 opacity-10 pointer-events-none" style={{ transform: 'translate(20%, -20%)' }}>
+                        <Tent size={400} />
+                    </div>
+                    
+                    <div className="relative z-10 flex flex-wrap justify-between items-center gap-6">
+                        <div className="flex items-center gap-6">
+                            <div className="w-20 h-20 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-2xl border border-white/20" style={{ background: 'linear-gradient(135deg, var(--clr-blue-400), var(--clr-blue-600))' }}>
+                                <Tent size={40} className="text-white" />
+                            </div>
+                            <div>
+                                <h1 className="text-4xl font-black text-white leading-tight tracking-tight uppercase">{church.name}</h1>
+                                <p className="text-xs font-black uppercase tracking-[0.3em] mt-1" style={{ color: 'var(--clr-cyan-400)' }}>Local Club Operations</p>
+                            </div>
+                        </div>
+
+                        <div className="flex gap-8 items-center bg-white/5 p-6 rounded-2xl border border-white/5 backdrop-blur-sm">
+                            <div className="text-right">
+                                <div className="text-3xl font-black text-white">{overview?.total_pathfinders ?? 0}</div>
+                                <div className="text-[10px] text-blue-200 font-black uppercase tracking-widest mt-1">Pathfinders</div>
+                            </div>
+                            <div className="h-10 w-px bg-white/10"></div>
+                            <div className="text-right">
+                                <div className="text-3xl font-black" style={{ color: 'var(--clr-cyan-400)' }}>{overview?.master_guides?.total ?? 0}</div>
+                                <div className="text-[10px] text-blue-200 font-black uppercase tracking-widest mt-1">Staff & Guides</div>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+
+                <div className="dashboard-container">
+                    {renderSection()}
+                </div>
             </div>
         </AuthenticatedLayout>
     );

@@ -16,6 +16,14 @@
   --clr-gold-400:      #e8ba3a;
   --clr-gold-300:      #f5d06e;
 
+  // --- Local Club Palette ---
+  --clr-blue-700:      #1d4ed8;
+  --clr-blue-600:      #2563eb;
+  --clr-blue-500:      #3b82f6;
+  --clr-blue-400:      #60a5fa;
+  --clr-cyan-500:      #06b6d4;
+  --clr-cyan-400:      #22d3ee;
+
   // --- Neutrals (dark-first) ---
   --clr-surface-950:   #0a0a0c;
   --clr-surface-900:   #111116;
@@ -108,5 +116,36 @@
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
   --shadow-md: 0 8px 30px rgba(0,0,0,0.06);
   --shadow-lg: 0 12px 40px rgba(0,0,0,0.1);
+}
+
+// --- Role Themes ---
+:root {
+  --theme-primary: var(--clr-surface-500);
+  --theme-bg-alpha: rgba(255, 255, 255, 0.05);
+  --theme-bg-alpha-strong: rgba(255, 255, 255, 0.1);
+  --theme-accent: var(--clr-text-primary);
+  --theme-gradient-1: var(--clr-surface-600);
+  --theme-gradient-2: var(--clr-surface-800);
+  --theme-glow: var(--shadow-sm);
+}
+
+[data-role-theme="district"] {
+  --theme-primary: var(--clr-burgundy-500);
+  --theme-bg-alpha: rgba(155, 34, 38, 0.12);
+  --theme-bg-alpha-strong: rgba(155, 34, 38, 0.25);
+  --theme-accent: var(--clr-gold-400);
+  --theme-gradient-1: var(--clr-burgundy-600);
+  --theme-gradient-2: var(--clr-burgundy-800);
+  --theme-glow: var(--shadow-glow-burgundy);
+}
+
+[data-role-theme="local"] {
+  --theme-primary: var(--clr-blue-500);
+  --theme-bg-alpha: rgba(59, 130, 246, 0.12);
+  --theme-bg-alpha-strong: rgba(59, 130, 246, 0.25);
+  --theme-accent: var(--clr-cyan-400);
+  --theme-gradient-1: var(--clr-blue-600);
+  --theme-gradient-2: var(--clr-blue-700); // Changed to blue-700 for gradient
+  --theme-glow: 0 0 24px rgba(59, 130, 246, 0.3);
 }
 

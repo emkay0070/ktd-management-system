@@ -21,12 +21,12 @@
       width: 42px;
       height: 42px;
       border-radius: var(--radius-md);
-      background: linear-gradient(135deg, var(--clr-burgundy-600), var(--clr-burgundy-800));
+      background: linear-gradient(135deg, var(--theme-gradient-1), var(--theme-gradient-2));
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: var(--shadow-glow-burgundy);
-      color: var(--clr-gold-400);
+      box-shadow: var(--theme-glow);
+      color: var(--theme-accent);
     }
     
     .logo-text {
@@ -122,13 +122,13 @@
       width: 38px;
       height: 38px;
       border-radius: var(--radius-md);
-      background: linear-gradient(135deg, var(--clr-burgundy-600), var(--clr-burgundy-800));
+      background: linear-gradient(135deg, var(--theme-gradient-1), var(--theme-gradient-2));
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      box-shadow: var(--shadow-glow-burgundy);
-      svg { color: var(--clr-gold-400); }
+      box-shadow: var(--theme-glow);
+      svg { color: var(--theme-accent); }
     }
 
     .logo-text {
@@ -143,7 +143,7 @@
       }
       .logo-sub {
         font-size: var(--fs-xs);
-        color: var(--clr-gold-400);
+        color: var(--theme-accent);
         letter-spacing: 0.08em;
         font-weight: var(--fw-medium);
       }
@@ -197,11 +197,11 @@
     }
 
     &--active {
-      background: linear-gradient(135deg, rgba(155, 34, 38, 0.25), rgba(155, 34, 38, 0.12));
+      background: linear-gradient(135deg, var(--theme-bg-alpha-strong), var(--theme-bg-alpha));
       color: var(--clr-text-primary);
-      border: 1px solid rgba(155, 34, 38, 0.3);
+      border: 1px solid var(--theme-bg-alpha-strong);
 
-      svg { opacity: 1; color: var(--clr-burgundy-400); }
+      svg { opacity: 1; color: var(--theme-primary); }
 
       &::before {
         content: '';
@@ -211,7 +211,7 @@
         transform: translateY(-50%);
         width: 3px;
         height: 18px;
-        background: var(--clr-burgundy-500);
+        background: var(--theme-primary);
         border-radius: 0 2px 2px 0;
       }
     }
@@ -240,13 +240,13 @@
         width: 36px;
         height: 36px;
         border-radius: var(--radius-full);
-        background: linear-gradient(135deg, var(--clr-burgundy-600), var(--clr-burgundy-800));
+        background: linear-gradient(135deg, var(--theme-gradient-1), var(--theme-gradient-2));
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: var(--fs-sm);
         font-weight: var(--fw-bold);
-        color: var(--clr-gold-300);
+        color: var(--theme-accent);
         flex-shrink: 0;
       }
 
