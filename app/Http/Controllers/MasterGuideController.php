@@ -88,7 +88,7 @@ class MasterGuideController extends Controller
     public function update(Request $request, MasterGuide $masterGuide)
     {
         $user = $request->user();
-        abort_unless($user && $user->role !== 'super_admin', 403);
+        abort_unless($user && !$user->hasRole('super_admin'), 403);
         abort_unless($user->church_id && $masterGuide->church_id === $user->church_id, 403);
 
         $religionId = $request->religion_id;

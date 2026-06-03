@@ -11,7 +11,7 @@ class AttendanceController extends Controller
     public function store(Request $request)
     {
         $user = $request->user();
-        abort_unless($user && $user->role === 'director', 403);
+        abort_unless($user && $user->hasAnyRole(['director', 'club_secretary']), 403);
 
         $request->validate([
             'date' => 'required|date',

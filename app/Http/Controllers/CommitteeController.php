@@ -13,7 +13,7 @@ class CommitteeController extends Controller
     public function storeMember(Request $request, string $type)
     {
         $user = $request->user();
-        abort_unless($user && $user->role !== 'super_admin', 403);
+        abort_unless($user && !$user->hasRole('super_admin'), 403);
         abort_unless($user->church_id, 403);
         abort_unless(in_array($type, ['executive', 'staff', 'pathfinder'], true), 404);
 
@@ -70,7 +70,7 @@ class CommitteeController extends Controller
     public function destroyMember(Request $request, CommitteeMember $committeeMember)
     {
         $user = $request->user();
-        abort_unless($user && $user->role !== 'super_admin', 403);
+        abort_unless($user && !$user->hasRole('super_admin'), 403);
         abort_unless($user->church_id, 403);
         abort_unless($committeeMember->committee && $committeeMember->committee->church_id === $user->church_id, 403);
 

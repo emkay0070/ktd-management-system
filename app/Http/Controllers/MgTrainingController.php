@@ -11,7 +11,7 @@ class MgTrainingController extends Controller
     public function store(Request $request)
     {
         $user = $request->user();
-        abort_unless($user && $user->role !== 'super_admin', 403);
+        abort_unless($user && !$user->hasRole('super_admin'), 403);
         abort_unless($user->church_id, 403);
 
         $data = $request->validate([
@@ -56,7 +56,7 @@ class MgTrainingController extends Controller
     public function update(Request $request, MgTraining $mgTraining)
     {
         $user = $request->user();
-        abort_unless($user && $user->role !== 'super_admin', 403);
+        abort_unless($user && !$user->hasRole('super_admin'), 403);
         abort_unless($user->church_id, 403);
         abort_unless($mgTraining->masterGuide && $mgTraining->masterGuide->church_id === $user->church_id, 403);
 
@@ -90,7 +90,7 @@ class MgTrainingController extends Controller
     public function destroy(Request $request, MgTraining $mgTraining)
     {
         $user = $request->user();
-        abort_unless($user && $user->role !== 'super_admin', 403);
+        abort_unless($user && !$user->hasRole('super_admin'), 403);
         abort_unless($user->church_id, 403);
         abort_unless($mgTraining->masterGuide && $mgTraining->masterGuide->church_id === $user->church_id, 403);
 

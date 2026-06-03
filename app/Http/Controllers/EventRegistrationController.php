@@ -92,7 +92,7 @@ class EventRegistrationController extends Controller
     public function destroy(Registration $registration)
     {
         $user = auth()->user();
-        abort_unless($user->church_id === $registration->church_id || $user->role === 'district_director', 403);
+        abort_unless($user->church_id === $registration->church_id || $user->hasAnyRole(['district_director', 'district_official']), 403);
 
         $registration->delete();
         return back()->with('message', 'Registration cancelled.');

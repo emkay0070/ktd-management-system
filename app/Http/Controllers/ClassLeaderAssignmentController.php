@@ -12,7 +12,7 @@ class ClassLeaderAssignmentController extends Controller
     public function store(Request $request, PathfinderClass $class)
     {
         $user = $request->user();
-        abort_unless($user && $user->role !== 'super_admin', 403);
+        abort_unless($user && !$user->hasRole('super_admin'), 403);
         abort_unless($user->church_id, 403);
 
         $data = $request->validate([
@@ -41,7 +41,7 @@ class ClassLeaderAssignmentController extends Controller
     public function destroy(Request $request, PathfinderClass $class, ClassLeaderAssignment $assignment)
     {
         $user = $request->user();
-        abort_unless($user && $user->role !== 'super_admin', 403);
+        abort_unless($user && !$user->hasRole('super_admin'), 403);
         abort_unless($user->church_id, 403);
 
         abort_unless($assignment->class_id === $class->id, 404);

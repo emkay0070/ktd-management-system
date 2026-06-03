@@ -17,7 +17,7 @@ class PathfinderController extends Controller
     public function store(Request $request)
     {
         $user = $request->user();
-        abort_unless($user && $user->role !== 'super_admin', 403);
+        abort_unless($user && !$user->hasRole('super_admin'), 403);
 
         $churchId = $user->church_id;
         if (!$churchId) {
@@ -153,7 +153,7 @@ class PathfinderController extends Controller
     public function update(Request $request, Pathfinder $pathfinder)
     {
         $user = $request->user();
-        abort_unless($user && $user->role !== 'super_admin', 403);
+        abort_unless($user && !$user->hasRole('super_admin'), 403);
         abort_unless($user->church_id && $pathfinder->church_id === $user->church_id, 403);
 
         $religionId = $request->religion_id;
@@ -276,7 +276,7 @@ class PathfinderController extends Controller
     public function destroy(Request $request, Pathfinder $pathfinder)
     {
         $user = $request->user();
-        abort_unless($user && $user->role !== 'super_admin', 403);
+        abort_unless($user && !$user->hasRole('super_admin'), 403);
         abort_unless($user->church_id && $pathfinder->church_id === $user->church_id, 403);
 
         $pathfinder->delete();

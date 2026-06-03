@@ -265,6 +265,7 @@ class DashboardRouterService
             'resources' => \App\Models\DistrictResource::where('district_id', $district->id)->latest()->get(),
             'bulletins' => $district->bulletins()->orderBy('created_at', 'desc')->get(),
             'registrations' => \App\Models\Registration::whereIn('church_id', $district->churches->pluck('id'))->with(['pathfinder', 'church', 'event'])->latest()->get(),
+            'treasury' => [], // Add proper treasury logic here later if needed
             'leaderboard' => $district->churches->map(fn($c) => ['id' => $c->id, 'name' => $c->name, 'points' => (int)\App\Models\TaskSubmission::where('church_id', $c->id)->where('status', 'Approved')->sum('points_awarded')])->sortByDesc('points')->values(),
             'analytics' => ['growth' => $growthPulse, 'composition' => [], 'activity' => $activityPulse], // Composition simplified for brevity here
             'section' => $section,
@@ -281,6 +282,7 @@ class DashboardRouterService
         return Inertia::render('Dashboard/Director', [
             'club' => $this->clubService->buildForChurch($church),
             'registrations' => \App\Models\Registration::where('church_id', $church->id)->with(['pathfinder', 'event'])->get(),
+            'district_tasks' => \App\Models\DistrictTask::where('district_id', $church->district_id)->orderBy('deadline', 'asc')->get(),
             'district_events' => \App\Models\DistrictEvent::where('district_id', $church->district_id)->where('is_published', \DB::raw('true'))->get(),
             'district_resources' => \App\Models\DistrictResource::where('district_id', $church->district_id)->latest()->get(),
             'district_bulletins' => \App\Models\DistrictBulletin::where('district_id', $church->district_id)->where('is_active', \DB::raw('true'))->get(),

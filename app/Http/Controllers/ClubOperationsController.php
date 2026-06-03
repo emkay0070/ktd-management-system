@@ -11,7 +11,7 @@ class ClubOperationsController extends Controller
     public function update(Request $request)
     {
         $user = $request->user();
-        abort_unless($user && $user->role !== 'super_admin', 403);
+        abort_unless($user && !$user->hasRole('super_admin'), 403);
         abort_unless($user->church_id, 403);
 
         $data = $request->validate([

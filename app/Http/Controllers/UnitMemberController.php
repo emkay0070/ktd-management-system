@@ -13,7 +13,7 @@ class UnitMemberController extends Controller
     public function store(Request $request, Unit $unit)
     {
         $user = $request->user();
-        abort_unless($user && $user->role !== 'super_admin', 403);
+        abort_unless($user && !$user->hasRole('super_admin'), 403);
         abort_unless($user->church_id && $unit->church_id === $user->church_id, 403);
 
         $data = $request->validate([
@@ -45,7 +45,7 @@ class UnitMemberController extends Controller
     public function destroy(Request $request, Unit $unit, Pathfinder $pathfinder)
     {
         $user = $request->user();
-        abort_unless($user && $user->role !== 'super_admin', 403);
+        abort_unless($user && !$user->hasRole('super_admin'), 403);
         abort_unless($user->church_id && $unit->church_id === $user->church_id, 403);
         abort_unless($pathfinder->church_id === $user->church_id, 403);
 

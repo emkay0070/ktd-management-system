@@ -12,7 +12,7 @@ class TaskSubmissionController extends Controller
     public function store(Request $request)
     {
         $user = auth()->user();
-        abort_unless($user && $user->role === 'director', 403);
+        abort_unless($user && $user->hasAnyRole(['director', 'club_secretary']), 403);
         
         $validated = $request->validate([
             'district_task_id' => 'required|exists:district_tasks,id',
