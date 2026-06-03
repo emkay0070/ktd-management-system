@@ -5,6 +5,8 @@ import {
     LogOut, Bell, Settings, ChevronRight, ChevronDown, Star, Tent, GraduationCap, Shield, Calendar, Trophy, BookOpen, Megaphone, ClipboardCheck, Activity, Sun, Moon,
     Menu, X
 } from 'lucide-react';
+import ToastNotification from '@/Components/ToastNotification';
+
 
 function NavItem({ href, icon: Icon, label, active = false, isCollapsed = false, isSidebarVisible = true, isMobileOpen = false }) {
     const showLabel = isSidebarVisible || isMobileOpen;
@@ -90,6 +92,7 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
 
     return (
         <div className={`app-shell ${isCollapsed ? 'app-shell--collapsed' : ''} ${isMobileMenuOpen ? 'app-shell--mobile-open' : ''}`}>
+            <ToastNotification />
             {/* Mobile Backdrop */}
             {isMobileMenuOpen && (
                 <div 

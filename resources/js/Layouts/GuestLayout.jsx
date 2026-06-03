@@ -1,6 +1,8 @@
 import { Link } from '@inertiajs/react';
 import { Tent, Moon, Sun, ChevronLeft } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import ToastNotification from '@/Components/ToastNotification';
+
 
 export default function GuestLayout({ 
     children, 
@@ -26,6 +28,7 @@ export default function GuestLayout({
 
     return (
         <div className="onboard-shell">
+            <ToastNotification />
             {/* ── Top Bar ──────────────────────────────── */}
             <header className="onboard-topbar">
                 <Link href="/" className="onboard-logo">

@@ -30,9 +30,17 @@ class DashboardRouterService
 
             $needsSetup = !$user->hasRole('super_admin') && (
                 (empty($activeRoles) && empty($pendingRoles)) ||
-                (in_array('parent', $activeRoles) && !$hasLinkedChild)
+                (in_array('parent', $activeRoles) && !$hasLinkedChild) ||
+                (!$user->church_id && !in_array('district_official', $allRoles))
             );
+
             if ($needsSetup) {
+                if (!str_starts_with($section, 'setup')) {
+                    $step = $this->getNextIncompleteStep($user, $pendingRoles, $activeRoles, $hasLinkedChild);
+                    session()->flash('warning', 'Your account setup is not yet complete. Please finish the step below to continue.');
+                    return redirect()->route('dashboard', ['section' => "setup-{$step}"]);
+                }
+
                 return Inertia::render('Dashboard/SetupWizard', [
                     'user'  => $user->only('id', 'name', 'email', 'church_id'),
                     'roles' => \App\Models\Role::where('name', '!=', 'super_admin')->get(),
@@ -49,6 +57,10 @@ class DashboardRouterService
         // 1.5 Pending Leadership Role "Waiting Room"
         $pendingRoles = $user->roles()->wherePivot('status', 'pending')->pluck('name')->toArray();
         if (in_array('district_official', $pendingRoles) || in_array('director', $pendingRoles)) {
+            if ($section !== 'onboarding-waiting') {
+                session()->flash('warning', 'Your account setup is not yet complete. Please finish the step below to continue.');
+                return redirect()->route('dashboard', ['section' => 'onboarding-waiting']);
+            }
             $pendingRole = in_array('district_official', $pendingRoles) ? 'district_official' : 'director';
             return Inertia::render('Onboarding/Index', [
                 'role' => $pendingRole,
@@ -72,6 +84,21 @@ class DashboardRouterService
             'pathfinder'        => $this->renderPathfinder($user, $section),
             default             => $this->renderObserver($user, $section),
         };
+    }
+
+    protected function getNextIncompleteStep(User $user, array $pendingRoles, array $activeRoles, bool $hasLinkedChild): string
+    {
+        $allRoles = array_merge($pendingRoles, $activeRoles);
+        if (empty($allRoles)) return 'role';
+
+        $activeNonObserverRoles = array_filter($activeRoles, fn($r) => $r !== 'observer');
+        if (count($pendingRoles) > 0 && count($activeNonObserverRoles) === 0) return 'approval';
+
+        if (in_array('parent', $allRoles) && !$hasLinkedChild) return 'link-child';
+
+        if (!$user->church_id && !in_array('district_official', $allRoles)) return 'organization';
+
+        return 'finish';
     }
 
     protected function renderSuperAdmin(User $user, $section)
