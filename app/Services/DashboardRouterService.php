@@ -254,6 +254,15 @@ class DashboardRouterService
             'committee' => \Illuminate\Support\Facades\URL::signedRoute('invites.show', ['role' => 'district_committee', 'scope_type' => \App\Models\District::class, 'scope_id' => $district->id]),
         ];
 
+        $pendingChurches = Church::where('district_id', $district->id)->whereIn('status', ['pending', 'pending_verification'])->get();
+        $pendingApprovals = User::whereHas('roles', fn($q) => $q->where('role_user.status', 'pending'))
+            ->where(function ($q) use ($district) {
+                $q->where('district_id', $district->id)
+                  ->orWhereHas('church', fn($q2) => $q2->where('district_id', $district->id));
+            })
+            ->with(['roles', 'church', 'district'])
+            ->get();
+
         return Inertia::render('Dashboard/District', [
             'district' => ['id' => $district->id, 'name' => $district->name, 'conference' => $district->conference->name ?? 'Unknown'],
             'churches' => $churches,
@@ -269,6 +278,8 @@ class DashboardRouterService
             'leaderboard' => $district->churches->map(fn($c) => ['id' => $c->id, 'name' => $c->name, 'points' => (int)\App\Models\TaskSubmission::where('church_id', $c->id)->where('status', 'Approved')->sum('points_awarded')])->sortByDesc('points')->values(),
             'analytics' => ['growth' => $growthPulse, 'composition' => [], 'activity' => $activityPulse], // Composition simplified for brevity here
             'section' => $section,
+            'pending_churches' => $pendingChurches,
+            'pending_approvals' => $pendingApprovals,
         ]);
     }
 
@@ -283,9 +294,9 @@ class DashboardRouterService
             'club' => $this->clubService->buildForChurch($church),
             'registrations' => \App\Models\Registration::where('church_id', $church->id)->with(['pathfinder', 'event'])->get(),
             'district_tasks' => \App\Models\DistrictTask::where('district_id', $church->district_id)->orderBy('deadline', 'asc')->get(),
-            'district_events' => \App\Models\DistrictEvent::where('district_id', $church->district_id)->where('is_published', \DB::raw('true'))->get(),
+            'district_events' => \App\Models\DistrictEvent::where('district_id', $church->district_id)->where('is_published', true)->get(),
             'district_resources' => \App\Models\DistrictResource::where('district_id', $church->district_id)->latest()->get(),
-            'district_bulletins' => \App\Models\DistrictBulletin::where('district_id', $church->district_id)->where('is_active', \DB::raw('true'))->get(),
+            'district_bulletins' => \App\Models\DistrictBulletin::where('district_id', $church->district_id)->where('is_active', true)->get(),
             'parent_link_requests' => \App\Models\PendingParentLink::whereIn('pathfinder_id', $pathfinders->pluck('id'))->where('status', 'pending')->with(['user', 'pathfinder'])->get(),
             'parents' => User::where('church_id', $church->id)->get()->filter(fn($u) => $u->hasRole('parent'))->values(),
             'section' => $section,

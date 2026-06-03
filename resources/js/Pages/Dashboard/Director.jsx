@@ -12,6 +12,8 @@ import LeadershipManager from './Partials/LeadershipManager';
 import OperationsManager from './Partials/OperationsManager';
 import ClubTasksManager from './Partials/ClubTasksManager';
 import ClubResourcesView from './Partials/ClubResourcesView';
+import ClubEventsView from './Partials/ClubEventsView';
+import ClubBulletinsView from './Partials/ClubBulletinsView';
 import RegistrationPortal from './Partials/RegistrationPortal';
 import ParentLinkManager from './Partials/ParentLinkManager';
 
@@ -51,7 +53,7 @@ export default function Director({ club, registrations = [], district_events = [
     const renderSection = () => {
         switch (section) {
             case 'overview':
-                return <DirectorOverview overview={overview} units={units} district_events={district_events} />;
+                return <DirectorOverview overview={overview} units={units} district_events={district_events} district_bulletins={district_bulletins} />;
             case 'pathfinders':
                 return <PathfinderManager pathfinders={pathfinders} units={units} picklists={picklists} readonly={readonly} />;
             case 'units':
@@ -66,6 +68,10 @@ export default function Director({ club, registrations = [], district_events = [
                 return <OperationsManager church={church} operations={operations} picklists={picklists} readonly={readonly} />;
             case 'missions':
                 return <ClubTasksManager tasks={district_tasks} readonly={readonly} />;
+            case 'events':
+                return <ClubEventsView events={district_events} />;
+            case 'bulletins':
+                return <ClubBulletinsView bulletins={district_bulletins} />;
             case 'resources':
                 return <ClubResourcesView resources={district_resources} />;
             case 'camp_portal':
@@ -86,6 +92,11 @@ export default function Director({ club, registrations = [], district_events = [
         leadership: 'Club Leadership',
         operations: 'Operations & Settings',
         parents: 'Parent Accounts & Links',
+        missions: 'District Missions',
+        resources: 'Resource Library',
+        events: 'District Events',
+        bulletins: 'Official Bulletins',
+        camp_portal: 'Camp Portal',
     };
 
     return (

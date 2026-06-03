@@ -325,6 +325,24 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
                                 active={route().current('dashboard', { section: 'resources' })}
                             />
                             <NavItem
+                                href={route('dashboard', 'events')}
+                                icon={Calendar}
+                                label="District Events"
+                                isCollapsed={isCollapsed}
+                                isSidebarVisible={isSidebarVisible}
+                                isMobileOpen={isMobileOpen}
+                                active={route().current('dashboard', { section: 'events' })}
+                            />
+                            <NavItem
+                                href={route('dashboard', 'bulletins')}
+                                icon={Megaphone}
+                                label="Bulletins"
+                                isCollapsed={isCollapsed}
+                                isSidebarVisible={isSidebarVisible}
+                                isMobileOpen={isMobileOpen}
+                                active={route().current('dashboard', { section: 'bulletins' })}
+                            />
+                            <NavItem
                                 href={route('dashboard', 'camp_portal')}
                                 icon={Tent}
                                 label="Camp Portal"
