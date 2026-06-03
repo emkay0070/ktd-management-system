@@ -116,7 +116,7 @@ class DashboardRouterService
                     
                     // Find the assigned director for this district
                     $director = \App\Models\User::whereHas('roles', function($q) {
-                        $q->where('name', 'district_director')->wherePivot('status', 'active');
+                        $q->where('name', 'district_director')->where('role_user.status', 'active');
                     })->where('district_id', $d->id)->first();
 
                     return [
@@ -136,8 +136,8 @@ class DashboardRouterService
                 ->get();
                 
             $unassigned_directors = \App\Models\User::whereHas('roles', function($q) {
-                $q->where('name', 'district_director')->wherePivot('status', 'active');
-            })->whereNull('district_id')->get()->map->only(['id', 'name', 'email']);
+                $q->where('name', 'district_director')->where('role_user.status', 'active');
+            })->whereNull('district_id')->get()->map(fn($user) => $user->only(['id', 'name', 'email']));
 
             return Inertia::render('Dashboard/SuperAdmin', [
                 'section' => 'directors',
