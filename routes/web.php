@@ -83,6 +83,7 @@ Route::middleware(['auth', 'verified', 'onboarded'])->group(function () {
     // Club Command Center (Director-only writes; controllers enforce role + church scoping)
     Route::get('/club/pathfinders', [PathfinderController::class, 'index'])->name('pathfinders.index');
     Route::post('/club/pathfinders', [PathfinderController::class, 'store'])->name('pathfinders.store');
+    Route::post('/club/pathfinders/bulk', [PathfinderController::class, 'storeBulk'])->name('pathfinders.bulk_store');
     Route::get('/club/pathfinders/{pathfinder}', [PathfinderController::class, 'show'])->name('pathfinders.show');
     Route::get('/club/pathfinders/{pathfinder}/edit', [PathfinderController::class, 'edit'])->name('pathfinders.edit');
     Route::put('/club/pathfinders/{pathfinder}', [PathfinderController::class, 'update'])->name('pathfinders.update');
@@ -96,6 +97,7 @@ Route::middleware(['auth', 'verified', 'onboarded'])->group(function () {
     Route::put('/club/units/{unit}/roles', [UnitRoleController::class, 'update'])->name('units.roles.update');
 
     Route::post('/club/master-guides', [MasterGuideController::class, 'store'])->name('master_guides.store');
+    Route::post('/club/master-guides/bulk', [MasterGuideController::class, 'storeBulk'])->name('master_guides.bulk_store');
     Route::get('/club/master-guides/{masterGuide}', [MasterGuideController::class, 'show'])->name('master_guides.show');
     Route::get('/club/master-guides/{masterGuide}/edit', [MasterGuideController::class, 'edit'])->name('master_guides.edit');
     Route::put('/club/master-guides/{masterGuide}', [MasterGuideController::class, 'update'])->name('master_guides.update');
@@ -137,6 +139,12 @@ Route::middleware(['auth', 'verified', 'onboarded'])->group(function () {
         ->name('verification.roles.approve');
     Route::post('/admin/roles/{user}/reject', [VerificationController::class, 'rejectRole'])
         ->name('verification.roles.reject');
+
+    // ── Super Admin — District Directors ────────────────────────────────────
+    Route::post('/admin/districts', [\App\Http\Controllers\DistrictDirectorController::class, 'storeDistrict'])->name('admin.districts.store');
+    Route::post('/admin/districts/{district}/directors/assign', [\App\Http\Controllers\DistrictDirectorController::class, 'assignDirector'])->name('admin.district-directors.assign');
+    Route::delete('/admin/directors/{user}/remove', [\App\Http\Controllers\DistrictDirectorController::class, 'removeDirector'])->name('admin.district-directors.remove');
+    Route::post('/admin/directors/{user}/assign-unassigned', [\App\Http\Controllers\DistrictDirectorController::class, 'assignUnassignedDirector'])->name('admin.district-directors.assign-unassigned');
 
 });
 

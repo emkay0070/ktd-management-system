@@ -2,6 +2,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { AlertTriangle, Check, Church, Layers, Shield, Users, Stethoscope, ChevronDown, ChevronUp, ChevronRight, X } from 'lucide-react';
 import { useState } from 'react';
+import DistrictDirectorManager from './Partials/DistrictDirectorManager';
 
 function VerifyChurchAction({ church }) {
     const { post, processing } = useForm({});
@@ -47,7 +48,18 @@ function VerifyRoleAction({ user }) {
     );
 }
 
-export default function SuperAdmin({ churches = [], pending_churches = [], pending_approvals = [], medical_alerts = [] }) {
+export default function SuperAdmin(props) {
+    const { 
+        section = 'overview', 
+        churches = [], 
+        pending_churches = [], 
+        pending_approvals = [], 
+        medical_alerts = [],
+        districts = [],
+        eligible_users = [],
+        conferences = [],
+        unassigned_directors = []
+    } = props;
     const { auth } = usePage().props;
     const [showMedicalDetails, setShowMedicalDetails] = useState(false);
     const [showChurchQueue, setShowChurchQueue] = useState(false);
@@ -63,8 +75,11 @@ export default function SuperAdmin({ churches = [], pending_churches = [], pendi
     const actionCount = pending_churches.length + pending_approvals.length;
 
     return (
-        <AuthenticatedLayout header="District Command Centre" breadcrumb="Super Admin → Overview">
-            <Head title="District Dashboard" />
+        <AuthenticatedLayout header="Super Admin Command Centre" breadcrumb={`Super Admin → ${section.charAt(0).toUpperCase() + section.slice(1)}`}>
+            <Head title={`Super Admin | ${section}`} />
+
+            {section === 'overview' && (
+                <>
 
             <div className="space-y-6 mb-8">
                 {actionCount > 0 && (
@@ -278,6 +293,26 @@ export default function SuperAdmin({ churches = [], pending_churches = [], pendi
                     </table>
                 </div>
             </div>
+            </>
+            )}
+
+            {section === 'directors' && (
+                <DistrictDirectorManager 
+                    districts={districts} 
+                    eligible_users={eligible_users} 
+                    conferences={conferences}
+                    unassigned_directors={unassigned_directors}
+                />
+            )}
+            
+            {section === 'pathfinders' && (
+                <div className="panel p-12 text-center text-muted">All Pathfinders module coming soon</div>
+            )}
+            
+            {section === 'registrations' && (
+                <div className="panel p-12 text-center text-muted">Global Registrations module coming soon</div>
+            )}
+
         </AuthenticatedLayout>
     );
 }

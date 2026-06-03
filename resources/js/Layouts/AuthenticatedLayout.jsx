@@ -3,7 +3,7 @@ import { Link, usePage, router } from '@inertiajs/react';
 import {
     LayoutDashboard, Users, Church, ClipboardList,
     LogOut, Bell, Settings, ChevronRight, ChevronDown, Star, Tent, GraduationCap, Shield, Calendar, Trophy, BookOpen, Megaphone, ClipboardCheck, Activity, Sun, Moon,
-    Menu, X
+    Menu, X, MapPin
 } from 'lucide-react';
 import ToastNotification from '@/Components/ToastNotification';
 
@@ -74,7 +74,7 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
     const isMobileOpen = isMobileMenuOpen;
 
     useEffect(() => {
-        document.body.setAttribute('data-theme', theme);
+        document.documentElement.setAttribute('data-theme', theme);
         localStorage.setItem('app_theme', theme);
     }, [theme]);
 
@@ -238,28 +238,40 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
                         <>
                             {(isSidebarVisible || isMobileOpen) && <span className="sidebar__section-label" style={{ marginTop: '12px' }}>Management</span>}
                             <NavItem
-                                href={route('dashboard')}
+                                href={route('dashboard', 'overview')}
                                 icon={Church}
-                                label="Churches"
+                                label="Churches & Clubs"
                                 isCollapsed={isCollapsed}
                                 isSidebarVisible={isSidebarVisible}
                                 isMobileOpen={isMobileOpen}
+                                active={route().current('dashboard', { section: 'overview' }) || (route().current('dashboard') && !route().params.section)}
                             />
                             <NavItem
-                                href={route('dashboard')}
+                                href={route('dashboard', 'directors')}
+                                icon={MapPin}
+                                label="District Directors"
+                                isCollapsed={isCollapsed}
+                                isSidebarVisible={isSidebarVisible}
+                                isMobileOpen={isMobileOpen}
+                                active={route().current('dashboard', { section: 'directors' })}
+                            />
+                            <NavItem
+                                href={route('dashboard', 'pathfinders')}
                                 icon={Users}
-                                label="Pathfinders"
+                                label="All Pathfinders"
                                 isCollapsed={isCollapsed}
                                 isSidebarVisible={isSidebarVisible}
                                 isMobileOpen={isMobileOpen}
+                                active={route().current('dashboard', { section: 'pathfinders' })}
                             />
                             <NavItem
-                                href={route('dashboard')}
+                                href={route('dashboard', 'registrations')}
                                 icon={ClipboardList}
                                 label="Registrations"
                                 isCollapsed={isCollapsed}
                                 isSidebarVisible={isSidebarVisible}
                                 isMobileOpen={isMobileOpen}
+                                active={route().current('dashboard', { section: 'registrations' })}
                             />
                         </>
                     )}

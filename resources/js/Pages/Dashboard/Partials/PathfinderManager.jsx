@@ -1,11 +1,12 @@
 import { useState, useMemo } from 'react';
-import { Plus, UserPlus, Search, Filter, Download, ExternalLink, Eye, Edit2, Trash2, Shield } from 'lucide-react';
+import { Plus, UserPlus, Search, Filter, Download, ExternalLink, Eye, Edit2, Trash2, Shield, Users } from 'lucide-react';
 import { useForm, router, Link } from '@inertiajs/react';
 import ReligionCombobox from './ReligionCombobox';
 import UnitManager from './UnitManager';
+import BulkPathfinderForm from './BulkPathfinderForm';
 
 export default function PathfinderManager({ pathfinders, units, picklists, readonly }) {
-    const [view, setView] = useState('list'); // 'list', 'register', or 'units'
+    const [view, setView] = useState('list'); // 'list', 'register', 'bulk_register', or 'units'
     const [searchQuery, setSearchQuery] = useState('');
     const [genderFilter, setGenderFilter] = useState('');
     const [classFilter, setClassFilter] = useState('');
@@ -100,13 +101,18 @@ export default function PathfinderManager({ pathfinders, units, picklists, reado
                                 <Download size={14} /> Export CSV
                             </button>
                             {!readonly && (
-                                <button className="btn btn--primary btn--sm" onClick={() => setView('register')}>
-                                    <Plus size={14} /> Register New
-                                </button>
+                                <>
+                                    <button className="btn btn--secondary btn--sm" onClick={() => setView('bulk_register')}>
+                                        <Users size={14} /> Bulk Add
+                                    </button>
+                                    <button className="btn btn--primary btn--sm" onClick={() => setView('register')}>
+                                        <Plus size={14} /> Register New
+                                    </button>
+                                </>
                             )}
                         </>
                     )}
-                    {(view === 'register' || view === 'units') && (
+                    {(view === 'register' || view === 'bulk_register' || view === 'units') && (
                         <button className="btn btn--secondary btn--sm" onClick={() => setView('list')}>
                             Back to List
                         </button>
@@ -230,6 +236,14 @@ export default function PathfinderManager({ pathfinders, units, picklists, reado
                 <div className="panel__body p-0 border-t border-white/5">
                     <UnitManager units={units} picklists={picklists} readonly={readonly} embedded={true} />
                 </div>
+            )}
+
+            {view === 'bulk_register' && !readonly && (
+                <BulkPathfinderForm 
+                    picklists={picklists} 
+                    onCancel={() => setView('list')} 
+                    onSuccess={() => setView('list')} 
+                />
             )}
 
             {view === 'register' && !readonly && (

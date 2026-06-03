@@ -107,6 +107,49 @@ class PathfinderController extends Controller
         return back()->with('message', 'Pathfinder saved successfully.');
     }
 
+    public function storeBulk(Request $request)
+    {
+        $user = $request->user();
+        abort_unless($user && $user->role !== 'super_admin', 403);
+
+        $churchId = $user->church_id;
+        if (!$churchId) {
+            return back()->withErrors(['error' => 'No church assigned to this director.']);
+        }
+
+        $request->validate([
+            'pathfinders' => 'required|array|min:1|max:20',
+            'pathfinders.*.name' => 'required|string|max:255',
+            'pathfinders.*.age' => 'required|integer|min:5|max:25',
+            'pathfinders.*.gender' => 'required|string|in:Male,Female',
+            'pathfinders.*.class_id' => 'required|integer|exists:classes,id',
+            'pathfinders.*.residence' => 'required|string|max:255',
+            'pathfinders.*.boarding_status' => 'required|string|in:day,boarding',
+            'pathfinders.*.religion_id' => 'required|integer|exists:religions,id',
+        ]);
+
+        foreach ($request->pathfinders as $pf) {
+            $pathfinder = Pathfinder::create([
+                'name' => $pf['name'],
+                'age' => $pf['age'],
+                'gender' => $pf['gender'],
+                'residence' => $pf['residence'],
+                'boarding_status' => $pf['boarding_status'],
+                'religion_id' => $pf['religion_id'],
+                'church_id' => $churchId,
+                'consent' => true,
+                'medical_consent' => true,
+            ]);
+
+            ClassAssignment::create([
+                'pathfinder_id' => $pathfinder->id,
+                'class_id' => $pf['class_id'],
+            ]);
+        }
+
+        return back()->with('message', count($request->pathfinders) . ' pathfinders saved successfully.');
+    }
+
     public function update(Request $request, Pathfinder $pathfinder)
     {
         $user = $request->user();

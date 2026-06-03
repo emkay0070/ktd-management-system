@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useForm, router, Link } from '@inertiajs/react';
-import { Plus, GraduationCap, Shield, UserPlus, Search, User, Edit2, Eye, LayoutGrid, Trash2 } from 'lucide-react';
+import { Plus, GraduationCap, Shield, UserPlus, Search, User, Edit2, Eye, LayoutGrid, Trash2, Users } from 'lucide-react';
 import ReligionCombobox from './ReligionCombobox';
 import LeadershipManager from './LeadershipManager';
+import BulkMasterGuideForm from './BulkMasterGuideForm';
 
 export default function MasterGuideManager({ master_guides, mg_training, picklists, readonly, committees, classes, derived_pathfinder_committee }) {
-    const [view, setView] = useState('list'); // 'list' or 'register'
+    const [view, setView] = useState('list'); // 'list', 'register', 'bulk_register'
     const [activeTab, setActiveTab] = useState('invested'); // 'invested' or 'training'
     const [searchQuery, setSearchQuery] = useState('');
 
@@ -83,9 +84,14 @@ export default function MasterGuideManager({ master_guides, mg_training, picklis
                                     />
                                 </div>
                                 {!readonly && (
-                                    <button className="btn btn--primary px-8 whitespace-nowrap" onClick={() => setView('register')}>
-                                        <Plus size={20} className="mr-2" /> Register
-                                    </button>
+                                    <div className="flex gap-2">
+                                        <button className="btn btn--secondary whitespace-nowrap" onClick={() => setView('bulk_register')}>
+                                            <Users size={16} className="mr-1" /> Bulk Add
+                                        </button>
+                                        <button className="btn btn--primary px-8 whitespace-nowrap" onClick={() => setView('register')}>
+                                            <Plus size={20} className="mr-2" /> Register
+                                        </button>
+                                    </div>
                                 )}
                             </div>
                         </div>
@@ -270,6 +276,12 @@ export default function MasterGuideManager({ master_guides, mg_training, picklis
                         )}
                     </div>
                 </div>
+            ) : view === 'bulk_register' ? (
+                <BulkMasterGuideForm 
+                    picklists={picklists}
+                    onCancel={() => setView('list')}
+                    onSuccess={() => setView('list')}
+                />
             ) : (
                 <div className="panel">
                     <div className="panel__header border-b border-white/5">

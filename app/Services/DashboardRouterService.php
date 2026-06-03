@@ -103,6 +103,51 @@ class DashboardRouterService
 
     protected function renderSuperAdmin(User $user, $section)
     {
+        if ($section === 'directors') {
+            $districts = \App\Models\District::with(['conference', 'churches.pathfinders'])
+                ->withCount('churches')
+                ->get()
+                ->map(function ($d) {
+                    // Manual sum because nested counts via withCount are tricky
+                    $total_pathfinders = 0;
+                    foreach ($d->churches as $church) {
+                        $total_pathfinders += $church->pathfinders->count();
+                    }
+                    
+                    // Find the assigned director for this district
+                    $director = \App\Models\User::whereHas('roles', function($q) {
+                        $q->where('name', 'district_director')->wherePivot('status', 'active');
+                    })->where('district_id', $d->id)->first();
+
+                    return [
+                        'id' => $d->id,
+                        'name' => $d->name,
+                        'conference' => $d->conference->name ?? 'Unknown',
+                        'churches_count' => $d->churches_count,
+                        'total_pathfinders' => $total_pathfinders,
+                        'director' => $director ? $director->only(['id', 'name', 'email', 'avatar_url']) : null,
+                    ];
+                });
+
+            // All eligible users for assigning a director (anyone not already a director of another district)
+            $eligible_users = \App\Models\User::query()
+                ->select(['id', 'name', 'email', 'district_id'])
+                ->orderBy('name')
+                ->get();
+                
+            $unassigned_directors = \App\Models\User::whereHas('roles', function($q) {
+                $q->where('name', 'district_director')->wherePivot('status', 'active');
+            })->whereNull('district_id')->get()->map->only(['id', 'name', 'email']);
+
+            return Inertia::render('Dashboard/SuperAdmin', [
+                'section' => 'directors',
+                'districts' => $districts,
+                'eligible_users' => $eligible_users,
+                'conferences' => \App\Models\Conference::all(['id', 'name']),
+                'unassigned_directors' => $unassigned_directors,
+            ]);
+        }
+
         $pendingChurches = Church::where('status', 'pending_verification')->get();
         $pendingApprovals = User::whereHas('roles', fn($q) => $q->where('role_user.status', 'pending'))
             ->with(['roles', 'church', 'district'])
@@ -139,6 +184,7 @@ class DashboardRouterService
             ]);
 
         return Inertia::render('Dashboard/SuperAdmin', [
+            'section' => $section,
             'churches' => $churches,
             'pending_churches' => $pendingChurches,
             'pending_approvals' => $pendingApprovals,

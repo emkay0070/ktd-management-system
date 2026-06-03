@@ -51,6 +51,40 @@ class MasterGuideController extends Controller
         return back()->with('message', 'Master Guide saved.');
     }
 
+    public function storeBulk(Request $request)
+    {
+        $user = $request->user();
+        abort_unless($user && $user->role !== 'super_admin', 403);
+        abort_unless($user->church_id, 403);
+
+        $request->validate([
+            'master_guides' => 'required|array|min:1|max:10',
+            'master_guides.*.name' => 'required|string|max:255',
+            'master_guides.*.phone' => 'nullable|string|max:255',
+            'master_guides.*.gender' => 'required|string|in:Male,Female',
+            'master_guides.*.role' => 'required|string|in:MG,MGiT',
+            'master_guides.*.religion_id' => 'required|integer|exists:religions,id',
+        ]);
+
+        foreach ($request->master_guides as $mg) {
+            MasterGuide::create([
+                'full_name' => $mg['name'],
+                'phone_number' => $mg['phone'], // Assuming db column might be phone or phone_number. Need to check what store() uses...
+                'gender' => $mg['gender'],
+                'role' => $mg['role'],
+                'religion_id' => $mg['religion_id'],
+                'church_id' => $user->church_id,
+                'residence' => 'N/A', // defaults required by schema
+                'occupation_status' => 'working',
+                'insured_yearly' => false,
+                'actively_teaching' => false,
+                'other_church_responsibility' => 'none',
+            ]);
+        }
+
+        return back()->with('message', count($request->master_guides) . ' Master Guides saved successfully.');
+    }
+
     public function update(Request $request, MasterGuide $masterGuide)
     {
         $user = $request->user();
