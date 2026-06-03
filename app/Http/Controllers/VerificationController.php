@@ -14,7 +14,12 @@ class VerificationController extends Controller
      */
     public function approveChurch(Request $request, Church $church): RedirectResponse
     {
-        abort_unless($request->user()->hasRole('super_admin'), 403);
+        $user = $request->user();
+        abort_unless($user->hasAnyRole(['super_admin', 'district_director']), 403);
+        
+        if (!$user->hasRole('super_admin')) {
+            abort_unless($church->district_id === $user->district_id, 403);
+        }
 
         $church->update(['status' => 'approved']);
 
@@ -26,7 +31,12 @@ class VerificationController extends Controller
      */
     public function rejectChurch(Request $request, Church $church): RedirectResponse
     {
-        abort_unless($request->user()->hasRole('super_admin'), 403);
+        $user = $request->user();
+        abort_unless($user->hasAnyRole(['super_admin', 'district_director']), 403);
+
+        if (!$user->hasRole('super_admin')) {
+            abort_unless($church->district_id === $user->district_id, 403);
+        }
 
         $church->update(['status' => 'rejected']);
 
@@ -37,33 +47,43 @@ class VerificationController extends Controller
      * Approve a pending leadership role for a user.
      * Activates the first pending role pivot found on the user.
      */
-    public function approveRole(Request $request, User $user): RedirectResponse
+    public function approveRole(Request $request, User $userTarget): RedirectResponse
     {
-        abort_unless($request->user()->hasRole('super_admin'), 403);
+        $user = $request->user();
+        abort_unless($user->hasAnyRole(['super_admin', 'district_director']), 403);
 
-        $pendingRole = $user->roles()->wherePivot('status', 'pending')->first();
-
-        if ($pendingRole) {
-            $user->roles()->updateExistingPivot($pendingRole->id, ['status' => 'active']);
+        if (!$user->hasRole('super_admin')) {
+            abort_unless($userTarget->district_id === $user->district_id || $userTarget->church?->district_id === $user->district_id, 403);
         }
 
-        return back()->with('success', "Role approved for {$user->name}.");
+        $pendingRole = $userTarget->roles()->wherePivot('status', 'pending')->first();
+
+        if ($pendingRole) {
+            $userTarget->roles()->updateExistingPivot($pendingRole->id, ['status' => 'active']);
+        }
+
+        return back()->with('success', "Role approved for {$userTarget->name}.");
     }
 
     /**
      * Reject (revoke) a pending leadership role for a user.
      */
-    public function rejectRole(Request $request, User $user): RedirectResponse
+    public function rejectRole(Request $request, User $userTarget): RedirectResponse
     {
-        abort_unless($request->user()->hasRole('super_admin'), 403);
+        $user = $request->user();
+        abort_unless($user->hasAnyRole(['super_admin', 'district_director']), 403);
 
-        $pendingRole = $user->roles()->wherePivot('status', 'pending')->first();
-
-        if ($pendingRole) {
-            $user->roles()->updateExistingPivot($pendingRole->id, ['status' => 'revoked']);
+        if (!$user->hasRole('super_admin')) {
+            abort_unless($userTarget->district_id === $user->district_id || $userTarget->church?->district_id === $user->district_id, 403);
         }
 
-        return back()->with('success', "Role revoked for {$user->name}.");
+        $pendingRole = $userTarget->roles()->wherePivot('status', 'pending')->first();
+
+        if ($pendingRole) {
+            $userTarget->roles()->updateExistingPivot($pendingRole->id, ['status' => 'revoked']);
+        }
+
+        return back()->with('success', "Role revoked for {$userTarget->name}.");
     }
 }
 

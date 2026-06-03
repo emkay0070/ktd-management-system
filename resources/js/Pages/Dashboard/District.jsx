@@ -38,11 +38,12 @@ export default function District({ auth, district, churches, committee, events, 
             <Head title={`District: ${district.name}`} />
 
             <div className="layout-content">
-                <header className="page-header relative overflow-hidden p-8 rounded-2xl mb-8 bg-surface-800 border border-white/5">
-                    {/* Decorative map elements */}
-                    <div className="absolute right-0 top-0 opacity-10 pointer-events-none">
-                        <Map size={400} />
-                    </div>
+                {isClubs && (
+                    <header className="page-header relative overflow-hidden p-8 rounded-2xl mb-8 bg-surface-800 border border-white/5">
+                        {/* Decorative map elements */}
+                        <div className="absolute right-0 top-0 opacity-5 pointer-events-none">
+                            <Map size={400} />
+                        </div>
                     
                     <div className="relative z-10 flex flex-wrap justify-between items-center gap-6">
                         <div className="flex items-center gap-6">
@@ -72,77 +73,8 @@ export default function District({ auth, district, churches, committee, events, 
                             </div>
                         </div>
                     </div>
-                </header>
-
-                <div className="tabs flex gap-2 border-b border-white/10 mb-8 overflow-x-auto no-scrollbar">
-                    <Link 
-                        href={route('dashboard', 'overview')}
-                        className={`tab-item ${isClubs ? 'tab-item--active' : ''}`}
-                    >
-                        <Shield size={16} /> Clubs
-                    </Link>
-                    
-                    {!isTreasuryOnly && (
-                        <>
-                            <Link 
-                                href={route('dashboard', 'committee')}
-                                className={`tab-item ${isCommittee ? 'tab-item--active' : ''}`}
-                            >
-                                <Users size={16} /> Committee
-                            </Link>
-                            <Link 
-                                href={route('dashboard', 'roster')}
-                                className={`tab-item ${isRoster ? 'tab-item--active' : ''}`}
-                            >
-                                <Users size={16} /> Registry
-                            </Link>
-                        </>
-                    )}
-
-                    <Link 
-                        href={route('dashboard', 'camp_registrations')}
-                        className={`tab-item ${isRegistration ? 'tab-item--active' : ''}`}
-                    >
-                        <Tent size={16} /> Treasury
-                    </Link>
-
-                    <Link 
-                        href={route('dashboard', 'events')}
-                        className={`tab-item ${isEvents ? 'tab-item--active' : ''}`}
-                    >
-                        <Calendar size={16} /> Events
-                    </Link>
-
-                    {!isTreasuryOnly && (
-                        <>
-                            <Link 
-                                href={route('dashboard', 'missions')}
-                                className={`tab-item ${isTasks ? 'tab-item--active' : ''}`}
-                            >
-                                <Trophy size={16} /> Missions
-                            </Link>
-                            <Link 
-                                href={route('dashboard', 'appraisals')}
-                                className={`tab-item ${isAppraisals ? 'tab-item--active' : ''}`}
-                            >
-                                <ClipboardCheck size={16} /> Appraisals
-                            </Link>
-                            <Link 
-                                href={route('dashboard', 'pulse')}
-                                className={`tab-item ${isPulse ? 'tab-item--active' : ''}`}
-                            >
-                                <Activity size={16} /> Pulse
-                            </Link>
-                        </>
-                    )}
-
-                    <Link 
-                        href={route('dashboard', 'bulletins')}
-                        className={`tab-item ${isBulletins ? 'tab-item--active' : ''}`}
-                    >
-                        <Megaphone size={16} /> Bulletins
-                    </Link>
-                </div>
+                    </header>
+                )}
 
                 <div className="page-content bg-transparent shadow-none border-none p-0">
                     {isClubs && <ClubsDirectory churches={churches} readonly={!hasRole('district_director')} />}
