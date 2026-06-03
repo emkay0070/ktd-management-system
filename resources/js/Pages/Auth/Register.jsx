@@ -94,7 +94,11 @@ export default function Register({ intent = null }) {
         'district': 'district_official'
     };
 
-    const dbRole = intent ? (roleMapping[intent] || 'observer') : 'observer';
+    const queryParams = new URLSearchParams(window.location.search);
+    const intentRole = queryParams.get('role');
+    const intentDistrictId = queryParams.get('district_id');
+
+    const dbRole = intentRole ? intentRole : (intent ? (roleMapping[intent] || 'observer') : 'observer');
 
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
@@ -105,7 +109,7 @@ export default function Register({ intent = null }) {
         union_id: '',
         conference_id: '',
         zone_id: '',
-        district_id: '',
+        district_id: intentDistrictId || '',
         church_id: '',
         new_church_name: '',
     });
@@ -158,6 +162,12 @@ export default function Register({ intent = null }) {
                  .then(res => setHierarchy(h => ({ ...h, churches: res.data })));
         }
     }, [data.district_id]);
+
+    useEffect(() => {
+        if (intentDistrictId && step === 0) {
+            setStep(1); // Skip straight to church selection (or account if district intent)
+        }
+    }, [intentDistrictId]);
 
     const submit = (e) => {
         e.preventDefault();

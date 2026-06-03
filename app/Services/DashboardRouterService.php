@@ -104,7 +104,9 @@ class DashboardRouterService
     protected function renderSuperAdmin(User $user, $section)
     {
         $pendingChurches = Church::where('status', 'pending_verification')->get();
-        $pendingApprovals = User::whereHas('roles', fn($q) => $q->where('role_user.status', 'pending'))->with('roles')->get();
+        $pendingApprovals = User::whereHas('roles', fn($q) => $q->where('role_user.status', 'pending'))
+            ->with(['roles', 'church', 'district'])
+            ->get();
 
         $medicalAlerts = Pathfinder::whereNotNull('medical_conditions')
             ->where('medical_conditions', '!=', '')
@@ -194,16 +196,23 @@ class DashboardRouterService
             ->groupBy('day')->orderBy('day', 'asc')->get();
 
         $committee = $district->users()->get()
-            ->filter(fn($u) => $u->hasAnyRole(['district_director', 'district_committee', 'district_treasurer', 'district_official']))
+            ->filter(fn($u) => $u->hasAnyRole(['district_director', 'district_committee', 'district_treasurer', 'district_secretary', 'district_official']))
             ->map(fn($u) => [
                 'id' => $u->id, 'name' => $u->name, 'email' => $u->email,
                 'roles' => $u->role_names, 'avatar_url' => $u->avatar_url,
             ]);
 
+        $inviteLinks = [
+            'treasurer' => \Illuminate\Support\Facades\URL::signedRoute('invites.show', ['role' => 'district_treasurer', 'scope_type' => \App\Models\District::class, 'scope_id' => $district->id]),
+            'secretary' => \Illuminate\Support\Facades\URL::signedRoute('invites.show', ['role' => 'district_secretary', 'scope_type' => \App\Models\District::class, 'scope_id' => $district->id]),
+            'committee' => \Illuminate\Support\Facades\URL::signedRoute('invites.show', ['role' => 'district_committee', 'scope_type' => \App\Models\District::class, 'scope_id' => $district->id]),
+        ];
+
         return Inertia::render('Dashboard/District', [
             'district' => ['id' => $district->id, 'name' => $district->name, 'conference' => $district->conference->name ?? 'Unknown'],
             'churches' => $churches,
-            'committee' => $committee,
+            'committee' => $committee->values(),
+            'invite_links' => $inviteLinks,
             'events' => $district->events()->orderBy('start_date', 'asc')->get(),
             'tasks' => $district->tasks()->with(['submissions.church'])->orderBy('deadline', 'asc')->get(),
             'roster' => \App\Models\MasterGuide::whereIn('church_id', $district->churches->pluck('id'))->with(['church', 'assignedClass'])->get(),

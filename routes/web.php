@@ -23,6 +23,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UnitMemberController;
 use App\Http\Controllers\UnitRoleController;
+use App\Http\Controllers\InviteController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -137,8 +138,11 @@ Route::middleware(['auth', 'verified', 'onboarded'])->group(function () {
     Route::post('/admin/roles/{user}/reject', [VerificationController::class, 'rejectRole'])
         ->name('verification.roles.reject');
 
-
 });
+
+// ── Invitations ─────────────────────────────────────────────────────────
+Route::get('/invites/accept', [InviteController::class, 'show'])->name('invites.show');
+Route::post('/invites/accept', [InviteController::class, 'accept'])->middleware('auth')->name('invites.accept');
 
 // ── Public Hierarchy API (used by registration wizard + onboarding) ──────
 Route::get('/api/hierarchy/unions', function () {

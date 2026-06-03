@@ -119,7 +119,11 @@ export default function SuperAdmin({ churches = [], pending_churches = [], pendi
                                         {pending_approvals.map(user => (
                                             <div key={user.id} className="flex items-center justify-between px-5 py-3">
                                                 <div>
-                                                    <div className="font-bold text-white text-sm">{user.name}</div>
+                                                    <div className="font-bold text-white text-sm">
+                                                        {user.name}
+                                                        {user.district && <span className="ml-2 text-xs text-gold-500 font-normal">({user.district.name})</span>}
+                                                        {user.church && <span className="ml-2 text-xs text-burgundy-400 font-normal">({user.church.name})</span>}
+                                                    </div>
                                                     <div className="text-[10px] text-gray-500 uppercase tracking-widest">
                                                         {user.roles?.filter(r => r.pivot?.status === 'pending').map(r => r.display_name ?? r.name).join(', ')}
                                                     </div>

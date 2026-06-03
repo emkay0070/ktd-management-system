@@ -12,7 +12,7 @@ import DistrictAppraisalManager from './Partials/DistrictAppraisalManager';
 import DistrictPulseView from './Partials/DistrictPulseView';
 import DistrictRegistrationManager from './Partials/DistrictRegistrationManager';
 
-export default function District({ auth, district, churches, committee, events, tasks, roster, resources, bulletins, appraisals, registrations, analytics, leaderboard, treasury, section }) {
+export default function District({ auth, district, churches, committee, events, tasks, roster, resources, bulletins, appraisals, registrations, analytics, leaderboard, treasury, section, invite_links }) {
     const userRoleNames = auth.user.role_names || [];
     const hasRole = (r) => userRoleNames.includes(r);
     
@@ -146,7 +146,7 @@ export default function District({ auth, district, churches, committee, events, 
 
                 <div className="page-content bg-transparent shadow-none border-none p-0">
                     {isClubs && <ClubsDirectory churches={churches} readonly={!hasRole('district_director')} />}
-                    {isCommittee && <DistrictCommitteeManager committee={committee} readonly={!hasRole('district_director')} />}
+                    {isCommittee && <DistrictCommitteeManager committee={committee} invite_links={invite_links} readonly={!hasRole('district_director')} />}
                     {isEvents && <DistrictEventsManager events={events} readonly={!hasRole('district_director')} />}
                     {isTasks && <DistrictTasksManager tasks={tasks} leaderboard={leaderboard} readonly={!hasRole('district_director')} />}
                     {isRoster && <DistrictRosterManager roster={roster} />}

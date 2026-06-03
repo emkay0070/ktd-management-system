@@ -42,7 +42,7 @@ class RegisteredUserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'role' => 'required|string|in:director,pathfinder,master_guide,parent,observer,district_official',
+            'role' => 'required|string|in:director,pathfinder,master_guide,parent,observer,district_official,district_director,district_treasurer,district_secretary,district_committee',
             'union_id' => 'nullable|exists:unions,id',
             'conference_id' => 'nullable|exists:conferences,id',
             'zone_id' => 'nullable|exists:zones,id',
@@ -78,6 +78,7 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
             'status' => 'pending_onboarding', // Identity needs onboarding
             'church_id' => $churchId,
+            'district_id' => $request->district_id,
             'avatar_path' => $avatarPath,
         ]);
 
@@ -90,8 +91,20 @@ class RegisteredUserController extends Controller
         // 3. Assign Intent Role
         $intentRole = \App\Models\Role::where('name', $request->role)->first();
         if ($intentRole && $request->role !== 'observer') {
-            $roleStatus = in_array($request->role, ['director', 'district_official']) ? 'pending' : 'active';
-            $user->roles()->attach($intentRole->id, ['status' => $roleStatus]);
+            $roleStatus = in_array($request->role, ['director', 'district_official', 'district_director', 'district_treasurer', 'district_secretary', 'district_committee']) ? 'pending' : 'active';
+            
+            $pivotData = ['status' => $roleStatus];
+            
+            // Scope assignment
+            if (in_array($request->role, ['district_official', 'district_director', 'district_treasurer', 'district_secretary', 'district_committee']) && $request->district_id) {
+                $pivotData['entity_type'] = \App\Models\District::class;
+                $pivotData['entity_id'] = $request->district_id;
+            } elseif ($request->role === 'director' && $request->church_id) {
+                $pivotData['entity_type'] = \App\Models\Church::class;
+                $pivotData['entity_id'] = $request->church_id;
+            }
+
+            $user->roles()->attach($intentRole->id, $pivotData);
         }
 
         // 4. Role-specific profile initialization

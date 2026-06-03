@@ -1,26 +1,18 @@
 import { useState } from 'react';
 import { useForm, router } from '@inertiajs/react';
-import { Shield, Plus, Mail, Check, AlertTriangle, Users, Trash2 } from 'lucide-react';
+import { Shield, Plus, Mail, Check, AlertTriangle, Users, Trash2, Copy, Link as LinkIcon } from 'lucide-react';
 
-export default function DistrictCommitteeManager({ committee, readonly }) {
+export default function DistrictCommitteeManager({ committee, invite_links, readonly }) {
     const [view, setView] = useState('list');
-    
-    const { data, setData, post, processing, errors, reset } = useForm({
-        name: '',
-        email: '',
-        password: '',
-        password_confirmation: ''
-    });
+    const [copiedLink, setCopiedLink] = useState(null);
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        post(route('district_committee.store'), {
-            onSuccess: () => {
-                reset();
-                setView('list');
-            }
-        });
+    const handleCopy = (role, link) => {
+        navigator.clipboard.writeText(link);
+        setCopiedLink(role);
+        setTimeout(() => setCopiedLink(null), 2000);
     };
+
+
 
     const handleDelete = (member) => {
         if (confirm(`Are you sure you want to remove ${member.name} from the District Committee?`)) {
@@ -40,7 +32,7 @@ export default function DistrictCommitteeManager({ committee, readonly }) {
                         className="btn btn--primary btn--sm" 
                         onClick={() => setView('form')}
                     >
-                        <Plus size={16} className="mr-2" /> Add Committee Member
+                        <LinkIcon size={16} className="mr-2" /> Invite Member
                     </button>
                 )}
                 {!readonly && view === 'form' && (
@@ -128,57 +120,37 @@ export default function DistrictCommitteeManager({ committee, readonly }) {
                 <div className="panel slide-in">
                     <div className="panel__header">
                         <div>
-                            <h3>Add Executive Member</h3>
-                            <p>Register a new member to the District Committee.</p>
+                            <h3>Invite Executive Member</h3>
+                            <p>Generate secure invitation links for your district committee. When they accept, they will automatically be assigned their role in your district.</p>
                         </div>
                     </div>
-                    <form onSubmit={handleSubmit} className="panel__body">
-                        <div className="form-grid-2">
-                            <div className="form-group">
-                                <label>Full Name</label>
-                                <input 
-                                    type="text" 
-                                    className="h-input" 
-                                    value={data.name} 
-                                    onChange={e => setData('name', e.target.value)} 
-                                    placeholder="e.g. Jane Doe"
-                                    required 
-                                />
-                                {errors.name && <div className="field-error">{errors.name}</div>}
-                            </div>
-                            <div className="form-group">
-                                <label>Email Address</label>
-                                <input 
-                                    type="email" 
-                                    className="h-input" 
-                                    value={data.email} 
-                                    onChange={e => setData('email', e.target.value)} 
-                                    placeholder="e.g. jane.doe@district.org"
-                                    required 
-                                />
-                                {errors.email && <div className="field-error">{errors.email}</div>}
-                            </div>
-                            <div className="form-group">
-                                <label>Temporary Password</label>
-                                <input 
-                                    type="password" 
-                                    className="h-input" 
-                                    value={data.password} 
-                                    onChange={e => setData('password', e.target.value)} 
-                                    required 
-                                    minLength={8}
-                                />
-                                <div className="field-hint">Must be at least 8 characters.</div>
-                                {errors.password && <div className="field-error">{errors.password}</div>}
-                            </div>
+                    <div className="panel__body">
+                        <div className="grid grid-cols-1 gap-4">
+                            {[
+                                { id: 'secretary', name: 'District Secretary', link: invite_links?.secretary },
+                                { id: 'treasurer', name: 'District Treasurer', link: invite_links?.treasurer },
+                                { id: 'committee', name: 'General Committee Member', link: invite_links?.committee },
+                            ].map(role => (
+                                <div key={role.id} className="flex items-center justify-between p-4 bg-surface-800 border border-white/10 rounded-xl">
+                                    <div>
+                                        <div className="font-bold text-white mb-1">{role.name}</div>
+                                        <div className="text-xs text-gray-500 font-mono break-all max-w-md truncate">{role.link}</div>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleCopy(role.id, role.link)}
+                                        className={`btn btn--sm flex-shrink-0 ml-4 ${copiedLink === role.id ? 'bg-green-600/20 text-green-400 border-green-600/30' : 'btn--outline'}`}
+                                    >
+                                        {copiedLink === role.id ? (
+                                            <><Check size={14} className="mr-2" /> Copied!</>
+                                        ) : (
+                                            <><Copy size={14} className="mr-2" /> Copy Link</>
+                                        )}
+                                    </button>
+                                </div>
+                            ))}
                         </div>
-
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '24px' }}>
-                            <button type="submit" className="btn btn--primary" disabled={processing}>
-                                {processing ? 'Registering...' : 'Register Official'}
-                            </button>
-                        </div>
-                    </form>
+                    </div>
                 </div>
             )}
         </div>
