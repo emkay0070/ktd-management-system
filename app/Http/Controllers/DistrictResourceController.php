@@ -11,7 +11,7 @@ class DistrictResourceController extends Controller
     public function store(Request $request)
     {
         $user = auth()->user();
-        abort_unless($user && in_array($user->role, ['district_director', 'district_committee']), 403);
+        abort_unless($user && $user->hasAnyRole(['district_director', 'district_committee', 'district_official']), 403);
 
         $request->validate([
             'title' => 'required|string|max:255',
@@ -47,7 +47,7 @@ class DistrictResourceController extends Controller
     public function destroy(DistrictResource $resource)
     {
         $user = auth()->user();
-        abort_unless($user && $user->role === 'district_director', 403);
+        abort_unless($user && $user->hasAnyRole(['district_director', 'district_official']), 403);
         abort_unless($resource->district_id === $user->district_id, 403);
 
         Storage::disk('public')->delete($resource->file_path);

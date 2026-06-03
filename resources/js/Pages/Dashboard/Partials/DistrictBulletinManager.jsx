@@ -42,7 +42,7 @@ export default function DistrictBulletinManager({ bulletins = [] }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
-                    <h3 style={{ margin: 0, color: '#fff' }}>Official District Bulletins</h3>
+                    <h3 style={{ margin: 0, color: 'var(--clr-text-primary)' }}>Official District Bulletins</h3>
                     <p style={{ fontSize: '12px', color: 'var(--clr-text-muted)' }}>Send priority announcements to all local club directors.</p>
                 </div>
                 {view === 'list' && (
@@ -56,8 +56,8 @@ export default function DistrictBulletinManager({ bulletins = [] }) {
 
             {view === 'create' ? (
                 <div className="panel slide-in">
-                    <form onSubmit={handleCreate} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                        <h3>Compose Bulletin</h3>
+                    <form onSubmit={handleCreate} className="panel__body" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                        <h3 style={{ color: 'var(--clr-text-primary)' }}>Compose Bulletin</h3>
                         <div className="form-grid-2">
                             <div className="form-group">
                                 <label>Subject / Title</label>
@@ -103,7 +103,7 @@ export default function DistrictBulletinManager({ bulletins = [] }) {
                                             <span style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', color: levelColors[bulletin.level] }}>{bulletin.level}</span>
                                             {!bulletin.is_active && <span className="badge badge--neutral">INACTIVE</span>}
                                         </div>
-                                        <h4 style={{ margin: '0 0 8px 0', fontSize: '16px', color: '#fff' }}>{bulletin.title}</h4>
+                                        <h4 style={{ margin: '0 0 8px 0', fontSize: '16px', color: 'var(--clr-text-primary)' }}>{bulletin.title}</h4>
                                         <p style={{ fontSize: '13px', color: 'var(--clr-text-secondary)', lineHeight: 1.5 }}>{bulletin.content}</p>
                                         
                                         <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '16px', fontSize: '11px', color: 'var(--clr-text-muted)' }}>

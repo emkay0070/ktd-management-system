@@ -102,7 +102,7 @@ export default function DistrictEventsManager({ events, readonly }) {
                                 </div>
                                 
                                 <div>
-                                    <h4 style={{ fontSize: '18px', fontWeight: 900, color: '#fff', margin: 0, lineHeight: 1.2 }}>{event.name}</h4>
+                                    <h4 style={{ fontSize: '18px', fontWeight: 900, color: 'var(--clr-text-primary)', margin: 0, lineHeight: 1.2 }}>{event.name}</h4>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '6px' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--clr-text-muted)' }}>
                                             <Tag size={12} className="text-gold-400/50" />
@@ -121,7 +121,7 @@ export default function DistrictEventsManager({ events, readonly }) {
                                 </div>
                                 
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: 'auto', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '12px', color: '#fff' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '12px', color: 'var(--clr-text-primary)' }}>
                                         <Clock size={14} className="text-burgundy-400" />
                                         <span style={{ fontWeight: 600 }}>{new Date(event.start_date).toLocaleDateString()} — {new Date(event.end_date).toLocaleDateString()}</span>
                                     </div>
@@ -136,7 +136,7 @@ export default function DistrictEventsManager({ events, readonly }) {
                     {events.length === 0 && (
                         <div style={{ gridColumn: '1 / -1', padding: '80px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', opacity: 0.4, background: 'rgba(0,0,0,0.1)', borderRadius: '16px', border: '1px dashed rgba(255,255,255,0.05)' }}>
                             <CalendarClock size={48} className="mb-4 text-gold-400" strokeWidth={1} />
-                            <div style={{ fontSize: '12px', fontWeight: 900, textTransform: 'uppercase', color: '#fff', letterSpacing: '0.2em' }}>No Events Scheduled</div>
+                            <div style={{ fontSize: '12px', fontWeight: 900, textTransform: 'uppercase', color: 'var(--clr-text-primary)', letterSpacing: '0.2em' }}>No Events Scheduled</div>
                             <p style={{ fontSize: '12px', marginTop: '8px', maxWidth: '300px' }}>Your district calendar is empty. Schedule events here to push them to local club directors.</p>
                         </div>
                     )}

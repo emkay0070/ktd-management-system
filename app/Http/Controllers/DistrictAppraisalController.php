@@ -11,7 +11,7 @@ class DistrictAppraisalController extends Controller
     public function store(Request $request)
     {
         $user = auth()->user();
-        abort_unless($user && in_array($user->role, ['district_director', 'district_committee']), 403);
+        abort_unless($user && $user->hasAnyRole(['district_director', 'district_committee', 'district_official']), 403);
 
         $validated = $request->validate([
             'church_id' => 'required|exists:churches,id',
@@ -47,7 +47,7 @@ class DistrictAppraisalController extends Controller
     public function destroy(DistrictAppraisal $appraisal)
     {
         $user = auth()->user();
-        abort_unless($user && $user->role === 'district_director', 403);
+        abort_unless($user && $user->hasAnyRole(['district_director', 'district_official']), 403);
         abort_unless($appraisal->district_id === $user->district_id, 403);
 
         $appraisal->delete();

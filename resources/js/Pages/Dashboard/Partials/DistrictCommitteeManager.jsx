@@ -62,7 +62,7 @@ export default function DistrictCommitteeManager({ committee, invite_links, read
                                     <tr key={member.id}>
                                         <td className="cell-primary" style={{ minWidth: 250, paddingLeft: '1.5rem' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                                                <div style={{ width: '40px', height: '40px', background: 'var(--clr-surface-700)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', flexShrink: 0, fontWeight: 700, overflow: 'hidden' }}>
+                                                <div style={{ width: '40px', height: '40px', background: 'var(--clr-surface-700)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--clr-text-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', flexShrink: 0, fontWeight: 700, overflow: 'hidden' }}>
                                                     {member.avatar_url ? (
                                                         <img src={member.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                                     ) : (

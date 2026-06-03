@@ -170,7 +170,7 @@ export default function DistrictPulseView({ analytics }) {
                                 </Pie>
                                 <Tooltip 
                                     contentStyle={{ background: '#0a0a0c', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}
-                                    itemStyle={{ color: '#fff', fontSize: '12px', fontWeight: 700 }}
+                                    itemStyle={{ color: 'var(--clr-text-primary)', fontSize: '12px', fontWeight: 700 }}
                                 />
                             </PieChart>
                         </ResponsiveContainer>

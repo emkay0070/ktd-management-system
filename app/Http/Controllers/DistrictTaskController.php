@@ -11,7 +11,7 @@ class DistrictTaskController extends Controller
     public function store(Request $request)
     {
         $user = auth()->user();
-        abort_unless($user && in_array($user->role, ['district_director', 'district_committee']), 403);
+        abort_unless($user && $user->hasAnyRole(['district_director', 'district_committee', 'district_official']), 403);
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -38,7 +38,7 @@ class DistrictTaskController extends Controller
     public function destroy(DistrictTask $task)
     {
         $user = auth()->user();
-        abort_unless($user && $user->role === 'district_director', 403);
+        abort_unless($user && $user->hasAnyRole(['district_director', 'district_official']), 403);
         abort_unless($task->district_id === $user->district_id, 403);
 
         $task->delete();
@@ -48,7 +48,7 @@ class DistrictTaskController extends Controller
     public function reviewSubmission(Request $request, TaskSubmission $submission)
     {
         $user = auth()->user();
-        abort_unless($user && in_array($user->role, ['district_director', 'district_committee']), 403);
+        abort_unless($user && $user->hasAnyRole(['district_director', 'district_committee', 'district_official']), 403);
         
         $validated = $request->validate([
             'status' => 'required|in:Approved,Rejected',

@@ -10,7 +10,7 @@ class DistrictEventController extends Controller
     public function store(Request $request)
     {
         $user = auth()->user();
-        abort_unless($user && in_array($user->role, ['district_director', 'district_committee']), 403);
+        abort_unless($user && $user->hasAnyRole(['district_director', 'district_committee', 'district_official']), 403);
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -41,7 +41,7 @@ class DistrictEventController extends Controller
     public function destroy(DistrictEvent $event)
     {
         $user = auth()->user();
-        abort_unless($user && $user->role === 'district_director', 403);
+        abort_unless($user && $user->hasAnyRole(['district_director', 'district_official']), 403);
         abort_unless($event->district_id === $user->district_id, 403);
 
         $event->delete();
@@ -52,7 +52,7 @@ class DistrictEventController extends Controller
     {
         $user = auth()->user();
         // Only District Directors can publish an event downwards
-        abort_unless($user && $user->role === 'district_director', 403);
+        abort_unless($user && $user->hasAnyRole(['district_director', 'district_official']), 403);
         abort_unless($event->district_id === $user->district_id, 403);
 
         $event->is_published = !$event->is_published;

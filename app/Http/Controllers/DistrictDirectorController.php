@@ -12,7 +12,7 @@ class DistrictDirectorController extends Controller
     public function storeDistrict(Request $request)
     {
         $user = $request->user();
-        abort_unless($user && $user->role === 'super_admin', 403);
+        abort_unless($user && $user->hasRole('super_admin'), 403);
 
         $request->validate([
             'name' => 'required|string|max:255',
@@ -28,7 +28,7 @@ class DistrictDirectorController extends Controller
     public function assignDirector(Request $request, District $district)
     {
         $currentUser = $request->user();
-        abort_unless($currentUser && $currentUser->role === 'super_admin', 403);
+        abort_unless($currentUser && $currentUser->hasRole('super_admin'), 403);
 
         $request->validate([
             'user_id' => 'required|exists:users,id',
@@ -64,7 +64,7 @@ class DistrictDirectorController extends Controller
     public function removeDirector(Request $request, User $user)
     {
         $currentUser = $request->user();
-        abort_unless($currentUser && $currentUser->role === 'super_admin', 403);
+        abort_unless($currentUser && $currentUser->hasRole('super_admin'), 403);
 
         // Optional: clear the district_id and inactivate role
         $role = Role::where('name', 'district_director')->first();
@@ -81,7 +81,7 @@ class DistrictDirectorController extends Controller
     public function assignUnassignedDirector(Request $request, User $user)
     {
         $currentUser = $request->user();
-        abort_unless($currentUser && $currentUser->role === 'super_admin', 403);
+        abort_unless($currentUser && $currentUser->hasRole('super_admin'), 403);
 
         $request->validate([
             'district_id' => 'required|exists:districts,id',

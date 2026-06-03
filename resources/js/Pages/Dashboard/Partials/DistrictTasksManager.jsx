@@ -68,7 +68,7 @@ export default function DistrictTasksManager({ tasks, leaderboard, readonly }) {
                     <Send size={16} className="mr-2" /> 
                     Submissions Inbox
                     {allSubmissions.length > 0 && (
-                        <span style={{ position: 'absolute', top: '-8px', right: '-8px', background: 'var(--clr-burgundy-500)', color: '#fff', fontSize: '10px', height: '18px', width: '18px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900 }}>
+                        <span style={{ position: 'absolute', top: '-8px', right: '-8px', background: 'var(--clr-burgundy-500)', color: 'var(--clr-text-primary)', fontSize: '10px', height: '18px', width: '18px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900 }}>
                             {allSubmissions.length}
                         </span>
                     )}

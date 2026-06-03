@@ -46,10 +46,17 @@ export default function ToastNotification() {
     if (!visible || !toast) return null;
 
     const styles = {
-        warning: 'bg-amber-500 border-amber-600 text-white',
-        success: 'bg-green-500 border-green-600 text-white',
-        error: 'bg-red-500 border-red-600 text-white',
-        info: 'bg-blue-500 border-blue-600 text-white',
+        warning: 'bg-surface-800 border-l-4 border-l-amber-500 text-[var(--clr-text-primary)] border-t border-r border-b border-white/5',
+        success: 'bg-surface-800 border-l-4 border-l-green-500 text-[var(--clr-text-primary)] border-t border-r border-b border-white/5',
+        error: 'bg-surface-800 border-l-4 border-l-red-500 text-[var(--clr-text-primary)] border-t border-r border-b border-white/5',
+        info: 'bg-surface-800 border-l-4 border-l-blue-500 text-[var(--clr-text-primary)] border-t border-r border-b border-white/5',
+    };
+
+    const iconColors = {
+        warning: 'text-amber-500',
+        success: 'text-green-500',
+        error: 'text-red-500',
+        info: 'text-blue-500',
     };
 
     const IconConfig = {
@@ -63,19 +70,19 @@ export default function ToastNotification() {
 
     if (minimized) {
         return (
-            <div className="fixed top-6 right-6 z-50 flex items-center justify-center cursor-pointer" onClick={() => setMinimized(false)}>
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 bg-amber-400"></span>
+            <div className="fixed bottom-6 right-6 z-50 flex items-center justify-center cursor-pointer" onClick={() => setMinimized(false)}>
+                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${iconColors[toast.type].replace('text-', 'bg-')}`}></span>
                 <div className={`relative flex items-center justify-center w-12 h-12 rounded-full shadow-lg ${styles[toast.type]}`}>
-                    <Icon size={20} />
+                    <Icon size={20} className={iconColors[toast.type]} />
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="fixed top-6 right-6 z-50 animate-in slide-in-from-top-2 fade-in duration-300">
-            <div className={`flex items-start gap-3 p-4 rounded-xl shadow-2xl border min-w-[320px] max-w-sm ${styles[toast.type]}`}>
-                <div className="shrink-0 mt-0.5">
+        <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-2 fade-in duration-300">
+            <div className={`flex items-start gap-3 p-4 rounded-xl shadow-2xl min-w-[320px] max-w-sm ${styles[toast.type]}`}>
+                <div className={`shrink-0 mt-0.5 ${iconColors[toast.type]}`}>
                     <Icon size={20} />
                 </div>
                 <div className="flex-1 text-sm font-medium leading-relaxed pr-2">
@@ -83,7 +90,7 @@ export default function ToastNotification() {
                 </div>
                 <button 
                     onClick={() => setVisible(false)}
-                    className="shrink-0 text-white/70 hover:text-white transition-colors"
+                    className="shrink-0 text-[var(--clr-text-muted)] hover:text-[var(--clr-text-primary)] transition-colors"
                 >
                     <X size={18} />
                 </button>

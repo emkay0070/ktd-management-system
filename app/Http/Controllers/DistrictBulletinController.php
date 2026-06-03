@@ -10,7 +10,7 @@ class DistrictBulletinController extends Controller
     public function store(Request $request)
     {
         $user = auth()->user();
-        abort_unless($user && in_array($user->role, ['district_director', 'district_committee']), 403);
+        abort_unless($user && $user->hasAnyRole(['district_director', 'district_committee', 'district_official']), 403);
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -34,7 +34,7 @@ class DistrictBulletinController extends Controller
     public function destroy(DistrictBulletin $bulletin)
     {
         $user = auth()->user();
-        abort_unless($user && $user->role === 'district_director', 403);
+        abort_unless($user && $user->hasAnyRole(['district_director', 'district_official']), 403);
         abort_unless($bulletin->district_id === $user->district_id, 403);
 
         $bulletin->delete();
@@ -44,7 +44,7 @@ class DistrictBulletinController extends Controller
     public function toggle(DistrictBulletin $bulletin)
     {
         $user = auth()->user();
-        abort_unless($user && in_array($user->role, ['district_director', 'district_committee']), 403);
+        abort_unless($user && $user->hasAnyRole(['district_director', 'district_committee', 'district_official']), 403);
         abort_unless($bulletin->district_id === $user->district_id, 403);
 
         $bulletin->update(['is_active' => !$bulletin->is_active]);

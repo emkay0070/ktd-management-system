@@ -77,6 +77,32 @@ export default function SuperAdmin(props) {
     return (
         <AuthenticatedLayout header="Super Admin Command Centre" breadcrumb={`Super Admin → ${section.charAt(0).toUpperCase() + section.slice(1)}`}>
             <Head title={`Super Admin | ${section}`} />
+            <div className="tabs flex gap-2 border-b border-white/10 mb-8 overflow-x-auto no-scrollbar mt-4">
+                <Link 
+                    href={route('dashboard', 'overview')}
+                    className={`tab-item ${section === 'overview' ? 'tab-item--active' : ''}`}
+                >
+                    <Church size={16} /> Global Overview
+                </Link>
+                <Link 
+                    href={route('dashboard', 'directors')}
+                    className={`tab-item ${section === 'directors' ? 'tab-item--active' : ''}`}
+                >
+                    <Shield size={16} /> District Directors
+                </Link>
+                <Link 
+                    href={route('dashboard', 'pathfinders')}
+                    className={`tab-item ${section === 'pathfinders' ? 'tab-item--active' : ''}`}
+                >
+                    <Users size={16} /> All Pathfinders
+                </Link>
+                <Link 
+                    href={route('dashboard', 'registrations')}
+                    className={`tab-item ${section === 'registrations' ? 'tab-item--active' : ''}`}
+                >
+                    <Layers size={16} /> Registrations
+                </Link>
+            </div>
 
             {section === 'overview' && (
                 <>

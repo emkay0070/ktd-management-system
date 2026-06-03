@@ -49,7 +49,7 @@ export default function DistrictAppraisalManager({ churches = [], appraisals = [
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
-                    <h3 style={{ margin: 0, color: '#fff' }}>Club Performance Appraisals</h3>
+                    <h3 style={{ margin: 0, color: 'var(--clr-text-primary)' }}>Club Performance Appraisals</h3>
                     <p style={{ fontSize: '12px', color: 'var(--clr-text-muted)' }}>Formally grade clubs across technical, admin, and activity rubrics.</p>
                 </div>
                 {view === 'list' && (
@@ -125,7 +125,7 @@ export default function DistrictAppraisalManager({ churches = [], appraisals = [
 
                         <div style={{ padding: '20px', background: 'rgba(212, 160, 23, 0.05)', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(212, 160, 23, 0.1)' }}>
                             <div style={{ fontSize: '12px', fontWeight: 900, textTransform: 'uppercase', color: 'var(--clr-gold-400)', marginBottom: '4px' }}>Computed Total Score</div>
-                            <div style={{ fontSize: '42px', fontWeight: 900, color: '#fff' }}>
+                            <div style={{ fontSize: '42px', fontWeight: 900, color: 'var(--clr-text-primary)' }}>
                                 {data.score_technical + data.score_admin + data.score_activities}
                                 <span style={{ fontSize: '18px', opacity: 0.5, fontWeight: 500 }}> / 100</span>
                             </div>
@@ -167,13 +167,13 @@ export default function DistrictAppraisalManager({ churches = [], appraisals = [
                                         </div>
                                     </td>
                                     <td>
-                                        <div style={{ fontWeight: 800, color: '#fff' }}>{app.church?.name}</div>
+                                        <div style={{ fontWeight: 800, color: 'var(--clr-text-primary)' }}>{app.church?.name}</div>
                                     </td>
                                     <td>
                                         <div style={{ display: 'flex', gap: '4px', fontSize: '11px', color: 'var(--clr-text-secondary)' }}>
-                                            <span style={{ fontWeight: 700, color: '#fff' }}>{app.score_technical}</span> / 30 | 
-                                            <span style={{ fontWeight: 700, color: '#fff' }}>{app.score_admin}</span> / 30 | 
-                                            <span style={{ fontWeight: 700, color: '#fff' }}>{app.score_activities}</span> / 40
+                                            <span style={{ fontWeight: 700, color: 'var(--clr-text-primary)' }}>{app.score_technical}</span> / 30 | 
+                                            <span style={{ fontWeight: 700, color: 'var(--clr-text-primary)' }}>{app.score_admin}</span> / 30 | 
+                                            <span style={{ fontWeight: 700, color: 'var(--clr-text-primary)' }}>{app.score_activities}</span> / 40
                                         </div>
                                     </td>
                                     <td>

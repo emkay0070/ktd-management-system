@@ -11,7 +11,7 @@ export default function BulkMasterGuideForm({ picklists, onCancel, onSuccess }) 
         name: '',
         phone: '',
         gender: 'Male',
-        role: 'MGiT', // Only MG or MGiT allowed in bulk
+        role: 'MGT', // Only MG or MGT allowed in bulk
         religion_id: defaultReligionId,
     });
 
@@ -125,8 +125,8 @@ export default function BulkMasterGuideForm({ picklists, onCancel, onSuccess }) 
                                         value={row.role}
                                         onChange={(e) => updateRow(row.id, 'role', e.target.value)}
                                     >
-                                        <option value="MGiT">MGiT</option>
-                                        <option value="Master Guide">Master Guide</option>
+                                        <option value="MGT">MGiT</option>
+                                        <option value="MG">Master Guide</option>
                                     </select>
                                 </td>
                                 <td>

@@ -47,7 +47,7 @@ class User extends Authenticatable
 
     protected function getDefaultContext(): string
     {
-        $priority = ['super_admin', 'district_official', 'director', 'master_guide', 'pathfinder', 'parent', 'observer'];
+        $priority = ['super_admin', 'district_director', 'district_treasurer', 'district_committee', 'district_official', 'director', 'master_guide', 'pathfinder', 'parent', 'observer'];
         foreach ($priority as $role) {
             if ($this->hasRole($role)) return $role;
         }

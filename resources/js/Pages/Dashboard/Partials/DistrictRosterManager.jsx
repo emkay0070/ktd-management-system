@@ -100,7 +100,7 @@ export default function DistrictRosterManager({ roster = [] }) {
                                             {mg.role}
                                         </div>
                                         <div>
-                                            <div style={{ fontWeight: 800, color: '#fff' }}>{mg.full_name}</div>
+                                            <div style={{ fontWeight: 800, color: 'var(--clr-text-primary)' }}>{mg.full_name}</div>
                                             <div style={{ fontSize: '10px', color: 'var(--clr-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                                                 {mg.responsibility || 'Club Member'}
                                             </div>

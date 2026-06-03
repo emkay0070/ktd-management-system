@@ -35,7 +35,7 @@ export default function DistrictResourceManager({ resources = [], readonly }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
-                    <h3 style={{ margin: 0, color: '#fff' }}>District Resource Library</h3>
+                    <h3 style={{ margin: 0, color: 'var(--clr-text-primary)' }}>District Resource Library</h3>
                     <p style={{ fontSize: '12px', color: 'var(--clr-text-muted)' }}>Central vault for all training materials and manuals.</p>
                 </div>
                 {!readonly && view === 'list' && (
@@ -47,8 +47,8 @@ export default function DistrictResourceManager({ resources = [], readonly }) {
 
             {view === 'upload' ? (
                 <div className="panel slide-in">
-                    <form onSubmit={handleUpload} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                        <h3>Upload Resource</h3>
+                    <form onSubmit={handleUpload} className="panel__body" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                        <h3 style={{ color: 'var(--clr-text-primary)' }}>Upload Resource</h3>
                         
                         <div className="form-grid-2">
                             <div className="form-group">
@@ -83,8 +83,8 @@ export default function DistrictResourceManager({ resources = [], readonly }) {
                                 />
                                 {data.file ? (
                                     <div style={{ textAlign: 'center' }}>
-                                        <FileText size={24} className="mx-auto mb-1 color-gold-400" />
-                                        <div style={{ fontSize: '12px', fontWeight: 800, color: '#fff' }}>{data.file.name}</div>
+                                        <FileText size={24} className="mx-auto mb-1 text-gold-400" />
+                                        <div style={{ fontSize: '12px', fontWeight: 800, color: 'var(--clr-text-primary)' }}>{data.file.name}</div>
                                         <div style={{ fontSize: '10px', color: 'var(--clr-text-muted)' }}>{(data.file.size / (1024 * 1024)).toFixed(2)} MB</div>
                                     </div>
                                 ) : (
@@ -116,7 +116,7 @@ export default function DistrictResourceManager({ resources = [], readonly }) {
                                     </div>
                                     <div>
                                         <div className="badge badge--neutral" style={{ fontSize: '9px', marginBottom: '4px' }}>{res.category}</div>
-                                        <h4 style={{ margin: 0, fontSize: '15px' }}>{res.title}</h4>
+                                        <h4 style={{ margin: 0, fontSize: '15px', color: 'var(--clr-text-primary)' }}>{res.title}</h4>
                                     </div>
                                 </div>
                                 {!readonly && (
@@ -132,7 +132,7 @@ export default function DistrictResourceManager({ resources = [], readonly }) {
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '16px' }}>
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <span style={{ fontSize: '10px', color: 'var(--clr-text-muted)', fontWeight: 800 }}>{res.file_type} FILE</span>
-                                        <span style={{ fontSize: '11px', color: '#fff' }}>{res.file_size}</span>
+                                        <span style={{ fontSize: '11px', color: 'var(--clr-text-primary)' }}>{res.file_size}</span>
                                     </div>
                                     <a 
                                         href={`/storage/${res.file_path}`} 
