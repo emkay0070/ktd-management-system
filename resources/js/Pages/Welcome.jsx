@@ -22,9 +22,9 @@ export default function Welcome({ auth }) {
             <Head title="EmPFC - Pathfinder Central" />
 
             {/* Top Navigation */}
-            <header className="flex items-center justify-between px-6 py-4 md:px-12 md:py-6 border-b border-white/5 backdrop-blur-xl sticky top-0 z-50 transition-all duration-300" style={{ backgroundColor: 'rgba(5, 5, 5, 0.7)' }}>
+            <header className="flex items-center justify-between border-b border-white/5 z-50 transition-all duration-300" style={{ padding: '1.5rem 2rem', backgroundColor: 'rgba(5, 5, 5, 0.7)', position: 'sticky', top: 0, backdropFilter: 'blur(12px)' }}>
                 <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-burgundy-500 to-burgundy-900 flex items-center justify-center shadow-[0_0_30px_rgba(155,34,38,0.3)] text-gold-400 border border-white/10">
+                    <div className="flex items-center justify-center border border-white/10" style={{ width: '48px', height: '48px', borderRadius: '1rem', background: 'linear-gradient(to bottom right, var(--clr-burgundy-500), var(--clr-burgundy-900))', boxShadow: '0 0 30px rgba(155,34,38,0.3)', color: 'var(--clr-gold-400)' }}>
                         <Tent size={24} />
                     </div>
                     <div>
@@ -35,12 +35,12 @@ export default function Welcome({ auth }) {
 
                 <nav className="flex items-center gap-6">
                     {auth.user ? (
-                        <Link href={route('dashboard')} className="group flex items-center gap-2 px-6 py-2.5 rounded-full bg-burgundy-600 hover:bg-burgundy-500 text-white font-bold text-sm transition-all shadow-[0_0_20px_rgba(155,34,38,0.2)] hover:shadow-[0_0_30px_rgba(155,34,38,0.4)]">
-                            Access Portal <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                        <Link href={route('dashboard')} className="group flex items-center justify-center gap-2 rounded-full font-bold text-sm transition-all text-white" style={{ padding: '10px 24px', backgroundColor: 'var(--clr-burgundy-600)', boxShadow: '0 0 20px rgba(155,34,38,0.2)' }}>
+                            Access Portal <ArrowRight size={16} />
                         </Link>
                     ) : (
-                        <Link href={route('login')} className="group flex items-center gap-2 px-2 py-2 text-sm font-bold text-gray-400 hover:text-white transition-colors">
-                            <Shield size={16} className="text-burgundy-500 group-hover:text-burgundy-400 transition-colors" /> Sign In
+                        <Link href={route('login')} className="group flex items-center gap-2 text-sm font-bold text-gray-400 transition-colors" style={{ padding: '8px' }}>
+                            <Shield size={16} style={{ color: 'var(--clr-burgundy-500)' }} /> Sign In
                         </Link>
                     )}
                 </nav>
@@ -50,30 +50,30 @@ export default function Welcome({ auth }) {
             <main className="flex-1 flex flex-col relative overflow-hidden">
                 
                 {/* Dynamic Background Elements */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[100vw] h-[100vh] pointer-events-none z-0 opacity-40">
-                    <div className="absolute top-[20%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-burgundy-600/20 rounded-full blur-[120px]"></div>
-                    <div className="absolute bottom-[10%] right-[10%] w-[600px] h-[600px] bg-gold-500/10 rounded-full blur-[150px]"></div>
-                    <div className="absolute top-[40%] left-[10%] w-[400px] h-[400px] bg-blue-500/5 rounded-full blur-[120px]"></div>
+                <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-0 opacity-40" style={{ overflow: 'hidden' }}>
+                    <div style={{ position: 'absolute', top: '20%', left: '50%', transform: 'translate(-50%, -50%)', width: '800px', height: '800px', backgroundColor: 'rgba(155,34,38,0.2)', borderRadius: '50%', filter: 'blur(120px)' }}></div>
+                    <div style={{ position: 'absolute', bottom: '10%', right: '10%', width: '600px', height: '600px', backgroundColor: 'rgba(212,160,23,0.1)', borderRadius: '50%', filter: 'blur(150px)' }}></div>
+                    <div style={{ position: 'absolute', top: '40%', left: '10%', width: '400px', height: '400px', backgroundColor: 'rgba(59,130,246,0.05)', borderRadius: '50%', filter: 'blur(120px)' }}></div>
                 </div>
 
-                <section className="relative z-10 pt-24 pb-20 px-6 md:px-12 flex flex-col items-center text-center">
-                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-surface-800/80 border border-white/5 backdrop-blur-md shadow-xl text-gray-300 text-[10px] font-black uppercase tracking-widest mb-10 animate-fade-in hover:border-burgundy-500/30 transition-colors cursor-default">
-                        <Activity size={14} className="text-burgundy-500" /> District Administration Platform
+                <section className="relative z-10 flex flex-col items-center text-center" style={{ padding: '6rem 2rem 5rem 2rem' }}>
+                    <div className="inline-flex items-center gap-2 border border-white/5 font-black uppercase tracking-widest mb-10 animate-fade-in transition-colors cursor-default" style={{ padding: '6px 16px', borderRadius: '9999px', backgroundColor: 'rgba(30, 30, 42, 0.8)', backdropFilter: 'blur(12px)', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)', color: '#d1d5db', fontSize: '10px' }}>
+                        <Activity size={14} style={{ color: 'var(--clr-burgundy-500)' }} /> District Administration Platform
                     </div>
                     
-                    <h1 className="text-6xl md:text-8xl font-black text-white mb-8 leading-[1.05] tracking-tighter max-w-5xl animate-slide-up drop-shadow-2xl">
-                        The Central <span className="text-transparent bg-clip-text bg-gradient-to-br from-burgundy-400 via-burgundy-500 to-gold-400">Pathfinder</span> Portal
+                    <h1 className="text-white mb-8 leading-none tracking-tight animate-slide-up" style={{ fontSize: 'clamp(3rem, 6vw, 5rem)', fontWeight: 900, maxWidth: '64rem' }}>
+                        The Central <span className="text-gradient">Pathfinder</span> Portal
                     </h1>
                     
-                    <p className="text-lg md:text-2xl mb-14 max-w-3xl leading-relaxed font-medium opacity-80" style={{ color: '#a8a8c8' }}>
+                    <p className="text-lg mb-14 max-w-4xl leading-relaxed font-medium opacity-80" style={{ color: '#a8a8c8', fontSize: 'clamp(1.125rem, 2vw, 1.5rem)' }}>
                         Unified management for the SDA Pathfinder movement. From club directors to parents, coordinate the mission with absolute precision.
                     </p>
 
                     {!auth.user && (
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-delayed w-full">
-                            <Link href={route('register')} className="group relative px-10 py-5 bg-white text-black font-black text-sm uppercase tracking-widest rounded-full overflow-hidden transition-all hover:scale-105 hover:shadow-[0_0_40px_rgba(255,255,255,0.2)] w-full sm:w-auto text-center flex items-center justify-center">
-                                <span className="relative z-10 flex items-center gap-3">
-                                    Join the Platform <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                            <Link href={route('register')} className="btn-join">
+                                <span style={{ position: 'relative', zIndex: 10, display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                    Join the Platform <ArrowRight size={18} />
                                 </span>
                             </Link>
                         </div>
@@ -81,10 +81,10 @@ export default function Welcome({ auth }) {
                 </section>
 
                 {/* Membership Ecosystem Row */}
-                <section className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 py-24 border-t border-white/5 bg-gradient-to-b from-transparent to-black/50">
-                    <div className="text-center mb-20">
-                        <h2 className="text-xs font-black text-burgundy-500 uppercase tracking-[0.3em] mb-4">The Ecosystem</h2>
-                        <h3 className="text-4xl md:text-5xl font-bold text-white tracking-tight">Built for Everyone</h3>
+                <section className="relative z-10 w-full mx-auto border-t border-white/5" style={{ maxWidth: '80rem', padding: '6rem 2rem', background: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.5))' }}>
+                    <div className="text-center mb-16" style={{ marginBottom: '5rem' }}>
+                        <h2 className="text-xs font-black uppercase tracking-[0.2em] mb-4" style={{ color: 'var(--clr-burgundy-500)' }}>The Ecosystem</h2>
+                        <h3 className="text-white tracking-tight" style={{ fontSize: 'clamp(2.25rem, 4vw, 3rem)', fontWeight: 700 }}>Built for Everyone</h3>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -94,13 +94,13 @@ export default function Welcome({ auth }) {
                             { role: 'Pathfinders', icon: Star, desc: 'Access your secure records, class assignments, and district certifications.' },
                             { role: 'Parents', icon: Users, desc: 'One-click family linking to track your children across the district.' }
                         ].map((feat, i) => (
-                            <div key={feat.role} className="group relative p-8 rounded-3xl bg-surface-900/40 border border-white/5 backdrop-blur-sm hover:bg-surface-800/80 hover:border-white/10 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)]">
-                                <div className="absolute inset-0 bg-gradient-to-br from-burgundy-500/5 to-transparent rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                            <div key={feat.role} className="feature-card">
+                                <div className="feature-card-glow"></div>
                                 <div className="relative z-10">
-                                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-8 transition-all duration-500 group-hover:scale-110 group-hover:bg-burgundy-500/20" style={{ backgroundColor: 'rgba(255, 255, 255, 0.03)', color: '#d46b70' }}>
+                                    <div className="feature-icon-wrapper">
                                         <feat.icon size={26} strokeWidth={1.5} />
                                     </div>
-                                    <h4 className="text-xl font-bold text-white mb-4 tracking-tight">{feat.role}</h4>
+                                    <h4 className="text-xl font-bold text-white tracking-tight" style={{ marginBottom: '1rem' }}>{feat.role}</h4>
                                     <p className="text-sm leading-relaxed font-medium" style={{ color: '#8b8b98' }}>
                                         {feat.desc}
                                     </p>
@@ -111,10 +111,10 @@ export default function Welcome({ auth }) {
                 </section>
             </main>
             
-            <footer className="px-6 md:px-12 py-8 flex flex-col md:flex-row justify-between items-center bg-black/60 border-t border-white/5 backdrop-blur-xl relative z-10">
+            <footer className="flex flex-col md:flex-row justify-between items-center border-t border-white/5 relative z-10" style={{ padding: '2rem', backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(12px)' }}>
                 <div className="flex items-center gap-3 mb-6 md:mb-0">
-                    <div className="w-8 h-8 rounded-lg bg-burgundy-900/50 flex items-center justify-center text-xs font-black text-burgundy-400 border border-burgundy-500/20">E</div>
-                    <div className="text-xs font-bold text-gray-400 tracking-widest uppercase">EmPFC Command Center</div>
+                    <div className="flex items-center justify-center text-xs font-black border" style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: 'rgba(155,34,38,0.2)', color: 'var(--clr-burgundy-400)', borderColor: 'rgba(155,34,38,0.2)' }}>E</div>
+                    <div className="text-xs font-bold tracking-widest uppercase" style={{ color: '#9ca3af' }}>EmPFC Command Center</div>
                 </div>
                 <div className="text-[10px] text-gray-600 font-bold uppercase tracking-widest">
                     &copy; {new Date().getFullYear()} Secured by Helanthus Architecture.
@@ -133,6 +133,22 @@ export default function Welcome({ auth }) {
                 .animate-slide-up { animation: slide-up 1s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
                 .animate-fade-in { animation: fade-in 0.8s ease forwards; }
                 .animate-fade-in-delayed { animation: fade-in 0.8s ease 0.4s forwards; opacity: 0; }
+
+                .btn-join { display: inline-flex; align-items: center; justify-content: center; padding: 16px 32px; background-color: #ffffff; color: #000000; font-weight: 900; font-size: 14px; text-transform: uppercase; letter-spacing: 0.1em; border-radius: 9999px; transition: all 0.3s ease; text-align: center; width: 100%; max-width: 320px; }
+                @media (min-width: 640px) { .btn-join { width: auto; max-width: none; } }
+                .btn-join:hover { transform: scale(1.05); box-shadow: 0 0 40px rgba(255, 255, 255, 0.2); }
+                .btn-join svg { transition: transform 0.3s ease; }
+                .btn-join:hover svg { transform: translateX(4px); }
+
+                .text-gradient { background-image: linear-gradient(to bottom right, var(--clr-burgundy-400), var(--clr-burgundy-500), var(--clr-gold-400)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+                .feature-card { position: relative; padding: 32px; border-radius: 24px; background-color: rgba(26, 26, 36, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(8px); transition: all 0.5s ease; cursor: pointer; }
+                .feature-card:hover { background-color: rgba(30, 30, 42, 0.8); border-color: rgba(255, 255, 255, 0.1); transform: translateY(-8px); box-shadow: 0 20px 40px -15px rgba(0,0,0,0.5); }
+                .feature-card-glow { position: absolute; inset: 0; background: linear-gradient(to bottom right, rgba(155, 34, 38, 0.05), transparent); border-radius: 24px; opacity: 0; transition: opacity 0.5s ease; }
+                .feature-card:hover .feature-card-glow { opacity: 1; }
+                
+                .feature-icon-wrapper { width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 32px; transition: all 0.5s ease; background-color: rgba(255, 255, 255, 0.03); color: #d46b70; position: relative; z-index: 10; }
+                .feature-card:hover .feature-icon-wrapper { transform: scale(1.1); background-color: rgba(155, 34, 38, 0.2); }
             `}} />
         </div>
     );
