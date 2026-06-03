@@ -124,7 +124,7 @@ class DashboardRouterService
         }
         
         $district = $user->district;
-        if (!$district) abort(403, 'No district assigned to this account.');
+        if (!$district) return redirect()->route('onboarding.index');
 
         $churches = Church::query()
             ->where('district_id', $district->id)
