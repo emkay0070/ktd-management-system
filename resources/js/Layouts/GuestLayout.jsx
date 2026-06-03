@@ -31,10 +31,10 @@ export default function GuestLayout({
             <ToastNotification />
             {/* ── Top Bar ──────────────────────────────── */}
             <header className="onboard-topbar">
-                <Link href="/" className="onboard-logo">
+                <a href="/" className="onboard-logo">
                     <Tent size={28} />
                     <span>EmPFC</span>
-                </Link>
+                </a>
                 <div className="onboard-topbar__right">
                     {backHref && (
                         <Link href={backHref} className="onboard-topbar__back">

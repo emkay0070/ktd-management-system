@@ -7,9 +7,13 @@ export default function Welcome({ auth }) {
     // Force dark mode for the landing page aesthetic
     useEffect(() => {
         document.body.setAttribute('data-theme', 'dark');
+        document.documentElement.style.backgroundColor = '#0a0a0c';
+        document.body.style.backgroundColor = '#0a0a0c';
         return () => {
             const savedTheme = localStorage.getItem('app_theme') || 'dark';
             document.body.setAttribute('data-theme', savedTheme);
+            document.documentElement.style.backgroundColor = '';
+            document.body.style.backgroundColor = '';
         };
     }, []);
 
