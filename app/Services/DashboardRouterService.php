@@ -195,8 +195,23 @@ class DashboardRouterService
 
     protected function renderDistrict(User $user, $section)
     {
-        if ($user->hasRole('district_treasurer') && $section === 'overview') {
-            $section = 'camp_registrations';
+        // Route coordinators to their default workspace when they land on 'overview'
+        if ($section === 'overview') {
+            if ($user->hasRole('district_treasurer') && !$user->hasAnyRole(['district_director', 'district_secretary'])) {
+                $section = 'camp_registrations';
+            } elseif ($user->hasRole('district_curriculum_coordinator') && !$user->hasAnyRole(['district_director', 'district_secretary'])) {
+                $section = 'curriculum';
+            } elseif ($user->hasRole('district_communication_coordinator') && !$user->hasAnyRole(['district_director', 'district_secretary'])) {
+                $section = 'bulletins';
+            } elseif ($user->hasRole('district_programs_coordinator') && !$user->hasAnyRole(['district_director', 'district_secretary'])) {
+                $section = 'events';
+            } elseif ($user->hasRole('district_music_coordinator') && !$user->hasAnyRole(['district_director', 'district_secretary'])) {
+                $section = 'overview'; // Music department workspace coming in Phase 2
+            } elseif ($user->hasRole('district_pbe_coordinator') && !$user->hasAnyRole(['district_director', 'district_secretary'])) {
+                $section = 'overview'; // PBE department workspace coming in Phase 2
+            } elseif ($user->hasRole('district_welfare_coordinator') && !$user->hasAnyRole(['district_director', 'district_secretary'])) {
+                $section = 'overview'; // Welfare department workspace coming in Phase 2
+            }
         }
         
         $district = $user->district;
@@ -270,6 +285,36 @@ class DashboardRouterService
             ->with(['roles', 'church', 'district'])
             ->get();
 
+        $permissions = [
+            'view_all' => $user->hasAnyRole(['super_admin', 'district_director', 'district_secretary']),
+            'edit_curriculum' => $user->hasAnyRole(['super_admin', 'district_director', 'district_secretary', 'district_curriculum_coordinator']),
+            'edit_communication' => $user->hasAnyRole(['super_admin', 'district_director', 'district_secretary', 'district_communication_coordinator']),
+            'edit_programs' => $user->hasAnyRole(['super_admin', 'district_director', 'district_secretary', 'district_programs_coordinator']),
+            'edit_music' => $user->hasAnyRole(['super_admin', 'district_director', 'district_secretary', 'district_music_coordinator']),
+            'edit_treasury' => $user->hasAnyRole(['super_admin', 'district_director', 'district_secretary', 'district_treasurer']),
+            'edit_pbe' => $user->hasAnyRole(['super_admin', 'district_director', 'district_secretary', 'district_pbe_coordinator']),
+            'edit_welfare' => $user->hasAnyRole(['super_admin', 'district_director', 'district_secretary', 'district_welfare_coordinator']),
+        ];
+
+        $curriculumStats = [];
+        foreach ($district->churches as $church) {
+            $stats = ['Friend' => 0, 'Companion' => 0, 'Explorer' => 0, 'Ranger' => 0, 'Voyager' => 0, 'Guide' => 0, 'Ready' => 0];
+            $pathfinders = \App\Models\Pathfinder::where('church_id', $church->id)->with('assignedClass')->get();
+            foreach ($pathfinders as $pf) {
+                if ($pf->assignedClass) {
+                    $className = $pf->assignedClass->name;
+                    if (isset($stats[$className])) {
+                        $stats[$className]++;
+                    }
+                    // TODO: Implement actual 'Ready for Investiture' logic based on CurriculumProgress
+                }
+            }
+            $curriculumStats[] = [
+                'church' => ['id' => $church->id, 'name' => $church->name],
+                'stats' => $stats,
+            ];
+        }
+
         return Inertia::render('Dashboard/District', [
             'district' => ['id' => $district->id, 'name' => $district->name, 'conference' => $district->conference->name ?? 'Unknown'],
             'churches' => $churches,
@@ -287,6 +332,8 @@ class DashboardRouterService
             'section' => $section,
             'pending_churches' => $pendingChurches,
             'pending_approvals' => $pendingApprovals,
+            'permissions' => $permissions,
+            'curriculum_stats' => $curriculumStats,
         ]);
     }
 

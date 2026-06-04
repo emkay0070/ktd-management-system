@@ -31,7 +31,7 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
     const hasAnyRole = (rs) => rs.some(r => roleNames.includes(r));
 
     const isSuperAdmin = hasRole('super_admin');
-    const isDistrictLeader = hasAnyRole(['district_director', 'district_committee', 'district_treasurer', 'district_official']);
+    const isDistrictLeader = hasAnyRole(['district_director', 'district_committee', 'district_treasurer', 'district_secretary', 'district_official', 'district_curriculum_coordinator', 'district_communication_coordinator', 'district_music_coordinator', 'district_welfare_coordinator', 'district_pbe_coordinator', 'district_programs_coordinator']);
     const isDirector = hasRole('director');
     const isMG = hasRole('master_guide');
     const isPathfinder = hasRole('pathfinder');
@@ -140,34 +140,69 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
 
                     {isDistrictLeader && (
                         <>
-                            {(isSidebarVisible || isMobileOpen) && <span className="sidebar__section-label" style={{ marginTop: '12px' }}>District Management</span>}
-                            <NavItem
-                                href={route('dashboard', 'clubs')}
-                                icon={Church}
-                                label="Clubs Directory"
-                                isCollapsed={isCollapsed}
-                                isSidebarVisible={isSidebarVisible}
-                                isMobileOpen={isMobileOpen}
-                                active={route().current('dashboard', { section: 'clubs' })}
-                            />
-                            <NavItem
-                                href={route('dashboard', 'committee')}
-                                icon={Users}
-                                label="Executive Committee"
-                                isCollapsed={isCollapsed}
-                                isSidebarVisible={isSidebarVisible}
-                                isMobileOpen={isMobileOpen}
-                                active={route().current('dashboard', { section: 'committee' })}
-                            />
-                            <NavItem
-                                href={route('dashboard', 'events')}
-                                icon={Calendar}
-                                label="Event Scheduler"
-                                isCollapsed={isCollapsed}
-                                isSidebarVisible={isSidebarVisible}
-                                isMobileOpen={isMobileOpen}
-                                active={route().current('dashboard', { section: 'events' })}
-                            />
+                            {(isSidebarVisible || isMobileOpen) && <span className="sidebar__section-label" style={{ marginTop: '12px' }}>District Headquarters</span>}
+                            
+                            {/* Level 1 & Directors */}
+                            {(hasAnyRole(['district_director', 'district_secretary', 'super_admin'])) && (
+                                <>
+                                    <NavItem
+                                        href={route('dashboard', 'clubs')}
+                                        icon={Church}
+                                        label="Clubs Directory"
+                                        isCollapsed={isCollapsed}
+                                        isSidebarVisible={isSidebarVisible}
+                                        isMobileOpen={isMobileOpen}
+                                        active={route().current('dashboard', { section: 'clubs' })}
+                                    />
+                                    <NavItem
+                                        href={route('dashboard', 'committee')}
+                                        icon={Users}
+                                        label="Executive Committee"
+                                        isCollapsed={isCollapsed}
+                                        isSidebarVisible={isSidebarVisible}
+                                        isMobileOpen={isMobileOpen}
+                                        active={route().current('dashboard', { section: 'committee' })}
+                                    />
+                                </>
+                            )}
+
+                            {/* Departments (Level 1 & Coordinators) */}
+                            {(hasAnyRole(['district_director', 'district_secretary', 'super_admin', 'district_programs_coordinator'])) && (
+                                <NavItem
+                                    href={route('dashboard', 'events')}
+                                    icon={Calendar}
+                                    label="Programs Dept"
+                                    isCollapsed={isCollapsed}
+                                    isSidebarVisible={isSidebarVisible}
+                                    isMobileOpen={isMobileOpen}
+                                    active={route().current('dashboard', { section: 'events' })}
+                                />
+                            )}
+                            
+                            {(hasAnyRole(['district_director', 'district_secretary', 'super_admin', 'district_curriculum_coordinator'])) && (
+                                <NavItem
+                                    href={route('dashboard', 'curriculum')}
+                                    icon={GraduationCap}
+                                    label="Curriculum Dept"
+                                    isCollapsed={isCollapsed}
+                                    isSidebarVisible={isSidebarVisible}
+                                    isMobileOpen={isMobileOpen}
+                                    active={route().current('dashboard', { section: 'curriculum' })}
+                                />
+                            )}
+                            
+                            {(hasAnyRole(['district_director', 'district_secretary', 'super_admin', 'district_communication_coordinator'])) && (
+                                <NavItem
+                                    href={route('dashboard', 'bulletins')}
+                                    icon={Megaphone}
+                                    label="Communication Dept"
+                                    isCollapsed={isCollapsed}
+                                    isSidebarVisible={isSidebarVisible}
+                                    isMobileOpen={isMobileOpen}
+                                    active={route().current('dashboard', { section: 'bulletins' })}
+                                />
+                            )}
+
                             <NavItem
                                 href={route('dashboard', 'missions')}
                                 icon={Trophy}
@@ -177,6 +212,7 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
                                 isMobileOpen={isMobileOpen}
                                 active={route().current('dashboard', { section: 'missions' })}
                             />
+                            
                             <NavItem
                                 href={route('dashboard', 'roster')}
                                 icon={Users}
@@ -186,6 +222,7 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
                                 isMobileOpen={isMobileOpen}
                                 active={route().current('dashboard', { section: 'roster' })}
                             />
+                            
                             <NavItem
                                 href={route('dashboard', 'resources')}
                                 icon={BookOpen}
@@ -195,42 +232,38 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
                                 isMobileOpen={isMobileOpen}
                                 active={route().current('dashboard', { section: 'resources' })}
                             />
-                            <NavItem
-                                href={route('dashboard', 'bulletins')}
-                                icon={Megaphone}
-                                label="Official Bulletins"
-                                isCollapsed={isCollapsed}
-                                isSidebarVisible={isSidebarVisible}
-                                isMobileOpen={isMobileOpen}
-                                active={route().current('dashboard', { section: 'bulletins' })}
-                            />
-                            <NavItem
-                                href={route('dashboard', 'appraisals')}
-                                icon={ClipboardCheck}
-                                label="Club Appraisals"
-                                isCollapsed={isCollapsed}
-                                isSidebarVisible={isSidebarVisible}
-                                isMobileOpen={isMobileOpen}
-                                active={route().current('dashboard', { section: 'appraisals' })}
-                            />
-                            <NavItem
-                                href={route('dashboard', 'pulse')}
-                                icon={Activity}
-                                label="District Pulse"
-                                isCollapsed={isCollapsed}
-                                isSidebarVisible={isSidebarVisible}
-                                isMobileOpen={isMobileOpen}
-                                active={route().current('dashboard', { section: 'pulse' })}
-                            />
-                            <NavItem
-                                href={route('dashboard', 'camp_registrations')}
-                                icon={Tent}
-                                label="Treasury & Regs"
-                                isCollapsed={isCollapsed}
-                                isSidebarVisible={isSidebarVisible}
-                                isMobileOpen={isMobileOpen}
-                                active={route().current('dashboard', { section: 'camp_registrations' })}
-                            />
+                            
+                            {(hasAnyRole(['district_director', 'district_secretary', 'super_admin'])) && (
+                                <>
+                                    <NavItem
+                                        href={route('dashboard', 'appraisals')}
+                                        icon={ClipboardCheck}
+                                        label="Appraisals"
+                                        isCollapsed={isCollapsed}
+                                        isSidebarVisible={isSidebarVisible}
+                                        isMobileOpen={isMobileOpen}
+                                        active={route().current('dashboard', { section: 'appraisals' })}
+                                    />
+                                    <NavItem
+                                        href={route('dashboard', 'pulse')}
+                                        icon={Activity}
+                                        label="District Pulse"
+                                        isCollapsed={isCollapsed}
+                                        isSidebarVisible={isSidebarVisible}
+                                        isMobileOpen={isMobileOpen}
+                                        active={route().current('dashboard', { section: 'pulse' })}
+                                    />
+                                    <NavItem
+                                        href={route('dashboard', 'camp_registrations')}
+                                        icon={Tent}
+                                        label="Treasury & Regs"
+                                        isCollapsed={isCollapsed}
+                                        isSidebarVisible={isSidebarVisible}
+                                        isMobileOpen={isMobileOpen}
+                                        active={route().current('dashboard', { section: 'camp_registrations' })}
+                                    />
+                                </>
+                            )}
                         </>
                     )}
 

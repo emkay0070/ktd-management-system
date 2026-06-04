@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useForm, router } from '@inertiajs/react';
 import { Megaphone, Plus, Trash2, Clock, Info, AlertTriangle, Zap, Eye, EyeOff } from 'lucide-react';
 
-export default function DistrictBulletinManager({ bulletins = [] }) {
+export default function DistrictBulletinManager({ bulletins = [], readonly }) {
     const [view, setView] = useState('list'); // list, create
 
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -45,7 +45,7 @@ export default function DistrictBulletinManager({ bulletins = [] }) {
                     <h3 style={{ margin: 0, color: 'var(--clr-text-primary)' }}>Official District Bulletins</h3>
                     <p style={{ fontSize: '12px', color: 'var(--clr-text-muted)' }}>Send priority announcements to all local club directors.</p>
                 </div>
-                {view === 'list' && (
+                {view === 'list' && !readonly && (
                     <button className="btn btn--primary btn--sm" onClick={() => setView('create')}>
                         <Plus size={16} className="mr-2" /> New Bulletin
                     </button>
@@ -118,14 +118,16 @@ export default function DistrictBulletinManager({ bulletins = [] }) {
                                         </div>
                                     </div>
                                 </div>
-                                <div style={{ display: 'flex', gap: '8px' }}>
-                                    <button onClick={() => toggleStatus(bulletin.id)} className="icon-btn" title={bulletin.is_active ? "Hide Bulletin" : "Show Bulletin"}>
-                                        {bulletin.is_active ? <EyeOff size={16} /> : <Eye size={16} />}
-                                    </button>
-                                    <button onClick={() => handleDelete(bulletin.id)} className="icon-btn" style={{ color: 'var(--clr-burgundy-400)' }}>
-                                        <Trash2 size={16} />
-                                    </button>
-                                </div>
+                                {!readonly && (
+                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                        <button className="btn btn--white btn--sm" onClick={() => toggleStatus(bulletin.id)} title={bulletin.is_active ? 'Hide Bulletin' : 'Show Bulletin'}>
+                                            {bulletin.is_active ? <EyeOff size={14} /> : <Eye size={14} />}
+                                        </button>
+                                        <button className="btn btn--white btn--sm" style={{ color: 'var(--clr-burgundy-500)', borderColor: 'var(--clr-burgundy-500)' }} onClick={() => handleDelete(bulletin.id)}>
+                                            <Trash2 size={14} />
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     ))}

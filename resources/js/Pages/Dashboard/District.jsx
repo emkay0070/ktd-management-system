@@ -41,8 +41,9 @@ import DistrictBulletinManager from './Partials/DistrictBulletinManager';
 import DistrictAppraisalManager from './Partials/DistrictAppraisalManager';
 import DistrictPulseView from './Partials/DistrictPulseView';
 import DistrictRegistrationManager from './Partials/DistrictRegistrationManager';
+import DistrictCurriculumManager from './Partials/DistrictCurriculumManager';
 
-export default function District({ auth, district, churches, committee, events, tasks, roster, resources, bulletins, appraisals, registrations, analytics, leaderboard, treasury, section, invite_links, pending_churches = [], pending_approvals = [] }) {
+export default function District({ auth, district, churches, committee, events, tasks, roster, resources, bulletins, appraisals, registrations, analytics, leaderboard, treasury, section, invite_links, pending_churches = [], pending_approvals = [], permissions, curriculum_stats }) {
     const [showChurchQueue, setShowChurchQueue] = useState(false);
     const [showRoleQueue, setShowRoleQueue] = useState(false);
     const actionCount = pending_churches.length + pending_approvals.length;
@@ -60,6 +61,7 @@ export default function District({ auth, district, churches, committee, events, 
     const isAppraisals = section === 'appraisals';
     const isPulse = section === 'pulse';
     const isRegistration = section === 'camp_registrations';
+    const isCurriculum = section === 'curriculum';
 
     const totalPathfinders = churches.reduce((sum, c) => sum + (c.total ?? 0), 0);
     const totalMGs = churches.reduce((sum, c) => sum + (c.master_guides ?? 0), 0);
@@ -176,16 +178,17 @@ export default function District({ auth, district, churches, committee, events, 
                 )}
 
                 <div className="page-content bg-transparent shadow-none border-none p-0">
-                    {isClubs && <ClubsDirectory churches={churches} readonly={!hasRole('district_director')} />}
-                    {isCommittee && <DistrictCommitteeManager committee={committee} invite_links={invite_links} readonly={!hasRole('district_director')} />}
-                    {isEvents && <DistrictEventsManager events={events} readonly={!hasRole('district_director')} />}
-                    {isTasks && <DistrictTasksManager tasks={tasks} leaderboard={leaderboard} readonly={!hasRole('district_director')} />}
+                    {isClubs && <ClubsDirectory churches={churches} readonly={!permissions?.view_all} />}
+                    {isCommittee && <DistrictCommitteeManager committee={committee} invite_links={invite_links} readonly={!permissions?.view_all} />}
+                    {isEvents && <DistrictEventsManager events={events} readonly={!permissions?.edit_programs} />}
+                    {isTasks && <DistrictTasksManager tasks={tasks} leaderboard={leaderboard} readonly={!permissions?.view_all} />}
                     {isRoster && <DistrictRosterManager roster={roster} />}
-                    {isResources && <DistrictResourceManager resources={resources} readonly={!hasRole('district_director')} />}
-                    {isBulletins && <DistrictBulletinManager bulletins={bulletins} />}
-                    {isAppraisals && <DistrictAppraisalManager churches={churches} appraisals={appraisals} />}
+                    {isResources && <DistrictResourceManager resources={resources} readonly={!permissions?.view_all} />}
+                    {isBulletins && <DistrictBulletinManager bulletins={bulletins} readonly={!permissions?.edit_communication} />}
+                    {isAppraisals && <DistrictAppraisalManager churches={churches} appraisals={appraisals} readonly={!permissions?.edit_welfare} />}
                     {isPulse && <DistrictPulseView analytics={analytics} />}
-                    {isRegistration && <DistrictRegistrationManager registrations={registrations} district_events={events} treasury={treasury} />}
+                    {isRegistration && <DistrictRegistrationManager registrations={registrations} district_events={events} treasury={treasury} readonly={!permissions?.edit_programs} />}
+                    {isCurriculum && <DistrictCurriculumManager curriculum_stats={curriculum_stats} readonly={!permissions?.edit_curriculum} />}
                 </div>
             </div>
         </AuthenticatedLayout>
