@@ -253,13 +253,17 @@ class DashboardRouterService
         }
         $regData = Pathfinder::whereIn('church_id', $district->churches->pluck('id'))->where('created_at', '>=', now()->subMonths(12))
             ->selectRaw("to_char(created_at, 'YYYY-MM') as month_key, count(*) as count")
-            ->groupBy('month_key')->pluck('count', 'month_key');
+            ->groupByRaw("to_char(created_at, 'YYYY-MM')")
+            ->pluck('count', 'month_key');
         
         $growthPulse = $months->map(fn($m) => ['label' => $m['month'], 'value' => (int)($regData[$m['key']] ?? 0)]);
 
         $activityPulse = \App\Models\TaskSubmission::whereIn('church_id', $district->churches->pluck('id'))
-            ->where('created_at', '>=', now()->subMonths(3))->selectRaw("to_char(created_at, 'YYYY-MM-DD') as day, count(*) as count")
-            ->groupBy('day')->orderBy('day', 'asc')->get();
+            ->where('created_at', '>=', now()->subMonths(3))
+            ->selectRaw("to_char(created_at, 'YYYY-MM-DD') as day, count(*) as count")
+            ->groupByRaw("to_char(created_at, 'YYYY-MM-DD')")
+            ->orderBy('day', 'asc')
+            ->get();
 
         $committee = $district->users()->get()
             ->filter(fn($u) => $u->hasAnyRole(['district_director', 'district_committee', 'district_treasurer', 'district_secretary', 'district_official', 'district_curriculum_coordinator', 'district_masterguide_coordinator', 'district_communication_coordinator', 'district_music_coordinator', 'district_welfare_coordinator', 'district_pbe_coordinator', 'district_programs_coordinator']))
@@ -433,8 +437,14 @@ class DashboardRouterService
         // Declining Clubs: Compare last 30 days vs 30-60 days
         $decliningClubs = [];
         foreach ($district->churches as $church) {
-            $last30 = \App\Models\AttendanceRecord::whereHas('session', fn($q) => $q->where('church_id', $church->id)->where('date', '>=', now()->subDays(30)))->avg('is_present') ?? 0;
-            $prev30 = \App\Models\AttendanceRecord::whereHas('session', fn($q) => $q->where('church_id', $church->id)->where('date', '<', now()->subDays(30))->where('date', '>=', now()->subDays(60)))->avg('is_present') ?? 0;
+            // Postgres doesn't allow AVG() on boolean columns directly
+            $last30 = \App\Models\AttendanceRecord::whereHas('session', fn($q) => $q->where('church_id', $church->id)->where('date', '>=', now()->subDays(30)))
+                ->selectRaw('AVG(CASE WHEN is_present THEN 1 ELSE 0 END) as aggregate')
+                ->value('aggregate') ?? 0;
+
+            $prev30 = \App\Models\AttendanceRecord::whereHas('session', fn($q) => $q->where('church_id', $church->id)->where('date', '<', now()->subDays(30))->where('date', '>=', now()->subDays(60)))
+                ->selectRaw('AVG(CASE WHEN is_present THEN 1 ELSE 0 END) as aggregate')
+                ->value('aggregate') ?? 0;
             
             if ($prev30 > 0 && ($last30 < $prev30 * 0.8)) { // 20% decline
                 $decliningClubs[] = [
