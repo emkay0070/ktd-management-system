@@ -288,8 +288,18 @@ class DashboardRouterService
         $permissions = [
             'view_all' => $user->hasAnyRole(['super_admin', 'district_director', 'district_secretary']),
             'edit_curriculum' => $user->hasAnyRole(['super_admin', 'district_director', 'district_secretary', 'district_curriculum_coordinator']),
+            
+            // Communication
+            'view_communication' => $user->hasAnyRole(['super_admin', 'district_director', 'district_secretary', 'district_communication_coordinator', 'district_programs_coordinator', 'district_curriculum_coordinator', 'district_music_coordinator', 'district_pbe_coordinator', 'district_welfare_coordinator']),
             'edit_communication' => $user->hasAnyRole(['super_admin', 'district_director', 'district_secretary', 'district_communication_coordinator']),
+            'publish_communication' => $user->hasAnyRole(['super_admin', 'district_director', 'district_secretary', 'district_communication_coordinator']),
+            'delete_communication' => $user->hasAnyRole(['super_admin', 'district_director', 'district_secretary']),
+            
+            // Programs (Events & Missions)
             'edit_programs' => $user->hasAnyRole(['super_admin', 'district_director', 'district_secretary', 'district_programs_coordinator']),
+            'publish_programs' => $user->hasAnyRole(['super_admin', 'district_director', 'district_secretary']),
+            'delete_programs' => $user->hasAnyRole(['super_admin', 'district_director', 'district_secretary']),
+            
             'edit_music' => $user->hasAnyRole(['super_admin', 'district_director', 'district_secretary', 'district_music_coordinator']),
             'edit_treasury' => $user->hasAnyRole(['super_admin', 'district_director', 'district_secretary', 'district_treasurer']),
             'edit_pbe' => $user->hasAnyRole(['super_admin', 'district_director', 'district_secretary', 'district_pbe_coordinator']),
@@ -347,10 +357,10 @@ class DashboardRouterService
         return Inertia::render('Dashboard/Director', [
             'club' => $this->clubService->buildForChurch($church),
             'registrations' => \App\Models\Registration::where('church_id', $church->id)->with(['pathfinder', 'event'])->get(),
-            'district_tasks' => \App\Models\DistrictTask::where('district_id', $church->district_id)->orderBy('deadline', 'asc')->get(),
-            'district_events' => \App\Models\DistrictEvent::where('district_id', $church->district_id)->where('is_published', true)->get(),
+            'district_tasks' => \App\Models\DistrictTask::where('district_id', $church->district_id)->whereIn('workflow_status', ['assigned', 'closed', 'reviewed'])->orderBy('deadline', 'asc')->get(),
+            'district_events' => \App\Models\DistrictEvent::where('district_id', $church->district_id)->where('workflow_status', 'published')->get(),
             'district_resources' => \App\Models\DistrictResource::where('district_id', $church->district_id)->latest()->get(),
-            'district_bulletins' => \App\Models\DistrictBulletin::where('district_id', $church->district_id)->where('is_active', true)->get(),
+            'district_bulletins' => \App\Models\DistrictBulletin::where('district_id', $church->district_id)->where('workflow_status', 'published')->get(),
             'parent_link_requests' => \App\Models\PendingParentLink::whereIn('pathfinder_id', $pathfinders->pluck('id'))->where('status', 'pending')->with(['user', 'pathfinder'])->get(),
             'parents' => User::where('church_id', $church->id)->get()->filter(fn($u) => $u->hasRole('parent'))->values(),
             'section' => $section,

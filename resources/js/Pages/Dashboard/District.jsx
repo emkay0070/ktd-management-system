@@ -180,11 +180,11 @@ export default function District({ auth, district, churches, committee, events, 
                 <div className="page-content bg-transparent shadow-none border-none p-0">
                     {isClubs && <ClubsDirectory churches={churches} readonly={!permissions?.view_all} />}
                     {isCommittee && <DistrictCommitteeManager committee={committee} invite_links={invite_links} readonly={!permissions?.view_all} />}
-                    {isEvents && <DistrictEventsManager events={events} readonly={!permissions?.edit_programs} />}
-                    {isTasks && <DistrictTasksManager tasks={tasks} leaderboard={leaderboard} readonly={!permissions?.view_all} />}
+                    {isEvents && <DistrictEventsManager events={events} canEdit={permissions?.edit_programs} canPublish={permissions?.publish_programs} canDelete={permissions?.delete_programs} />}
+                    {isTasks && <DistrictTasksManager tasks={tasks} leaderboard={leaderboard} canEdit={permissions?.edit_programs} canPublish={permissions?.publish_programs} canDelete={permissions?.delete_programs} />}
                     {isRoster && <DistrictRosterManager roster={roster} />}
                     {isResources && <DistrictResourceManager resources={resources} readonly={!permissions?.view_all} />}
-                    {isBulletins && <DistrictBulletinManager bulletins={bulletins} readonly={!permissions?.edit_communication} />}
+                    {isBulletins && <DistrictBulletinManager bulletins={bulletins} canEdit={permissions?.edit_communication} canPublish={permissions?.publish_communication} canDelete={permissions?.delete_communication} />}
                     {isAppraisals && <DistrictAppraisalManager churches={churches} appraisals={appraisals} readonly={!permissions?.edit_welfare} />}
                     {isPulse && <DistrictPulseView analytics={analytics} />}
                     {isRegistration && <DistrictRegistrationManager registrations={registrations} district_events={events} treasury={treasury} readonly={!permissions?.edit_programs} />}

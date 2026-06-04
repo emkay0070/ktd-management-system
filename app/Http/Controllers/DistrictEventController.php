@@ -9,8 +9,7 @@ class DistrictEventController extends Controller
 {
     public function store(Request $request)
     {
-        $user = auth()->user();
-        abort_unless($user && $user->hasAnyRole(['district_director', 'district_committee', 'district_official']), 403);
+        $this->authorize('create', DistrictEvent::class);
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -20,10 +19,11 @@ class DistrictEventController extends Controller
             'location' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'registration_fee' => 'required|numeric|min:0',
+            'message_type' => 'required|in:official_event,training_seminar,general_assembly',
         ]);
 
         DistrictEvent::create([
-            'district_id' => $user->district_id,
+            'district_id' => auth()->user()->district_id,
             'name' => $validated['name'],
             'type' => $validated['type'],
             'start_date' => $validated['start_date'],
@@ -31,18 +31,18 @@ class DistrictEventController extends Controller
             'location' => $validated['location'],
             'description' => $validated['description'],
             'registration_fee' => $validated['registration_fee'],
-            'status' => 'Scheduled',
-            'is_published' => false, // Always defaults to false for committee review
+            'operational_status' => 'Scheduled',
+            'workflow_status' => 'draft', // Always defaults to draft for committee review
+            'message_type' => $validated['message_type'],
         ]);
 
-        return back()->with('message', 'District event scheduled successfully.');
+        return back()->with('message', 'District event scheduled as draft.');
     }
 
     public function destroy(DistrictEvent $event)
     {
-        $user = auth()->user();
-        abort_unless($user && $user->hasAnyRole(['district_director', 'district_official']), 403);
-        abort_unless($event->district_id === $user->district_id, 403);
+        $this->authorize('delete', $event);
+        abort_unless($event->district_id === auth()->user()->district_id, 403);
 
         $event->delete();
         return back()->with('message', 'Event removed.');
@@ -50,15 +50,14 @@ class DistrictEventController extends Controller
 
     public function togglePublish(DistrictEvent $event)
     {
-        $user = auth()->user();
-        // Only District Directors can publish an event downwards
-        abort_unless($user && $user->hasAnyRole(['district_director', 'district_official']), 403);
-        abort_unless($event->district_id === $user->district_id, 403);
+        $this->authorize('publish', $event);
+        abort_unless($event->district_id === auth()->user()->district_id, 403);
 
-        $event->is_published = !$event->is_published;
+        $newStatus = $event->workflow_status === 'published' ? 'draft' : 'published';
+        $event->workflow_status = $newStatus;
         $event->save();
 
-        $state = $event->is_published ? 'broadcasted to all local clubs' : 'hidden from local clubs';
+        $state = $event->workflow_status === 'published' ? 'broadcasted to all local clubs' : 'hidden from local clubs';
         return back()->with('message', "Event has been {$state}.");
     }
 }

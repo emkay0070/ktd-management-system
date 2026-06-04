@@ -57,6 +57,7 @@ Route::middleware(['auth', 'verified', 'onboarded'])->group(function () {
     // District Tasks & Competitions
     Route::post('/district/tasks', [DistrictTaskController::class, 'store'])->name('district_tasks.store');
     Route::delete('/district/tasks/{task}', [DistrictTaskController::class, 'destroy'])->name('district_tasks.destroy');
+    Route::post('/district/tasks/{task}/toggle-assign', [DistrictTaskController::class, 'toggleAssign'])->name('district_tasks.toggle_assign');
     Route::post('/district/submissions/{submission}/review', [DistrictTaskController::class, 'reviewSubmission'])->name('district_tasks.review');
     
     // District Resources Library

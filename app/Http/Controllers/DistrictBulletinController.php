@@ -9,33 +9,33 @@ class DistrictBulletinController extends Controller
 {
     public function store(Request $request)
     {
-        $user = auth()->user();
-        abort_unless($user && $user->hasAnyRole(['district_director', 'district_committee', 'district_official']), 403);
+        $this->authorize('create', DistrictBulletin::class);
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
             'level' => 'required|in:Info,Warning,Urgent',
             'expires_at' => 'nullable|date',
+            'message_type' => 'required|in:directive,bulletin,reminder,event_update,engagement_post',
         ]);
 
         DistrictBulletin::create([
-            'district_id' => $user->district_id,
+            'district_id' => auth()->user()->district_id,
             'title' => $validated['title'],
             'content' => $validated['content'],
             'level' => $validated['level'],
-            'is_active' => true,
+            'workflow_status' => 'draft',
+            'message_type' => $validated['message_type'],
             'expires_at' => $validated['expires_at'],
         ]);
 
-        return back()->with('message', 'District bulletin posted successfully.');
+        return back()->with('message', 'District bulletin created as draft.');
     }
 
     public function destroy(DistrictBulletin $bulletin)
     {
-        $user = auth()->user();
-        abort_unless($user && $user->hasAnyRole(['district_director', 'district_official']), 403);
-        abort_unless($bulletin->district_id === $user->district_id, 403);
+        $this->authorize('delete', $bulletin);
+        abort_unless($bulletin->district_id === auth()->user()->district_id, 403);
 
         $bulletin->delete();
         return back()->with('message', 'Bulletin removed.');
@@ -43,11 +43,11 @@ class DistrictBulletinController extends Controller
 
     public function toggle(DistrictBulletin $bulletin)
     {
-        $user = auth()->user();
-        abort_unless($user && $user->hasAnyRole(['district_director', 'district_committee', 'district_official']), 403);
-        abort_unless($bulletin->district_id === $user->district_id, 403);
+        $this->authorize('publish', $bulletin);
+        abort_unless($bulletin->district_id === auth()->user()->district_id, 403);
 
-        $bulletin->update(['is_active' => !$bulletin->is_active]);
-        return back()->with('message', 'Bulletin status updated.');
+        $newStatus = $bulletin->workflow_status === 'published' ? 'draft' : 'published';
+        $bulletin->update(['workflow_status' => $newStatus]);
+        return back()->with('message', "Bulletin status updated to {$newStatus}.");
     }
 }

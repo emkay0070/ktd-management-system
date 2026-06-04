@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useForm, router } from '@inertiajs/react';
-import { Trophy, Plus, ClipboardList, CheckCircle, XCircle, Clock, Image as ImageIcon, Send, MessageSquare } from 'lucide-react';
+import { Trophy, Plus, ClipboardList, CheckCircle, XCircle, Trash2, Clock, Image as ImageIcon, Send, MessageSquare } from 'lucide-react';
 
-export default function DistrictTasksManager({ tasks, leaderboard, readonly }) {
+export default function DistrictTasksManager({ tasks, leaderboard, canEdit = false, canPublish = false, canDelete = false }) {
     const [activeTab, setActiveTab] = useState('missions'); // missions, submissions, leaderboard
     const [view, setView] = useState('list'); // list, form, review
     const [selectedSubmission, setSelectedSubmission] = useState(null);
@@ -13,6 +13,7 @@ export default function DistrictTasksManager({ tasks, leaderboard, readonly }) {
         points: 10,
         deadline: '',
         quarter: 'Q1',
+        message_type: 'routine_task',
     });
 
     const reviewForm = useForm({
@@ -44,6 +45,13 @@ export default function DistrictTasksManager({ tasks, leaderboard, readonly }) {
     const handleDeleteTask = (task) => {
         if (confirm(`Are you sure you want to delete this mission? This will remove all club submissions for it.`)) {
             router.delete(route('district_tasks.destroy', task.id));
+        }
+    };
+
+    const handleToggleAssign = (task) => {
+        const action = task.workflow_status === 'assigned' ? 'unassign this from' : 'assign this to';
+        if (confirm(`Are you sure you want to ${action} all clubs?`)) {
+            router.post(route('district_tasks.toggle_assign', task.id));
         }
     };
 
@@ -88,9 +96,14 @@ export default function DistrictTasksManager({ tasks, leaderboard, readonly }) {
                             <h3 style={{ margin: 0, color: 'var(--clr-text-primary)' }}>Club Missions</h3>
                             <p style={{ fontSize: '12px', color: 'var(--clr-text-muted)' }}>Tasks assigned to clubs for points.</p>
                         </div>
-                        {!readonly && view === 'list' && (
+                        {canEdit && view === 'list' && (
                             <button className="btn btn--primary btn--sm" onClick={() => setView('form')}>
                                 <Plus size={16} className="mr-2" /> Post New Mission
+                            </button>
+                        )}
+                        {canEdit && view === 'form' && (
+                            <button className="btn btn--secondary btn--sm" onClick={() => setView('list')}>
+                                Cancel
                             </button>
                         )}
                     </div>
@@ -99,17 +112,33 @@ export default function DistrictTasksManager({ tasks, leaderboard, readonly }) {
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
                             {tasks.map(task => (
                                 <div key={task.id} className="panel" style={{ position: 'relative', padding: 'var(--sp-8)' }}>
-                                    {!readonly && (
-                                        <button 
-                                            onClick={() => handleDeleteTask(task)}
-                                            style={{ position: 'absolute', top: '16px', right: '16px', color: 'rgba(255,255,255,0.2)', background: 'none', border: 'none', cursor: 'pointer' }}
-                                        >
-                                            <XCircle size={18} />
-                                        </button>
-                                    )}
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                                        <div className="badge badge--gold">{task.points} Points</div>
-                                        <div className="badge badge--neutral" style={{ textTransform: 'uppercase' }}>{task.quarter}</div>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <div className="badge badge--gold">{task.points} Points</div>
+                                            <div className="badge badge--neutral" style={{ textTransform: 'uppercase' }}>{task.quarter}</div>
+                                            {task.workflow_status === 'draft' && <span className="badge badge--neutral">DRAFT</span>}
+                                            {task.workflow_status === 'assigned' && <span className="badge badge--green">ASSIGNED</span>}
+                                        </div>
+                                        <div className="flex gap-2">
+                                            {canPublish && (
+                                                <button 
+                                                    onClick={() => handleToggleAssign(task)}
+                                                    className={`action-btn p-1.5 rounded transition-colors ${task.workflow_status === 'assigned' ? 'text-gold-400 bg-gold-400/10 hover:bg-gold-400/20' : 'text-muted hover:text-white hover:bg-white/10'}`} 
+                                                    title={task.workflow_status === 'assigned' ? "Unassign Mission" : "Assign Mission to Clubs"}
+                                                >
+                                                    <Send size={16} />
+                                                </button>
+                                            )}
+                                            {canDelete && (
+                                                <button 
+                                                    onClick={() => handleDeleteTask(task)}
+                                                    className="action-btn p-1.5 rounded text-danger/50 hover:text-danger hover:bg-danger/10" 
+                                                    title="Delete Mission"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
                                     <h4 style={{ margin: '0 0 8px 0', color: 'var(--clr-text-primary)' }}>{task.title}</h4>
                                     <p style={{ fontSize: '13px', color: 'var(--clr-text-secondary)', marginBottom: '16px', minHeight: '40px' }}>{task.description}</p>
@@ -128,7 +157,7 @@ export default function DistrictTasksManager({ tasks, leaderboard, readonly }) {
                                     <label>Task Title</label>
                                     <input className="h-input" value={data.title} onChange={e => setData('title', e.target.value)} required placeholder="e.g. Upload church choir service photo" />
                                 </div>
-                                <div className="form-grid-2">
+                                <div className="form-grid-3">
                                     <div className="form-group">
                                         <label>Points to Award</label>
                                         <input type="number" className="h-input" value={data.points} onChange={e => setData('points', e.target.value)} required />
@@ -142,6 +171,13 @@ export default function DistrictTasksManager({ tasks, leaderboard, readonly }) {
                                             <option value="Q4">Q4 (Oct - Dec)</option>
                                         </select>
                                     </div>
+                                    <div className="form-group">
+                                        <label>Task Priority</label>
+                                        <select className="h-select" value={data.message_type} onChange={e => setData('message_type', e.target.value)}>
+                                            <option value="routine_task">Routine Task</option>
+                                            <option value="official_directive">Official Directive</option>
+                                        </select>
+                                    </div>
                                 </div>
                                 <div className="form-group">
                                     <label>Deadline</label>
@@ -153,7 +189,7 @@ export default function DistrictTasksManager({ tasks, leaderboard, readonly }) {
                                 </div>
                                 <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
                                     <button type="button" className="btn btn--secondary" onClick={() => setView('list')}>Cancel</button>
-                                    <button type="submit" className="btn btn--primary" disabled={processing}>Post Mission</button>
+                                    <button type="submit" className="btn btn--primary" disabled={processing}>Save Draft</button>
                                 </div>
                             </form>
                         </div>

@@ -17,15 +17,15 @@ class DistrictEvent extends Model
         'start_date',
         'end_date',
         'location',
-        'status',
+        'operational_status',
+        'workflow_status',
+        'message_type',
         'registration_fee',
-        'is_published',
     ];
 
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
-        'is_published' => 'boolean',
     ];
 
     public function district()
