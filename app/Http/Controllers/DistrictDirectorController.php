@@ -94,11 +94,21 @@ class DistrictDirectorController extends Controller
         
         $role = Role::firstOrCreate(['name' => 'district_director', 'display_name' => 'District Director']);
         
-        $user->roles()->updateExistingPivot($role->id, [
-            'status' => 'active',
-            'entity_type' => District::class,
-            'entity_id' => $district->id,
-            'assigned_by' => $currentUser->id,
+        // Remove any existing pending district roles so they don't block the user
+        $districtRoleNames = ['district_official', 'district_director', 'district_treasurer', 'district_secretary', 'district_committee'];
+        $pendingDistrictRoles = $user->roles()->whereIn('name', $districtRoleNames)->wherePivot('status', 'pending')->pluck('roles.id');
+        if ($pendingDistrictRoles->isNotEmpty()) {
+            $user->roles()->detach($pendingDistrictRoles);
+        }
+        
+        $user->roles()->syncWithoutDetaching([
+            $role->id => [
+                'status' => 'active',
+                'entity_type' => District::class,
+                'entity_id' => $district->id,
+                'assigned_by' => $currentUser->id,
+                'assigned_at' => now(),
+            ]
         ]);
 
         return back()->with('message', 'District Director assigned to district successfully.');

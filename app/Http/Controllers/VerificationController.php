@@ -56,10 +56,10 @@ class VerificationController extends Controller
             abort_unless($userTarget->district_id === $user->district_id || $userTarget->church?->district_id === $user->district_id, 403);
         }
 
-        $pendingRole = $userTarget->roles()->wherePivot('status', 'pending')->first();
-
-        if ($pendingRole) {
-            $userTarget->roles()->updateExistingPivot($pendingRole->id, ['status' => 'active']);
+        $pendingRoles = $userTarget->roles()->wherePivot('status', 'pending')->get();
+        
+        foreach ($pendingRoles as $role) {
+            $userTarget->roles()->updateExistingPivot($role->id, ['status' => 'active']);
         }
 
         return back()->with('success', "Role approved for {$userTarget->name}.");
