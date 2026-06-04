@@ -260,9 +260,9 @@ class DashboardRouterService
 
         $activityPulse = \App\Models\TaskSubmission::whereIn('church_id', $district->churches->pluck('id'))
             ->where('created_at', '>=', now()->subMonths(3))
-            ->selectRaw("to_char(created_at, 'YYYY-MM-DD') as day, count(*) as count")
+            ->selectRaw("to_char(created_at, 'YYYY-MM-DD') as submission_day, count(*) as count")
             ->groupByRaw("to_char(created_at, 'YYYY-MM-DD')")
-            ->orderBy('day', 'asc')
+            ->orderByRaw("to_char(created_at, 'YYYY-MM-DD') ASC")
             ->get();
 
         $committee = $district->users()->get()
