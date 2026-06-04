@@ -31,7 +31,7 @@ class DashboardRouterService
             $needsSetup = !$user->hasRole('super_admin') && (
                 (empty($activeRoles) && empty($pendingRoles)) ||
                 (in_array('parent', $activeRoles) && !$hasLinkedChild) ||
-                (!$user->church_id && empty(array_intersect(['district_official', 'district_director', 'district_treasurer', 'district_secretary', 'district_committee', 'district_curriculum_coordinator', 'district_communication_coordinator', 'district_music_coordinator', 'district_welfare_coordinator', 'district_pbe_coordinator', 'district_programs_coordinator'], $allRoles)))
+                (!$user->church_id && empty(array_intersect(['district_official', 'district_director', 'district_treasurer', 'district_secretary', 'district_committee', 'district_curriculum_coordinator', 'district_masterguide_coordinator', 'district_communication_coordinator', 'district_music_coordinator', 'district_welfare_coordinator', 'district_pbe_coordinator', 'district_programs_coordinator'], $allRoles)))
             );
 
             if ($needsSetup) {
@@ -56,7 +56,7 @@ class DashboardRouterService
 
         // 1.5 Pending Leadership Role "Waiting Room"
         $pendingRoles = $user->roles()->wherePivot('status', 'pending')->pluck('name')->toArray();
-        $pendingDistrictRoles = array_intersect(['district_official', 'district_director', 'district_treasurer', 'district_secretary', 'district_committee', 'district_curriculum_coordinator', 'district_communication_coordinator', 'district_music_coordinator', 'district_welfare_coordinator', 'district_pbe_coordinator', 'district_programs_coordinator'], $pendingRoles);
+        $pendingDistrictRoles = array_intersect(['district_official', 'district_director', 'district_treasurer', 'district_secretary', 'district_committee', 'district_curriculum_coordinator', 'district_masterguide_coordinator', 'district_communication_coordinator', 'district_music_coordinator', 'district_welfare_coordinator', 'district_pbe_coordinator', 'district_programs_coordinator'], $pendingRoles);
         if (count($pendingDistrictRoles) > 0 || in_array('director', $pendingRoles)) {
             if ($section !== 'onboarding-waiting') {
                 session()->flash('warning', 'Your account setup is not yet complete. Please finish the step below to continue.');
@@ -97,7 +97,7 @@ class DashboardRouterService
 
         if (in_array('parent', $allRoles) && !$hasLinkedChild) return 'link-child';
 
-        if (!$user->church_id && empty(array_intersect(['district_official', 'district_director', 'district_treasurer', 'district_secretary', 'district_committee', 'district_curriculum_coordinator', 'district_communication_coordinator', 'district_music_coordinator', 'district_welfare_coordinator', 'district_pbe_coordinator', 'district_programs_coordinator'], $allRoles))) return 'organization';
+        if (!$user->church_id && empty(array_intersect(['district_official', 'district_director', 'district_treasurer', 'district_secretary', 'district_committee', 'district_curriculum_coordinator', 'district_masterguide_coordinator', 'district_communication_coordinator', 'district_music_coordinator', 'district_welfare_coordinator', 'district_pbe_coordinator', 'district_programs_coordinator'], $allRoles))) return 'organization';
 
         return 'finish';
     }
@@ -201,6 +201,8 @@ class DashboardRouterService
                 $section = 'camp_registrations';
             } elseif ($user->hasRole('district_curriculum_coordinator') && !$user->hasAnyRole(['district_director', 'district_secretary'])) {
                 $section = 'curriculum';
+            } elseif ($user->hasRole('district_masterguide_coordinator') && !$user->hasAnyRole(['district_director', 'district_secretary'])) {
+                $section = 'masterguide';
             } elseif ($user->hasRole('district_communication_coordinator') && !$user->hasAnyRole(['district_director', 'district_secretary'])) {
                 $section = 'bulletins';
             } elseif ($user->hasRole('district_programs_coordinator') && !$user->hasAnyRole(['district_director', 'district_secretary'])) {
@@ -258,7 +260,7 @@ class DashboardRouterService
             ->groupBy('day')->orderBy('day', 'asc')->get();
 
         $committee = $district->users()->get()
-            ->filter(fn($u) => $u->hasAnyRole(['district_director', 'district_committee', 'district_treasurer', 'district_secretary', 'district_official', 'district_curriculum_coordinator', 'district_communication_coordinator', 'district_music_coordinator', 'district_welfare_coordinator', 'district_pbe_coordinator', 'district_programs_coordinator']))
+            ->filter(fn($u) => $u->hasAnyRole(['district_director', 'district_committee', 'district_treasurer', 'district_secretary', 'district_official', 'district_curriculum_coordinator', 'district_masterguide_coordinator', 'district_communication_coordinator', 'district_music_coordinator', 'district_welfare_coordinator', 'district_pbe_coordinator', 'district_programs_coordinator']))
             ->map(fn($u) => [
                 'id' => $u->id, 'name' => $u->name, 'email' => $u->email,
                 'roles' => $u->role_names, 'avatar_url' => $u->avatar_url,
@@ -269,6 +271,7 @@ class DashboardRouterService
             'secretary' => \Illuminate\Support\Facades\URL::signedRoute('invites.show', ['role' => 'district_secretary', 'scope_type' => \App\Models\District::class, 'scope_id' => $district->id]),
             'committee' => \Illuminate\Support\Facades\URL::signedRoute('invites.show', ['role' => 'district_committee', 'scope_type' => \App\Models\District::class, 'scope_id' => $district->id]),
             'curriculum' => \Illuminate\Support\Facades\URL::signedRoute('invites.show', ['role' => 'district_curriculum_coordinator', 'scope_type' => \App\Models\District::class, 'scope_id' => $district->id]),
+            'masterguide' => \Illuminate\Support\Facades\URL::signedRoute('invites.show', ['role' => 'district_masterguide_coordinator', 'scope_type' => \App\Models\District::class, 'scope_id' => $district->id]),
             'communication' => \Illuminate\Support\Facades\URL::signedRoute('invites.show', ['role' => 'district_communication_coordinator', 'scope_type' => \App\Models\District::class, 'scope_id' => $district->id]),
             'music' => \Illuminate\Support\Facades\URL::signedRoute('invites.show', ['role' => 'district_music_coordinator', 'scope_type' => \App\Models\District::class, 'scope_id' => $district->id]),
             'welfare' => \Illuminate\Support\Facades\URL::signedRoute('invites.show', ['role' => 'district_welfare_coordinator', 'scope_type' => \App\Models\District::class, 'scope_id' => $district->id]),
@@ -288,6 +291,7 @@ class DashboardRouterService
         $permissions = [
             'view_all' => $user->hasAnyRole(['super_admin', 'district_director', 'district_secretary']),
             'edit_curriculum' => $user->hasAnyRole(['super_admin', 'district_director', 'district_secretary', 'district_curriculum_coordinator']),
+            'edit_masterguide' => $user->hasAnyRole(['super_admin', 'district_director', 'district_secretary', 'district_masterguide_coordinator']),
             
             // Communication
             'view_communication' => $user->hasAnyRole(['super_admin', 'district_director', 'district_secretary', 'district_communication_coordinator', 'district_programs_coordinator', 'district_curriculum_coordinator', 'district_music_coordinator', 'district_pbe_coordinator', 'district_welfare_coordinator']),

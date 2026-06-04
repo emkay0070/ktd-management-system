@@ -183,11 +183,23 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
                                 <NavItem
                                     href={route('dashboard', 'curriculum')}
                                     icon={GraduationCap}
-                                    label="Curriculum Dept"
+                                    label="Curriculum (Pathfinders)"
                                     isCollapsed={isCollapsed}
                                     isSidebarVisible={isSidebarVisible}
                                     isMobileOpen={isMobileOpen}
                                     active={route().current('dashboard', { section: 'curriculum' })}
+                                />
+                            )}
+                            
+                            {(hasAnyRole(['district_director', 'district_secretary', 'super_admin', 'district_masterguide_coordinator'])) && (
+                                <NavItem
+                                    href={route('dashboard', 'masterguide')}
+                                    icon={Star}
+                                    label="Master Guide Dept"
+                                    isCollapsed={isCollapsed}
+                                    isSidebarVisible={isSidebarVisible}
+                                    isMobileOpen={isMobileOpen}
+                                    active={route().current('dashboard', { section: 'masterguide' })}
                                 />
                             )}
                             

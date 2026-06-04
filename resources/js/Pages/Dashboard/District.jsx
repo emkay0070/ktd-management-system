@@ -42,6 +42,7 @@ import DistrictAppraisalManager from './Partials/DistrictAppraisalManager';
 import DistrictPulseView from './Partials/DistrictPulseView';
 import DistrictRegistrationManager from './Partials/DistrictRegistrationManager';
 import DistrictCurriculumManager from './Partials/DistrictCurriculumManager';
+import MasterGuideManager from './Partials/MasterGuideManager';
 
 export default function District({ auth, district, churches, committee, events, tasks, roster, resources, bulletins, appraisals, registrations, analytics, leaderboard, treasury, section, invite_links, pending_churches = [], pending_approvals = [], permissions, curriculum_stats }) {
     const [showChurchQueue, setShowChurchQueue] = useState(false);
@@ -62,6 +63,7 @@ export default function District({ auth, district, churches, committee, events, 
     const isPulse = section === 'pulse';
     const isRegistration = section === 'camp_registrations';
     const isCurriculum = section === 'curriculum';
+    const isMasterGuide = section === 'masterguide';
 
     const totalPathfinders = churches.reduce((sum, c) => sum + (c.total ?? 0), 0);
     const totalMGs = churches.reduce((sum, c) => sum + (c.master_guides ?? 0), 0);
@@ -189,6 +191,7 @@ export default function District({ auth, district, churches, committee, events, 
                     {isPulse && <DistrictPulseView analytics={analytics} />}
                     {isRegistration && <DistrictRegistrationManager registrations={registrations} district_events={events} treasury={treasury} readonly={!permissions?.edit_programs} />}
                     {isCurriculum && <DistrictCurriculumManager curriculum_stats={curriculum_stats} readonly={!permissions?.edit_curriculum} />}
+                    {isMasterGuide && <MasterGuideManager master_guides={roster} readonly={!permissions?.edit_masterguide} />}
                 </div>
             </div>
         </AuthenticatedLayout>
