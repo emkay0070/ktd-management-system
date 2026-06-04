@@ -36,6 +36,8 @@ class AppServiceProvider extends ServiceProvider
 
         if (config('app.env') === 'production' || env('FORCE_HTTPS', false)) {
             URL::forceScheme('https');
+            // Ensure session cookies are secure when HTTPS is forced
+            config(['session.secure' => true]);
         }
 
         Vite::prefetch(concurrency: 3);
