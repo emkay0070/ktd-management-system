@@ -38,13 +38,39 @@ import DistrictTasksManager from './Partials/DistrictTasksManager';
 import DistrictRosterManager from './Partials/DistrictRosterManager';
 import DistrictResourceManager from './Partials/DistrictResourceManager';
 import DistrictBulletinManager from './Partials/DistrictBulletinManager';
-import DistrictAppraisalManager from './Partials/DistrictAppraisalManager';
+import DistrictWelfareManager from './Partials/DistrictWelfareManager';
 import DistrictPulseView from './Partials/DistrictPulseView';
 import DistrictRegistrationManager from './Partials/DistrictRegistrationManager';
 import DistrictCurriculumManager from './Partials/DistrictCurriculumManager';
 import MasterGuideManager from './Partials/MasterGuideManager';
 
-export default function District({ auth, district, churches, committee, events, tasks, roster, resources, bulletins, appraisals, registrations, analytics, leaderboard, treasury, section, invite_links, pending_churches = [], pending_approvals = [], permissions, curriculum_stats }) {
+export default function District({ 
+    auth, 
+    district = {}, 
+    churches = [], 
+    committee = [], 
+    events = [], 
+    tasks = [], 
+    roster = [], 
+    resources = [], 
+    bulletins = [], 
+    appraisals = [], 
+    registrations = [], 
+    analytics = {}, 
+    leaderboard = [], 
+    treasury = [], 
+    section = 'overview', 
+    invite_links = {}, 
+    pending_churches = [], 
+    pending_approvals = [], 
+    permissions = {}, 
+    curriculum_stats = [], 
+    investiture_candidates = [], 
+    curriculum_standards = [], 
+    welfare_cases = [], 
+    social_events = [], 
+    retention_metrics = { inactive_members: [], declining_clubs: [] } 
+}) {
     const [showChurchQueue, setShowChurchQueue] = useState(false);
     const [showRoleQueue, setShowRoleQueue] = useState(false);
     const actionCount = pending_churches.length + pending_approvals.length;
@@ -59,7 +85,7 @@ export default function District({ auth, district, churches, committee, events, 
     const isRoster = section === 'roster';
     const isResources = section === 'resources';
     const isBulletins = section === 'bulletins';
-    const isAppraisals = section === 'appraisals';
+    const isWelfare = section === 'welfare' || section === 'appraisals';
     const isPulse = section === 'pulse';
     const isRegistration = section === 'camp_registrations';
     const isCurriculum = section === 'curriculum';
@@ -187,7 +213,15 @@ export default function District({ auth, district, churches, committee, events, 
                     {isRoster && <DistrictRosterManager roster={roster} />}
                     {isResources && <DistrictResourceManager resources={resources} readonly={!permissions?.view_all} />}
                     {isBulletins && <DistrictBulletinManager bulletins={bulletins} canEdit={permissions?.edit_communication} canPublish={permissions?.publish_communication} canDelete={permissions?.delete_communication} auth={auth} />}
-                    {isAppraisals && <DistrictAppraisalManager churches={churches} appraisals={appraisals} readonly={!permissions?.edit_welfare} />}
+                    {isWelfare && <DistrictWelfareManager 
+                        churches={churches} 
+                        appraisals={appraisals} 
+                        welfare_cases={welfare_cases} 
+                        social_events={social_events} 
+                        retention_metrics={retention_metrics} 
+                        readonly={!permissions?.edit_welfare} 
+                        auth={auth} 
+                    />}
                     {isPulse && <DistrictPulseView analytics={analytics} />}
                     {isRegistration && <DistrictRegistrationManager registrations={registrations} district_events={events} treasury={treasury} readonly={!permissions?.edit_programs} />}
                     {isCurriculum && <DistrictCurriculumManager curriculum_stats={curriculum_stats} investiture_candidates={investiture_candidates} curriculum_standards={curriculum_standards} readonly={!permissions?.edit_curriculum} auth={auth} />}

@@ -85,40 +85,43 @@ export default function DistrictRegistrationManager({ registrations = [], distri
                         <div>
                             <div style={{ fontSize: '10px', fontWeight: 900, color: 'var(--clr-gold-500)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Expected Collections</div>
                             <div style={{ fontSize: '24px', fontWeight: 900, color: 'var(--clr-text-primary)', marginTop: '4px' }}>
-                                UGX {eventStats?.expected.toLocaleString()}
+                                UGX {eventStats?.expected?.toLocaleString() ?? 0}
                             </div>
                         </div>
                         <TrendingUp size={32} style={{ opacity: 0.2, color: 'var(--clr-gold-500)' }} />
                     </div>
                     <div style={{ marginTop: '16px', height: '4px', background: 'var(--clr-surface-600)', borderRadius: '2px', overflow: 'hidden' }}>
-                        <div style={{ height: '100%', width: `${eventStats?.progress}%`, background: 'var(--clr-gold-500)', transition: 'width 1s ease' }}></div>
+                        <div style={{ height: '100%', width: `${eventStats?.progress ?? 0}%`, background: 'var(--clr-gold-500)', transition: 'width 1s ease' }}></div>
                     </div>
                 </div>
 
                 <div className="panel" style={{ borderLeft: '4px solid var(--clr-success)', background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.05), transparent)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div>
-                            <div style={{ fontSize: '10px', fontWeight: 900, color: 'var(--clr-success)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Actual Realized</div>
+                            <div style={{ fontSize: '10px', fontWeight: 900, color: 'var(--clr-success)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Actual Collections</div>
                             <div style={{ fontSize: '24px', fontWeight: 900, color: 'var(--clr-text-primary)', marginTop: '4px' }}>
-                                UGX {eventStats?.collected.toLocaleString()}
+                                UGX {eventStats?.collected?.toLocaleString() ?? 0}
                             </div>
                         </div>
                         <DollarSign size={32} style={{ opacity: 0.2, color: 'var(--clr-success)' }} />
                     </div>
-                    <p style={{ fontSize: '11px', color: 'var(--clr-text-muted)', marginTop: '12px' }}>
-                        {eventStats?.progress.toFixed(1)}% of target achieved
-                    </p>
+                    <div style={{ marginTop: '16px', fontSize: '10px', color: 'var(--clr-text-secondary)', fontWeight: 700 }}>
+                        {eventStats?.total ?? 0} Pathfinders Registered
+                    </div>
                 </div>
 
-                <div className="panel" style={{ borderLeft: '4px solid var(--clr-burgundy-500)', background: 'linear-gradient(135deg, rgba(184, 50, 50, 0.05), transparent)' }}>
+                <div className="panel" style={{ borderLeft: '4px solid var(--clr-info)', background: 'linear-gradient(135deg, rgba(14, 165, 233, 0.05), transparent)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div>
-                            <div style={{ fontSize: '10px', fontWeight: 900, color: 'var(--clr-burgundy-400)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Outstanding Balance</div>
+                            <div style={{ fontSize: '10px', fontWeight: 900, color: 'var(--clr-info)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Outstanding Balance</div>
                             <div style={{ fontSize: '24px', fontWeight: 900, color: 'var(--clr-text-primary)', marginTop: '4px' }}>
-                                UGX {eventStats?.remaining.toLocaleString()}
+                                UGX {eventStats?.remaining?.toLocaleString() ?? 0}
                             </div>
                         </div>
-                        <PieChart size={32} style={{ opacity: 0.2, color: 'var(--clr-burgundy-400)' }} />
+                        <PieChart size={32} style={{ opacity: 0.2, color: 'var(--clr-info)' }} />
+                    </div>
+                    <div style={{ marginTop: '16px', fontSize: '10px', color: 'var(--clr-text-secondary)', fontWeight: 700 }}>
+                        {debtClubs.length} Clubs with pending payments
                     </div>
                 </div>
             </div>

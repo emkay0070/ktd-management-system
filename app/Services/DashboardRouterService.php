@@ -205,6 +205,8 @@ class DashboardRouterService
                 $section = 'masterguide';
             } elseif ($user->hasRole('district_communication_coordinator') && !$user->hasAnyRole(['district_director', 'district_secretary'])) {
                 $section = 'bulletins';
+            } elseif ($user->hasRole('district_welfare_coordinator') && !$user->hasAnyRole(['district_director', 'district_secretary'])) {
+                $section = 'welfare';
             } elseif ($user->hasRole('district_programs_coordinator') && !$user->hasAnyRole(['district_director', 'district_secretary'])) {
                 $section = 'events';
             } elseif ($user->hasRole('district_music_coordinator') && !$user->hasAnyRole(['district_director', 'district_secretary'])) {
@@ -409,6 +411,42 @@ class DashboardRouterService
             ->latest()
             ->get();
 
+        // Welfare & Social Data
+        $welfareCases = \App\Models\WelfareCase::where('district_id', $district->id)
+            ->with(['church:id,name', 'beneficiary:id,name', 'creator:id,name'])
+            ->latest()
+            ->get();
+
+        $socialEvents = \App\Models\SocialEvent::where('district_id', $district->id)
+            ->with('creator:id,name')
+            ->latest()
+            ->get();
+
+        // Member Engagement & Retention Metrics
+        $inactivePathfinders = \App\Models\Pathfinder::whereIn('church_id', $district->churches->pluck('id'))
+            ->whereDoesntHave('attendanceRecords', function($q) {
+                $q->where('created_at', '>=', now()->subDays(30));
+            })
+            ->with('church:id,name')
+            ->get(['id', 'name', 'church_id', 'gender', 'age']);
+
+        // Declining Clubs: Compare last 30 days vs 30-60 days
+        $decliningClubs = [];
+        foreach ($district->churches as $church) {
+            $last30 = \App\Models\AttendanceRecord::whereHas('session', fn($q) => $q->where('church_id', $church->id)->where('date', '>=', now()->subDays(30)))->avg('is_present') ?? 0;
+            $prev30 = \App\Models\AttendanceRecord::whereHas('session', fn($q) => $q->where('church_id', $church->id)->where('date', '<', now()->subDays(30))->where('date', '>=', now()->subDays(60)))->avg('is_present') ?? 0;
+            
+            if ($prev30 > 0 && ($last30 < $prev30 * 0.8)) { // 20% decline
+                $decliningClubs[] = [
+                    'id' => $church->id,
+                    'name' => $church->name,
+                    'last_30' => round($last30 * 100),
+                    'prev_30' => round($prev30 * 100),
+                    'decline' => round(($prev30 - $last30) * 100)
+                ];
+            }
+        }
+
         return Inertia::render('Dashboard/District', [
             'district' => ['id' => $district->id, 'name' => $district->name, 'conference' => $district->conference->name ?? 'Unknown'],
             'churches' => $churches,
@@ -433,6 +471,12 @@ class DashboardRouterService
             'curriculum_stats' => $curriculumStats,
             'investiture_candidates' => $investitureCandidates,
             'curriculum_standards' => $curriculumStandards,
+            'welfare_cases' => $welfareCases,
+            'social_events' => $socialEvents,
+            'retention_metrics' => [
+                'inactive_members' => $inactivePathfinders,
+                'declining_clubs' => $decliningClubs,
+            ],
         ]);
     }
 

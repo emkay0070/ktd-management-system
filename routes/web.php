@@ -64,6 +64,12 @@ Route::middleware(['auth', 'verified', 'onboarded'])->group(function () {
     Route::post('/district/resources', [DistrictResourceController::class, 'store'])->name('district_resources.store');
     Route::delete('/district/resources/{resource}', [DistrictResourceController::class, 'destroy'])->name('district_resources.destroy');
 
+    // Welfare & Social Command Centre
+    Route::post('/welfare/cases', [\App\Http\Controllers\WelfareController::class, 'storeCase'])->name('welfare.cases.store');
+    Route::put('/welfare/cases/{case}', [\App\Http\Controllers\WelfareController::class, 'updateCase'])->name('welfare.cases.update');
+    Route::post('/welfare/events', [\App\Http\Controllers\WelfareController::class, 'storeEvent'])->name('welfare.events.store');
+    Route::put('/welfare/events/{event}', [\App\Http\Controllers\WelfareController::class, 'updateEvent'])->name('welfare.events.update');
+
     // District Bulletins & Appraisals
     Route::post('/district/bulletins', [DistrictBulletinController::class, 'store'])->name('district_bulletins.store');
     Route::delete('/district/bulletins/{bulletin}', [DistrictBulletinController::class, 'destroy'])->name('district_bulletins.destroy');
