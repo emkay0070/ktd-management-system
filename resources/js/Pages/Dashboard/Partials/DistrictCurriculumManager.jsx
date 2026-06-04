@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useForm, router } from '@inertiajs/react';
-import { GraduationCap, AlertCircle, BookOpen, UserCheck, Activity, Users, Send, CheckCircle2, Search, Filter, ClipboardList, ShieldCheck, Edit2, X, Check, Trash2, User, Clock } from 'lucide-react';
+import { GraduationCap, AlertCircle, BookOpen, UserCheck, Activity, Users, Send, CheckCircle2, Search, Filter, ClipboardList, ShieldCheck, Edit2, X, Check, Trash2, User, Clock, Plus } from 'lucide-react';
 
 export default function DistrictCurriculumManager({ curriculum_stats = [], investiture_candidates = [], curriculum_standards = [], readonly, auth }) {
     const userRoles = auth.user.role_names || [];
