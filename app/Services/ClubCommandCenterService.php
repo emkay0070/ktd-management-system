@@ -78,7 +78,39 @@ class ClubCommandCenterService
                 'medical_conditions',
                 'consent',
                 'church_id',
-            ]);
+            ])->map(function ($p) {
+            return [
+                'id' => $p->id,
+                'name' => $p->name,
+                'age' => $p->age,
+                'gender' => $p->gender,
+                'guardian_name' => $p->guardian_name,
+                'guardian_phone' => $p->guardian_phone,
+                'father_name' => $p->father_name,
+                'mother_name' => $p->mother_name,
+                'religion_id' => $p->religion_id,
+                'other_religion' => $p->other_religion,
+                'residence' => $p->residence,
+                'school_class' => $p->school_class,
+                'is_inducted' => $p->is_inducted,
+                'insured_yearly' => $p->insured_yearly,
+                'boarding_status' => $p->boarding_status,
+                'medical_conditions' => $p->medical_conditions,
+                'consent' => $p->consent,
+                'church_id' => $p->church_id,
+                'avatar_url' => $p->avatar_url,
+                'class_assignment_id' => $p->classAssignment?->id,
+                'investiture_status' => $p->classAssignment?->investiture_status ?? 'not_ready',
+                'assigned_class' => $p->classAssignment?->pathfinderClass ? [
+                    'id' => $p->classAssignment->pathfinderClass->id,
+                    'name' => $p->classAssignment->pathfinderClass->name,
+                ] : null,
+                'unit' => $p->unitMembership?->unit ? [
+                    'id' => $p->unitMembership->unit->id,
+                    'name' => $p->unitMembership->unit->name,
+                ] : null,
+            ];
+        });
 
         $latestSession = AttendanceSession::query()
             ->where('church_id', $church->id)

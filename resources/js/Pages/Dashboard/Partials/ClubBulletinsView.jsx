@@ -1,6 +1,11 @@
-import { Megaphone, AlertTriangle, Info, Clock, FolderOpen } from 'lucide-react';
+import { Megaphone, AlertTriangle, Info, Clock, FolderOpen, CheckCircle2, User, Send, Check } from 'lucide-react';
+import { router } from '@inertiajs/react';
 
 export default function ClubBulletinsView({ bulletins = [] }) {
+    const handleAcknowledge = (id) => {
+        router.post(route('district_bulletins.acknowledge', id), {}, { preserveScroll: true });
+    };
+
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -53,6 +58,9 @@ export default function ClubBulletinsView({ bulletins = [] }) {
                                         }}>
                                             {bulletin.level || 'General'}
                                         </span>
+                                        <span style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', padding: '2px 8px', borderRadius: '999px', background: 'rgba(255,255,255,0.05)', color: 'var(--clr-text-muted)' }}>
+                                            {bulletin.department}
+                                        </span>
                                         <span style={{ fontSize: '10px', color: 'var(--clr-text-muted)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
                                             <Clock size={10} />
                                             {bulletin.created_at ? new Date(bulletin.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Recently'}
@@ -61,9 +69,38 @@ export default function ClubBulletinsView({ bulletins = [] }) {
                                     <h4 style={{ margin: '0 0 8px', color: 'var(--clr-text-primary)', fontSize: '16px', fontWeight: 900 }}>
                                         {bulletin.title}
                                     </h4>
-                                    <p style={{ fontSize: '13px', color: 'var(--clr-text-secondary)', lineHeight: 1.6, margin: 0 }}>
+                                    <p style={{ fontSize: '13px', color: 'var(--clr-text-secondary)', lineHeight: 1.6, margin: '0 0 16px' }}>
                                         {bulletin.content}
                                     </p>
+
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '16px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '10px', color: 'var(--clr-text-muted)', fontWeight: 800, textTransform: 'uppercase' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                <User size={12} /> {bulletin.author?.name || 'District Office'}
+                                            </div>
+                                            {bulletin.requires_acknowledgement && (
+                                                <div style={{ color: 'var(--clr-gold-400)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                    <CheckCircle2 size={12} /> Needs Receipt
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {bulletin.requires_acknowledgement && (
+                                            bulletin.acknowledgements?.length > 0 ? (
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10px', fontWeight: 900, color: 'var(--clr-green-400)', textTransform: 'uppercase' }}>
+                                                    <Check size={14} /> Receipt Confirmed
+                                                </div>
+                                            ) : (
+                                                <button 
+                                                    onClick={() => handleAcknowledge(bulletin.id)}
+                                                    className="btn btn--sm btn--gold"
+                                                    style={{ height: '30px', padding: '0 12px', fontSize: '11px' }}
+                                                >
+                                                    <Send size={14} style={{ marginRight: '6px' }} /> Acknowledge
+                                                </button>
+                                            )
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>

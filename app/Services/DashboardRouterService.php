@@ -311,23 +311,103 @@ class DashboardRouterService
         ];
 
         $curriculumStats = [];
+        $investitureCandidates = \App\Models\ClassAssignment::whereIn('pathfinder_id', function($q) use ($district) {
+                $q->select('id')->from('pathfinders')->whereIn('church_id', $district->churches->pluck('id'));
+            })
+            ->whereIn('investiture_status', ['pending_review', 'recommended', 'approved'])
+            ->with(['pathfinder.church', 'pathfinderClass', 'recommendedBy', 'approvedBy'])
+            ->get()
+            ->map(fn($ca) => [
+                'id' => $ca->id,
+                'pathfinder' => $ca->pathfinder->only(['id', 'name', 'gender']),
+                'church' => $ca->pathfinder->church->only(['id', 'name']),
+                'class' => $ca->pathfinderClass->only(['id', 'name']),
+                'status' => $ca->investiture_status,
+                'notes' => $ca->investiture_recommendation_notes,
+                'recommended_by' => $ca->recommendedBy?->name,
+                'recommended_at' => $ca->recommended_at?->toDateString(),
+                'approved_by' => $ca->approvedBy?->name,
+                'approved_at' => $ca->approved_at?->toDateString(),
+            ]);
+
+        $instructorStats = \App\Models\MasterGuide::whereIn('church_id', $district->churches->pluck('id'))
+            ->with(['church', 'assignedClass'])
+            ->get()
+            ->groupBy('church_id')
+            ->map(fn($mgs, $churchId) => [
+                'count' => $mgs->count(),
+                'active_instructors' => $mgs->where('actively_teaching', true)->count(),
+                'classes_covered' => $mgs->pluck('assigned_class_id')->unique()->filter()->count(),
+            ]);
+
+        // Enhanced Health Score: Attendance Component (Last 3 months)
+        $attendanceStats = \App\Models\AttendanceSession::whereIn('church_id', $district->churches->pluck('id'))
+            ->where('date', '>=', now()->subMonths(3))
+            ->with('records')
+            ->get()
+            ->groupBy('church_id')
+            ->map(function ($sessions) {
+                $totalPossible = 0;
+                $totalPresent = 0;
+                foreach ($sessions as $session) {
+                    $totalPossible += $session->records->count();
+                    $totalPresent += $session->records->where('is_present', true)->count();
+                }
+                return $totalPossible > 0 ? ($totalPresent / $totalPossible) * 100 : 0;
+            });
+
         foreach ($district->churches as $church) {
             $stats = ['Friend' => 0, 'Companion' => 0, 'Explorer' => 0, 'Ranger' => 0, 'Voyager' => 0, 'Guide' => 0, 'Ready' => 0];
-            $pathfinders = \App\Models\Pathfinder::where('church_id', $church->id)->with('assignedClass')->get();
+            $pathfinders = \App\Models\Pathfinder::where('church_id', $church->id)->with('classAssignment.pathfinderClass')->get();
+            
+            $pfCount = $pathfinders->count();
+
             foreach ($pathfinders as $pf) {
-                if ($pf->assignedClass) {
-                    $className = $pf->assignedClass->name;
+                if ($pf->classAssignment && $pf->classAssignment->pathfinderClass) {
+                    $className = $pf->classAssignment->pathfinderClass->name;
                     if (isset($stats[$className])) {
                         $stats[$className]++;
                     }
-                    // TODO: Implement actual 'Ready for Investiture' logic based on CurriculumProgress
+                    
+                    if ($pf->classAssignment->investiture_status !== 'not_ready') {
+                        $stats['Ready']++;
+                    }
                 }
             }
+
+            // Enhanced Health Score Calculation
+            // 1. Staffing Ratio (30%) - Target 1 instructor per 8 pathfinders
+            $instructors = $instructorStats[$church->id]['active_instructors'] ?? 0;
+            $staffingRatio = $pfCount > 0 ? min(1, $instructors / (ceil($pfCount / 8))) : 0;
+            
+            // 2. Investiture Readiness (40%)
+            $readyRatio = $pfCount > 0 ? $stats['Ready'] / $pfCount : 0;
+            
+            // 3. Attendance Consistency (30%)
+            $attendanceRatio = ($attendanceStats[$church->id] ?? 0) / 100;
+            
+            $healthScore = round(
+                ($staffingRatio * 30) + 
+                ($readyRatio * 40) + 
+                ($attendanceRatio * 30)
+            );
+
             $curriculumStats[] = [
                 'church' => ['id' => $church->id, 'name' => $church->name],
                 'stats' => $stats,
+                'health_score' => $healthScore,
+                'attendance_avg' => round($attendanceStats[$church->id] ?? 0),
+                'instructors' => $instructorStats[$church->id] ?? ['count' => 0, 'active_instructors' => 0, 'classes_covered' => 0],
             ];
         }
+
+        $curriculumStandards = \App\Models\CurriculumStandard::where('district_id', $district->id)
+            ->when(!$user->hasAnyRole(['district_director', 'district_curriculum_coordinator', 'super_admin']), function($q) {
+                $q->where('workflow_status', 'published');
+            })
+            ->with('creator:id,name')
+            ->latest()
+            ->get();
 
         return Inertia::render('Dashboard/District', [
             'district' => ['id' => $district->id, 'name' => $district->name, 'conference' => $district->conference->name ?? 'Unknown'],
@@ -337,8 +417,11 @@ class DashboardRouterService
             'events' => $district->events()->orderBy('start_date', 'asc')->get(),
             'tasks' => $district->tasks()->with(['submissions.church'])->orderBy('deadline', 'asc')->get(),
             'roster' => \App\Models\MasterGuide::whereIn('church_id', $district->churches->pluck('id'))->with(['church', 'assignedClass'])->get(),
-            'resources' => \App\Models\DistrictResource::where('district_id', $district->id)->latest()->get(),
-            'bulletins' => $district->bulletins()->orderBy('created_at', 'desc')->get(),
+            'resources' => \App\Models\DistrictResource::where('district_id', $district->id)->with('uploader')->latest()->get(),
+            'bulletins' => $district->bulletins()
+                ->with(['author:id,name', 'acknowledgements.user:id,name', 'acknowledgements.church:id,name'])
+                ->orderBy('created_at', 'desc')
+                ->get(),
             'registrations' => \App\Models\Registration::whereIn('church_id', $district->churches->pluck('id'))->with(['pathfinder', 'church', 'event'])->latest()->get(),
             'treasury' => [], // Add proper treasury logic here later if needed
             'leaderboard' => $district->churches->map(fn($c) => ['id' => $c->id, 'name' => $c->name, 'points' => (int)\App\Models\TaskSubmission::where('church_id', $c->id)->where('status', 'Approved')->sum('points_awarded')])->sortByDesc('points')->values(),
@@ -348,6 +431,8 @@ class DashboardRouterService
             'pending_approvals' => $pendingApprovals,
             'permissions' => $permissions,
             'curriculum_stats' => $curriculumStats,
+            'investiture_candidates' => $investitureCandidates,
+            'curriculum_standards' => $curriculumStandards,
         ]);
     }
 
@@ -364,7 +449,10 @@ class DashboardRouterService
             'district_tasks' => \App\Models\DistrictTask::where('district_id', $church->district_id)->whereIn('workflow_status', ['assigned', 'closed', 'reviewed'])->orderBy('deadline', 'asc')->get(),
             'district_events' => \App\Models\DistrictEvent::where('district_id', $church->district_id)->where('workflow_status', 'published')->get(),
             'district_resources' => \App\Models\DistrictResource::where('district_id', $church->district_id)->latest()->get(),
-            'district_bulletins' => \App\Models\DistrictBulletin::where('district_id', $church->district_id)->where('workflow_status', 'published')->get(),
+            'district_bulletins' => \App\Models\DistrictBulletin::where('district_id', $church->district_id)
+                ->where('workflow_status', 'published')
+                ->with(['author:id,name', 'acknowledgements' => fn($q) => $q->where('user_id', $user->id)])
+                ->get(),
             'parent_link_requests' => \App\Models\PendingParentLink::whereIn('pathfinder_id', $pathfinders->pluck('id'))->where('status', 'pending')->with(['user', 'pathfinder'])->get(),
             'parents' => User::where('church_id', $church->id)->get()->filter(fn($u) => $u->hasRole('parent'))->values(),
             'section' => $section,
@@ -413,7 +501,11 @@ class DashboardRouterService
 
         return Inertia::render('Dashboard/Pathfinder', [
             'profile' => $profile,
-            'announcements' => \App\Models\DistrictBulletin::where('is_active', \DB::raw('true'))->where('district_id', $user->church?->district_id)->latest()->get(),
+            'announcements' => \App\Models\DistrictBulletin::where('workflow_status', 'published')
+                ->where('district_id', $user->church?->district_id)
+                ->with(['author:id,name', 'acknowledgements' => fn($q) => $q->where('user_id', $user->id)])
+                ->latest()
+                ->get(),
             'curriculum' => $curriculum,
         ]);
     }
@@ -424,6 +516,11 @@ class DashboardRouterService
             'profile' => $user->parentProfile,
             'children' => $user->children()->with(['assignedClass', 'unit', 'registrations.event'])->get(),
             'requests' => $user->pendingLinks()->with('pathfinder')->get(),
+            'announcements' => \App\Models\DistrictBulletin::where('workflow_status', 'published')
+                ->where('district_id', $user->church?->district_id)
+                ->with(['author:id,name', 'acknowledgements' => fn($q) => $q->where('user_id', $user->id)])
+                ->latest()
+                ->get(),
         ]);
     }
 
@@ -431,7 +528,11 @@ class DashboardRouterService
     {
         return Inertia::render('Dashboard/Observer', [
             'user' => $user->only('id', 'name', 'email'),
-            'bulletins' => \App\Models\DistrictBulletin::where('is_active', \DB::raw('true'))->latest()->take(5)->get(),
+            'bulletins' => \App\Models\DistrictBulletin::where('workflow_status', 'published')
+                ->with(['author:id,name', 'acknowledgements' => fn($q) => $q->where('user_id', $user->id)])
+                ->latest()
+                ->take(5)
+                ->get(),
         ]);
     }
 }

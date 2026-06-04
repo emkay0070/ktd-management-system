@@ -1,8 +1,12 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head } from '@inertiajs/react';
-import { Users, Link2, Calendar, Heart, GraduationCap, Shield, ChevronRight, Clock } from 'lucide-react';
+import { Users, Link2, Calendar, Heart, GraduationCap, Shield, ChevronRight, Clock, Megaphone, Send, Check } from 'lucide-react';
+import { router } from '@inertiajs/react';
 
-export default function ParentDashboard({ profile, children = [], requests = [] }) {
+export default function ParentDashboard({ profile, children = [], requests = [], announcements = [] }) {
+    const handleAcknowledge = (id) => {
+        router.post(route('district_bulletins.acknowledge', id), {}, { preserveScroll: true });
+    };
     return (
         <AuthenticatedLayout 
             header="Parent Dashboard" 
@@ -102,6 +106,60 @@ export default function ParentDashboard({ profile, children = [], requests = [] 
 
                 {/* Right: Link Requests & Summary */}
                 <div className="space-y-6">
+                    <div className="panel bg-burgundy-900/10 border-burgundy-500/20">
+                        <div className="panel__header border-burgundy-500/10">
+                            <div>
+                                <h3 className="text-burgundy-400 uppercase tracking-widest font-black text-xs">Official Alerts</h3>
+                                <p className="text-[11px] text-burgundy-900/60 uppercase font-black">District Communications</p>
+                            </div>
+                        </div>
+                        <div className="panel__body">
+                            {announcements.length === 0 ? (
+                                <p className="text-xs text-gray-500 italic">No new announcements from the District.</p>
+                            ) : (
+                                <div className="space-y-4">
+                                    {announcements.map(item => (
+                                        <div key={item.id} className={`p-4 bg-white/5 rounded-xl border ${item.level === 'Urgent' ? 'border-burgundy-500/30 bg-burgundy-500/5' : 'border-white/10'}`}>
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <span className={`text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded ${
+                                                    item.level === 'Urgent' ? 'bg-burgundy-500/20 text-burgundy-400' : 'bg-gold-500/20 text-gold-500'
+                                                }`}>
+                                                    {item.level}
+                                                </span>
+                                                <span className="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-white/5 text-gray-500">
+                                                    {item.department}
+                                                </span>
+                                            </div>
+                                            <div className="font-bold text-white text-sm mb-1">{item.title}</div>
+                                            <div className="text-[11px] text-gray-400 line-clamp-3 leading-relaxed mb-3">{item.content}</div>
+                                            
+                                            <div className="pt-3 border-t border-white/5 flex items-center justify-between">
+                                                <span className="flex items-center gap-1 text-[9px] uppercase tracking-widest font-black text-gray-600">
+                                                    <Clock size={10} /> {new Date(item.created_at).toLocaleDateString()}
+                                                </span>
+                                                
+                                                {item.requires_acknowledgement && (
+                                                    item.acknowledgements?.length > 0 ? (
+                                                        <span className="text-[9px] font-black text-success-400 uppercase tracking-widest flex items-center gap-1">
+                                                            <Check size={12} /> Received
+                                                        </span>
+                                                    ) : (
+                                                        <button 
+                                                            onClick={() => handleAcknowledge(item.id)}
+                                                            className="text-[9px] font-black text-gold-500 uppercase tracking-widest hover:text-white transition-colors flex items-center gap-1"
+                                                        >
+                                                            <Send size={10} /> Acknowledge
+                                                        </button>
+                                                    )
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
                     <div className="panel bg-burgundy-900/10 border-burgundy-500/20">
                         <div className="panel__header border-burgundy-500/10">
                             <div>

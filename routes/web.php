@@ -68,6 +68,8 @@ Route::middleware(['auth', 'verified', 'onboarded'])->group(function () {
     Route::post('/district/bulletins', [DistrictBulletinController::class, 'store'])->name('district_bulletins.store');
     Route::delete('/district/bulletins/{bulletin}', [DistrictBulletinController::class, 'destroy'])->name('district_bulletins.destroy');
     Route::post('/district/bulletins/{bulletin}/toggle', [DistrictBulletinController::class, 'toggle'])->name('district_bulletins.toggle');
+    Route::post('/district/bulletins/{bulletin}/approve', [DistrictBulletinController::class, 'approve'])->name('district_bulletins.approve');
+    Route::post('/district/bulletins/{bulletin}/acknowledge', [DistrictBulletinController::class, 'acknowledge'])->name('district_bulletins.acknowledge');
 
     Route::post('/district/appraisals', [DistrictAppraisalController::class, 'store'])->name('district_appraisals.store');
     Route::delete('/district/appraisals/{appraisal}', [DistrictAppraisalController::class, 'destroy'])->name('district_appraisals.destroy');
@@ -106,6 +108,21 @@ Route::middleware(['auth', 'verified', 'onboarded'])->group(function () {
 
     Route::post('/curriculum/{pathfinder}/signoff/{requirement}', [\App\Http\Controllers\CurriculumController::class, 'signoff'])
         ->name('curriculum.signoff');
+
+    Route::post('/curriculum/assignments/{assignment}/ready', [\App\Http\Controllers\CurriculumController::class, 'readyForReview'])
+        ->name('curriculum.assignments.ready');
+    Route::post('/curriculum/assignments/{assignment}/recommend', [\App\Http\Controllers\CurriculumController::class, 'recommend'])
+        ->name('curriculum.assignments.recommend');
+    Route::post('/curriculum/assignments/{assignment}/approve', [\App\Http\Controllers\CurriculumController::class, 'approve'])
+        ->name('curriculum.assignments.approve');
+    Route::post('/curriculum/assignments/{assignment}/invested', [\App\Http\Controllers\CurriculumController::class, 'markInvested'])
+        ->name('curriculum.assignments.invested');
+
+    // Curriculum Standards
+    Route::post('/curriculum/standards', [\App\Http\Controllers\CurriculumController::class, 'storeStandard'])->name('curriculum.standards.store');
+    Route::put('/curriculum/standards/{standard}', [\App\Http\Controllers\CurriculumController::class, 'updateStandard'])->name('curriculum.standards.update');
+    Route::post('/curriculum/standards/{standard}/toggle', [\App\Http\Controllers\CurriculumController::class, 'toggleStandardStatus'])->name('curriculum.standards.toggle');
+    Route::delete('/curriculum/standards/{standard}', [\App\Http\Controllers\CurriculumController::class, 'destroyStandard'])->name('curriculum.standards.destroy');
 
     Route::post('/club/mg-training', [MgTrainingController::class, 'store'])->name('mg_training.store');
     Route::put('/club/mg-training/{mgTraining}', [MgTrainingController::class, 'update'])->name('mg_training.update');

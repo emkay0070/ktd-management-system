@@ -186,11 +186,11 @@ export default function District({ auth, district, churches, committee, events, 
                     {isTasks && <DistrictTasksManager tasks={tasks} leaderboard={leaderboard} canEdit={permissions?.edit_programs} canPublish={permissions?.publish_programs} canDelete={permissions?.delete_programs} />}
                     {isRoster && <DistrictRosterManager roster={roster} />}
                     {isResources && <DistrictResourceManager resources={resources} readonly={!permissions?.view_all} />}
-                    {isBulletins && <DistrictBulletinManager bulletins={bulletins} canEdit={permissions?.edit_communication} canPublish={permissions?.publish_communication} canDelete={permissions?.delete_communication} />}
+                    {isBulletins && <DistrictBulletinManager bulletins={bulletins} canEdit={permissions?.edit_communication} canPublish={permissions?.publish_communication} canDelete={permissions?.delete_communication} auth={auth} />}
                     {isAppraisals && <DistrictAppraisalManager churches={churches} appraisals={appraisals} readonly={!permissions?.edit_welfare} />}
                     {isPulse && <DistrictPulseView analytics={analytics} />}
                     {isRegistration && <DistrictRegistrationManager registrations={registrations} district_events={events} treasury={treasury} readonly={!permissions?.edit_programs} />}
-                    {isCurriculum && <DistrictCurriculumManager curriculum_stats={curriculum_stats} readonly={!permissions?.edit_curriculum} />}
+                    {isCurriculum && <DistrictCurriculumManager curriculum_stats={curriculum_stats} investiture_candidates={investiture_candidates} curriculum_standards={curriculum_standards} readonly={!permissions?.edit_curriculum} auth={auth} />}
                     {isMasterGuide && <MasterGuideManager master_guides={roster} readonly={!permissions?.edit_masterguide} />}
                 </div>
             </div>

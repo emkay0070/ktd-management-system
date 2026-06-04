@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Plus, UserPlus, Search, Filter, Download, ExternalLink, Eye, Edit2, Trash2, Shield, Users } from 'lucide-react';
+import { Plus, UserPlus, Search, Filter, Download, ExternalLink, Eye, Edit2, Trash2, Shield, Users, GraduationCap, CheckCircle2 } from 'lucide-react';
 import { useForm, router, Link } from '@inertiajs/react';
 import ReligionCombobox from './ReligionCombobox';
 import UnitManager from './UnitManager';
@@ -58,6 +58,12 @@ export default function PathfinderManager({ pathfinders, units, picklists, reado
                 setView('list');
             },
         });
+    }
+
+    function handleDelete(id) {
+        if (confirm('Are you sure you want to delete this record?')) {
+            router.delete(route('pathfinders.destroy', id));
+        }
     }
 
     function exportToCSV() {
@@ -197,23 +203,34 @@ export default function PathfinderManager({ pathfinders, units, picklists, reado
                                         <td className="hidden sm:table-cell">{p.unit?.name ?? '-'}</td>
                                         <td className="hidden lg:table-cell">{p.is_inducted ? <span className="badge badge--success text-[10px]">Yes</span> : <span className="badge badge--warning text-[10px]">No</span>}</td>
                                         <td className="hidden lg:table-cell">{p.insured_yearly ? <span className="badge badge--success text-[10px]">Yes</span> : <span className="badge badge--warning text-[10px]">No</span>}</td>
-                                        <td style={{ width: 90 }}>
-                                            <div className="flex gap-2">
-                                                <Link
-                                                    href={route('pathfinders.show', p.id)}
-                                                    className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                                                    title="View Details"
-                                                >
-                                                    <Eye size={17} className="text-muted hover:text-white transition-colors" />
+                                        <td style={{ width: 140 }}>
+                                            <div className="flex justify-end gap-1">
+                                                {!readonly && p.investiture_status === 'not_ready' && (
+                                                    <button 
+                                                        onClick={() => router.post(route('curriculum.assignments.ready', p.class_assignment_id))} 
+                                                        className="action-btn text-success-400 hover:bg-success-500/10" 
+                                                        title="Mark Ready for Investiture"
+                                                    >
+                                                        <GraduationCap size={16} />
+                                                    </button>
+                                                )}
+                                                {p.investiture_status !== 'not_ready' && (
+                                                    <div className="flex items-center gap-1 px-2 py-1 rounded bg-white/5 text-[9px] font-black uppercase tracking-widest text-gold-500" title={`Status: ${p.investiture_status}`}>
+                                                        <CheckCircle2 size={10} /> {p.investiture_status === 'pending_review' ? 'Review' : p.investiture_status}
+                                                    </div>
+                                                )}
+                                                <Link href={route('pathfinders.show', p.id)} className="action-btn text-info-400 hover:bg-info-500/10" title="View Profile">
+                                                    <Eye size={16} />
                                                 </Link>
                                                 {!readonly && (
-                                                    <Link
-                                                        href={route('pathfinders.edit', p.id)}
-                                                        className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                                                        title="Edit Pathfinder"
-                                                    >
-                                                        <Edit2 size={17} className="text-muted hover:text-white transition-colors" />
-                                                    </Link>
+                                                    <>
+                                                        <Link href={route('pathfinders.edit', p.id)} className="action-btn text-gold-400 hover:bg-gold-500/10" title="Edit">
+                                                            <Edit2 size={16} />
+                                                        </Link>
+                                                        <button onClick={() => handleDelete(p.id)} className="action-btn text-danger-400 hover:bg-danger-500/10" title="Delete">
+                                                            <Trash2 size={16} />
+                                                        </button>
+                                                    </>
                                                 )}
                                             </div>
                                         </td>
