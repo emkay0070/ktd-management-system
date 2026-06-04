@@ -19,6 +19,20 @@ export default function DistrictCommitteeManager({ committee, invite_links, read
             router.delete(route('district_committee.destroy', member.id));
         }
     };
+
+    const formatRoleName = (role) => {
+        if (!role) return 'Committee Member';
+        if (role === 'district_director') return 'District Director';
+        if (role === 'district_secretary') return 'District Secretary';
+        if (role === 'district_treasurer') return 'District Treasurer';
+        if (role === 'district_curriculum_coordinator') return 'Curriculum Coordinator';
+        if (role === 'district_communication_coordinator') return 'Communication Coordinator';
+        if (role === 'district_music_coordinator') return 'Music Coordinator';
+        if (role === 'district_welfare_coordinator') return 'Welfare Coordinator';
+        if (role === 'district_pbe_coordinator') return 'PBE Coordinator';
+        if (role === 'district_programs_coordinator') return 'Programs Coordinator';
+        return 'Committee Member';
+    };
     
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -79,7 +93,7 @@ export default function DistrictCommitteeManager({ committee, invite_links, read
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                                 <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: member.role === 'district_director' ? 'var(--clr-gold-500)' : 'var(--clr-burgundy-500)', boxShadow: member.role === 'district_director' ? '0 0 5px rgba(212,160,23,0.5)' : '0 0 5px rgba(155,34,38,0.5)' }}></div>
                                                 <span style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em', color: member.role === 'district_director' ? 'var(--clr-gold-400)' : 'var(--clr-burgundy-400)' }}>
-                                                    {member.role === 'district_director' ? 'District Director' : 'Committee Member'}
+                                                    {formatRoleName(member.roles ? member.roles[0] : member.role)}
                                                 </span>
                                             </div>
                                         </td>
@@ -129,6 +143,12 @@ export default function DistrictCommitteeManager({ committee, invite_links, read
                             {[
                                 { id: 'secretary', name: 'District Secretary', link: invite_links?.secretary },
                                 { id: 'treasurer', name: 'District Treasurer', link: invite_links?.treasurer },
+                                { id: 'curriculum', name: 'Curriculum Coordinator', link: invite_links?.curriculum },
+                                { id: 'communication', name: 'Communication Coordinator', link: invite_links?.communication },
+                                { id: 'music', name: 'Music Coordinator', link: invite_links?.music },
+                                { id: 'welfare', name: 'Welfare Coordinator', link: invite_links?.welfare },
+                                { id: 'pbe', name: 'PBE Coordinator', link: invite_links?.pbe },
+                                { id: 'programs', name: 'Programs Coordinator', link: invite_links?.programs },
                                 { id: 'committee', name: 'General Committee Member', link: invite_links?.committee },
                             ].map(role => (
                                 <div key={role.id} className="flex items-center justify-between p-4 bg-surface-800 border border-white/10 rounded-xl">
