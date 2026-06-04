@@ -55,7 +55,7 @@ export default function ClubEventsView({ events = [] }) {
                             <h4 style={{ fontSize: '11px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.15em', color: 'var(--clr-gold-400)', marginBottom: '16px' }}>
                                 Upcoming ({upcoming.length})
                             </h4>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '24px' }}>
                                 {upcoming.map(event => (
                                     <EventCard key={event.id} event={event} />
                                 ))}
@@ -68,7 +68,7 @@ export default function ClubEventsView({ events = [] }) {
                             <h4 style={{ fontSize: '11px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.15em', color: 'var(--clr-text-muted)', marginBottom: '16px' }}>
                                 Past Events ({past.length})
                             </h4>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px', opacity: 0.5 }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '24px', opacity: 0.5 }}>
                                 {past.map(event => (
                                     <EventCard key={event.id} event={event} />
                                 ))}
@@ -84,8 +84,8 @@ export default function ClubEventsView({ events = [] }) {
 
 function EventCard({ event }) {
     return (
-        <div className="panel" style={{ borderLeft: '3px solid var(--clr-gold-500)', padding: 0, overflow: 'hidden' }}>
-            <div style={{ padding: '20px 20px 12px' }}>
+        <div className="panel" style={{ borderLeft: '3px solid var(--clr-gold-500)', padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', height: '100%' }}>
+            <div style={{ padding: '24px 24px 16px', flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                     <Tag size={12} style={{ color: 'var(--clr-gold-400)' }} />
                     <span style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.15em', color: 'var(--clr-gold-400)' }}>

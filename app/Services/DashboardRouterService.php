@@ -31,7 +31,7 @@ class DashboardRouterService
             $needsSetup = !$user->hasRole('super_admin') && (
                 (empty($activeRoles) && empty($pendingRoles)) ||
                 (in_array('parent', $activeRoles) && !$hasLinkedChild) ||
-                (!$user->church_id && !in_array('district_official', $allRoles))
+                (!$user->church_id && empty(array_intersect(['district_official', 'district_director', 'district_treasurer', 'district_secretary', 'district_committee'], $allRoles)))
             );
 
             if ($needsSetup) {
@@ -56,12 +56,13 @@ class DashboardRouterService
 
         // 1.5 Pending Leadership Role "Waiting Room"
         $pendingRoles = $user->roles()->wherePivot('status', 'pending')->pluck('name')->toArray();
-        if (in_array('district_official', $pendingRoles) || in_array('director', $pendingRoles)) {
+        $pendingDistrictRoles = array_intersect(['district_official', 'district_director', 'district_treasurer', 'district_secretary', 'district_committee'], $pendingRoles);
+        if (count($pendingDistrictRoles) > 0 || in_array('director', $pendingRoles)) {
             if ($section !== 'onboarding-waiting') {
                 session()->flash('warning', 'Your account setup is not yet complete. Please finish the step below to continue.');
                 return redirect()->route('dashboard', ['section' => 'onboarding-waiting']);
             }
-            $pendingRole = in_array('district_official', $pendingRoles) ? 'district_official' : 'director';
+            $pendingRole = count($pendingDistrictRoles) > 0 ? reset($pendingDistrictRoles) : 'director';
             return Inertia::render('Onboarding/Index', [
                 'role' => $pendingRole,
                 'church_status' => $user->church ? $user->church->status : null,
@@ -96,7 +97,7 @@ class DashboardRouterService
 
         if (in_array('parent', $allRoles) && !$hasLinkedChild) return 'link-child';
 
-        if (!$user->church_id && !in_array('district_official', $allRoles)) return 'organization';
+        if (!$user->church_id && empty(array_intersect(['district_official', 'district_director', 'district_treasurer', 'district_secretary', 'district_committee'], $allRoles))) return 'organization';
 
         return 'finish';
     }

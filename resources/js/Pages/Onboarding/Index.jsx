@@ -24,7 +24,8 @@ export default function OnboardingIndex({ role, church_status, church_name }) {
     const intervalRef = useRef(null);
 
     useEffect(() => {
-        if (role !== 'district_official' && role !== 'director') return;
+        const isDistrictRole = ['district_official', 'district_director', 'district_treasurer', 'district_secretary', 'district_committee'].includes(role);
+        if (!isDistrictRole && role !== 'director') return;
 
         const checkStatus = async () => {
             try {
@@ -57,7 +58,7 @@ export default function OnboardingIndex({ role, church_status, church_name }) {
 
     // ── Approved state — celebration screen ──────────────────────────────────
     if (approved) {
-        const isDistrict = role === 'district_official';
+        const isDistrict = ['district_official', 'district_director', 'district_treasurer', 'district_secretary', 'district_committee'].includes(role);
         return (
             <GuestLayout>
                 <Head title="Approved! — EmPFC" />
@@ -82,7 +83,7 @@ export default function OnboardingIndex({ role, church_status, church_name }) {
     }
 
     // ── Waiting Room for leadership roles ────────────────────────────────────
-    if (role === 'district_official') {
+    if (['district_official', 'district_director', 'district_treasurer', 'district_secretary', 'district_committee'].includes(role)) {
         return (
             <GuestLayout>
                 <Head title="Pending Verification — EmPFC" />

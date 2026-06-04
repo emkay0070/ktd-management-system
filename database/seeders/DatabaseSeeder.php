@@ -18,6 +18,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Restore Organizational Hierarchy (Unions, Conferences, Zones, Districts, Churches)
+        $this->call(CentralUgandaConferenceSeeder::class);
         // User::factory(10)->create();
 
         $classes = [
@@ -47,17 +49,11 @@ class DatabaseSeeder extends Seeder
             Religion::firstOrCreate(['name' => $religionName]);
         }
 
-        $church = Church::firstOrCreate([
-            'name' => 'Kampala Central SDA',
-        ], [
-            'location' => 'Kampala',
-        ]);
-
         // Super Admin
         $admin = User::firstOrCreate(
             ['email' => 'admin@empfc.org'],
             [
-                'name' => 'District Admin',
+                'name' => 'System Admin',
                 'password' => bcrypt('password'),
                 'email_verified_at' => now(),
             ],
@@ -65,21 +61,6 @@ class DatabaseSeeder extends Seeder
         $superAdminRole = \App\Models\Role::where('name', 'super_admin')->first();
         if ($superAdminRole) {
             $admin->roles()->sync([$superAdminRole->id => ['status' => 'active']]);
-        }
-
-        // Church Director
-        $director = User::firstOrCreate(
-            ['email' => 'director@empfc.org'],
-            [
-                'name' => 'Church Director',
-                'password' => bcrypt('password'),
-                'church_id' => $church->id,
-                'email_verified_at' => now(),
-            ],
-        );
-        $directorRole = \App\Models\Role::where('name', 'director')->first();
-        if ($directorRole) {
-            $director->roles()->sync([$directorRole->id => ['status' => 'active']]);
         }
     }
 }

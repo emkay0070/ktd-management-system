@@ -60,7 +60,9 @@ export default function SetupWizard({ user, roles = [], state = {} }) {
         
         if (allRoles.includes('parent') && !has_linked_child) return 'LINK_CHILD';
         
-        if (!has_church && !allRoles.includes('district_official')) return 'JOIN_CLUB';
+        const districtRoles = ['district_official', 'district_director', 'district_treasurer', 'district_secretary', 'district_committee'];
+        const hasDistrictRole = allRoles.some(r => districtRoles.includes(r));
+        if (!has_church && !hasDistrictRole) return 'JOIN_CLUB';
         
         return 'FINISH';
     };

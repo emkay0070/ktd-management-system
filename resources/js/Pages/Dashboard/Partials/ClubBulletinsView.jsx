@@ -20,12 +20,13 @@ export default function ClubBulletinsView({ bulletins = [] }) {
                     <p style={{ color: 'var(--clr-text-muted)' }}>No official bulletins have been published yet.</p>
                 </div>
             ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                     {bulletins.map(bulletin => (
                         <div
                             key={bulletin.id}
                             className="panel"
                             style={{
+                                padding: '24px',
                                 borderLeft: `3px solid ${bulletin.level === 'Urgent' ? 'var(--clr-burgundy-500)' : 'var(--clr-gold-500)'}`,
                                 background: bulletin.level === 'Urgent'
                                     ? 'linear-gradient(to right, rgba(128, 0, 32, 0.08), transparent)'
