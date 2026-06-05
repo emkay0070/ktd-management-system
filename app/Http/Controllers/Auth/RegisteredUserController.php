@@ -42,7 +42,7 @@ class RegisteredUserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'role' => 'required|string|in:director,pathfinder,master_guide,parent,observer,district_official,district_director,district_treasurer,district_secretary,district_committee,district_curriculum_coordinator,district_masterguide_coordinator,district_communication_coordinator,district_music_coordinator,district_welfare_coordinator,district_pbe_coordinator,district_programs_coordinator',
+            'role' => 'required|string|in:director,pathfinder,master_guide,parent,observer,' . implode(',', User::getAllDistrictRoles()),
             'union_id' => 'nullable|exists:unions,id',
             'conference_id' => 'nullable|exists:conferences,id',
             'zone_id' => 'nullable|exists:zones,id',
@@ -91,23 +91,13 @@ class RegisteredUserController extends Controller
         // 3. Assign Intent Role
         $intentRole = \App\Models\Role::where('name', $request->role)->first();
         if ($intentRole && $request->role !== 'observer') {
-            $roleStatus = in_array($request->role, [
-                'director', 'district_official', 'district_director', 'district_treasurer', 
-                'district_secretary', 'district_committee', 'district_curriculum_coordinator', 
-                'district_masterguide_coordinator', 'district_communication_coordinator', 
-                'district_music_coordinator', 'district_welfare_coordinator', 'district_pbe_coordinator', 
-                'district_programs_coordinator'
-            ]) ? 'pending' : 'active';
+            $isDistrictRole = in_array($request->role, User::getAllDistrictRoles());
+            $roleStatus = ($request->role === 'director' || $isDistrictRole) ? 'pending' : 'active';
             
             $pivotData = ['status' => $roleStatus];
             
             // Scope assignment
-            if (in_array($request->role, [
-                'district_official', 'district_director', 'district_treasurer', 'district_secretary', 
-                'district_committee', 'district_curriculum_coordinator', 'district_masterguide_coordinator', 
-                'district_communication_coordinator', 'district_music_coordinator', 'district_welfare_coordinator', 
-                'district_pbe_coordinator', 'district_programs_coordinator'
-            ]) && $request->district_id) {
+            if ($isDistrictRole && $request->district_id) {
                 $pivotData['entity_type'] = \App\Models\District::class;
                 $pivotData['entity_id'] = $request->district_id;
             } elseif ($request->role === 'director' && $request->church_id) {

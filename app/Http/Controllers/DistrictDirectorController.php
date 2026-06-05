@@ -95,13 +95,7 @@ class DistrictDirectorController extends Controller
         $role = Role::firstOrCreate(['name' => 'district_director', 'display_name' => 'District Director']);
         
         // Remove any existing pending district roles so they don't block the user
-        $districtRoleNames = [
-            'district_official', 'district_director', 'district_treasurer', 'district_secretary', 
-            'district_committee', 'district_curriculum_coordinator', 'district_masterguide_coordinator', 
-            'district_communication_coordinator', 'district_music_coordinator', 'district_welfare_coordinator', 
-            'district_pbe_coordinator', 'district_programs_coordinator'
-        ];
-        $pendingDistrictRoles = $user->roles()->whereIn('name', $districtRoleNames)->wherePivot('status', 'pending')->pluck('roles.id');
+        $pendingDistrictRoles = $user->roles()->whereIn('name', User::getAllDistrictRoles())->wherePivot('status', 'pending')->pluck('roles.id');
         if ($pendingDistrictRoles->isNotEmpty()) {
             $user->roles()->detach($pendingDistrictRoles);
         }

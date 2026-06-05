@@ -56,7 +56,7 @@ class DashboardRouterService
 
         // 1.5 Pending Leadership Role "Waiting Room"
         $pendingRoles = $user->roles()->wherePivot('status', 'pending')->pluck('name')->toArray();
-        $pendingDistrictRoles = array_intersect(['district_official', 'district_director', 'district_treasurer', 'district_secretary', 'district_committee', 'district_curriculum_coordinator', 'district_masterguide_coordinator', 'district_communication_coordinator', 'district_music_coordinator', 'district_welfare_coordinator', 'district_pbe_coordinator', 'district_programs_coordinator'], $pendingRoles);
+        $pendingDistrictRoles = array_intersect(User::getAllDistrictRoles(), $pendingRoles);
         if (count($pendingDistrictRoles) > 0 || in_array('director', $pendingRoles)) {
             if ($section !== 'onboarding-waiting') {
                 session()->flash('warning', 'Your account setup is not yet complete. Please finish the step below to continue.');
@@ -73,22 +73,12 @@ class DashboardRouterService
         $context = $user->active_context;
 
         // 2. Route by explicit context rather than highest possible permission
+        if (in_array($context, User::getAllDistrictRoles())) {
+            return $this->renderDistrict($user, $section);
+        }
+
         return match ($context) {
             'super_admin'       => $this->renderSuperAdmin($user, $section),
-            
-            'district_official', 
-            'district_director', 
-            'district_treasurer', 
-            'district_secretary', 
-            'district_committee',
-            'district_curriculum_coordinator',
-            'district_masterguide_coordinator',
-            'district_communication_coordinator',
-            'district_music_coordinator',
-            'district_welfare_coordinator',
-            'district_pbe_coordinator',
-            'district_programs_coordinator' => $this->renderDistrict($user, $section),
-
             'director'          => $this->renderDirector($user, $section),
             'master_guide'      => $this->renderMasterGuide($user, $section),
             'parent'            => $this->renderParent($user, $section),
@@ -107,7 +97,7 @@ class DashboardRouterService
 
         if (in_array('parent', $allRoles) && !$hasLinkedChild) return 'link-child';
 
-        if (!$user->church_id && empty(array_intersect(['district_official', 'district_director', 'district_treasurer', 'district_secretary', 'district_committee', 'district_curriculum_coordinator', 'district_masterguide_coordinator', 'district_communication_coordinator', 'district_music_coordinator', 'district_welfare_coordinator', 'district_pbe_coordinator', 'district_programs_coordinator'], $allRoles))) return 'organization';
+        if (!$user->church_id && empty(array_intersect(User::getAllDistrictRoles(), $allRoles))) return 'organization';
 
         return 'finish';
     }

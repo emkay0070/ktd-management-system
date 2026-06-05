@@ -31,7 +31,20 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
     const hasAnyRole = (rs) => rs.some(r => roleNames.includes(r));
 
     const isSuperAdmin = hasRole('super_admin');
-    const isDistrictLeader = hasAnyRole(['district_director', 'district_committee', 'district_treasurer', 'district_secretary', 'district_official', 'district_curriculum_coordinator', 'district_communication_coordinator', 'district_music_coordinator', 'district_welfare_coordinator', 'district_pbe_coordinator', 'district_programs_coordinator']);
+    const isDistrictLeader = hasAnyRole([
+        'district_official',
+        'district_director',
+        'district_treasurer',
+        'district_secretary',
+        'district_committee',
+        'district_curriculum_coordinator',
+        'district_masterguide_coordinator',
+        'district_communication_coordinator',
+        'district_music_coordinator',
+        'district_welfare_coordinator',
+        'district_pbe_coordinator',
+        'district_programs_coordinator'
+    ]);
     const isDirector = hasRole('director');
     const isMG = hasRole('master_guide');
     const isPathfinder = hasRole('pathfinder');

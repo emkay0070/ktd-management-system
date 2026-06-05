@@ -10,18 +10,10 @@ class DistrictResourceController extends Controller
 {
     public function store(Request $request)
     {
+        /** @var \App\Models\User $user */
         $user = $request->user();
-        $coordinatorRoles = [
-            'district_curriculum_coordinator',
-            'district_masterguide_coordinator',
-            'district_communication_coordinator',
-            'district_programs_coordinator',
-            'district_music_coordinator',
-            'district_welfare_coordinator',
-            'district_pbe_coordinator'
-        ];
         
-        abort_unless($user && ($user->hasAnyRole(['district_director', 'district_committee', 'district_official', 'district_secretary']) || $user->hasAnyRole($coordinatorRoles)), 403);
+        abort_unless($user && ($user->isDistrictExecutive() || $user->isDistrictCoordinator()), 403);
 
         $request->validate([
             'title' => 'required|string|max:255',

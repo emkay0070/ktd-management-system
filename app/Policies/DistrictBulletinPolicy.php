@@ -10,12 +10,12 @@ class DistrictBulletinPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->hasAnyRole(['super_admin', 'district_director', 'district_secretary', 'district_communication_coordinator', 'district_programs_coordinator', 'district_curriculum_coordinator', 'district_music_coordinator', 'district_pbe_coordinator', 'district_welfare_coordinator', 'club_director']);
+        return $user->hasRole('super_admin') || $user->isDistrictLeader() || $user->hasRole('club_director');
     }
 
     public function view(User $user, DistrictBulletin $bulletin): bool
     {
-        if ($user->hasAnyRole(['super_admin', 'district_director', 'district_secretary'])) {
+        if ($user->hasRole('super_admin') || $user->hasAnyRole(['district_director', 'district_secretary'])) {
             return true;
         }
 
@@ -30,7 +30,7 @@ class DistrictBulletinPolicy
 
     public function create(User $user): bool
     {
-        return $user->hasAnyRole(['super_admin', 'district_director', 'district_secretary', 'district_communication_coordinator']);
+        return $user->hasRole('super_admin') || $user->hasAnyRole(['district_director', 'district_secretary', 'district_communication_coordinator']);
     }
 
     public function update(User $user, DistrictBulletin $bulletin): bool

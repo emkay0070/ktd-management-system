@@ -13,6 +13,50 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     /**
+     * District-level leadership roles.
+     */
+    public const DISTRICT_ROLES = [
+        'district_official', 
+        'district_director', 
+        'district_treasurer', 
+        'district_secretary', 
+        'district_committee',
+        'district_curriculum_coordinator', 
+        'district_masterguide_coordinator',
+        'district_communication_coordinator', 
+        'district_music_coordinator',
+        'district_welfare_coordinator', 
+        'district_pbe_coordinator', 
+        'district_programs_coordinator'
+    ];
+
+    /**
+     * District Role Groups
+     */
+    public const DISTRICT_EXECUTIVE_ROLES = [
+        'district_official',
+        'district_director',
+        'district_treasurer',
+        'district_secretary',
+        'district_committee'
+    ];
+
+    public const DISTRICT_COORDINATOR_ROLES = [
+        'district_curriculum_coordinator',
+        'district_masterguide_coordinator',
+        'district_communication_coordinator',
+        'district_music_coordinator',
+        'district_welfare_coordinator',
+        'district_pbe_coordinator',
+        'district_programs_coordinator'
+    ];
+
+    public static function getAllDistrictRoles(): array
+    {
+        return array_merge(self::DISTRICT_EXECUTIVE_ROLES, self::DISTRICT_COORDINATOR_ROLES);
+    }
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
@@ -70,6 +114,30 @@ class User extends Authenticatable
         return $this->belongsToMany(Role::class)
             ->withPivot('status', 'assigned_by', 'assigned_at', 'entity_type', 'entity_id')
             ->withTimestamps();
+    }
+
+    /**
+     * Check if user is a district leader (Executive or Coordinator).
+     */
+    public function isDistrictLeader(): bool
+    {
+        return $this->hasAnyRole(self::getAllDistrictRoles());
+    }
+
+    /**
+     * Check if user is a district executive officer.
+     */
+    public function isDistrictExecutive(): bool
+    {
+        return $this->hasAnyRole(self::DISTRICT_EXECUTIVE_ROLES);
+    }
+
+    /**
+     * Check if user is a district department coordinator.
+     */
+    public function isDistrictCoordinator(): bool
+    {
+        return $this->hasAnyRole(self::DISTRICT_COORDINATOR_ROLES);
     }
 
     /**

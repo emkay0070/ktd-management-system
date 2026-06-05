@@ -15,7 +15,8 @@ class DistrictChurchController extends Controller
             'is_school' => 'boolean'
         ]);
 
-        $user = auth()->user();
+        /** @var \App\Models\User $user */
+        $user = $request->user();
         if (!$user->district_id) {
             return back()->with('error', 'You must belong to a district to add a club.');
         }
