@@ -225,7 +225,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/onboarding/status', function (\Illuminate\Http\Request $request) {
         $user = $request->user();
         $pendingRoles = $user->roles()->wherePivot('status', 'pending')->pluck('name')->toArray();
-        $hasLeadershipPending = count(array_intersect(['district_official', 'district_director', 'district_treasurer', 'district_secretary', 'district_committee', 'district_curriculum_coordinator', 'district_communication_coordinator', 'district_music_coordinator', 'district_welfare_coordinator', 'district_pbe_coordinator', 'district_programs_coordinator', 'director'], $pendingRoles)) > 0;
+        $hasLeadershipPending = count(array_intersect([
+            'district_official', 'district_director', 'district_treasurer', 'district_secretary', 
+            'district_committee', 'district_curriculum_coordinator', 'district_masterguide_coordinator', 
+            'district_communication_coordinator', 'district_music_coordinator', 'district_welfare_coordinator', 
+            'district_pbe_coordinator', 'district_programs_coordinator', 'director'
+        ], $pendingRoles)) > 0;
 
         return response()->json([
             'approved' => !$hasLeadershipPending,

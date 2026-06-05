@@ -24,7 +24,12 @@ export default function OnboardingIndex({ role, church_status, church_name }) {
     const intervalRef = useRef(null);
 
     useEffect(() => {
-        const isDistrictRole = ['district_official', 'district_director', 'district_treasurer', 'district_secretary', 'district_committee', 'district_curriculum_coordinator', 'district_communication_coordinator', 'district_music_coordinator', 'district_welfare_coordinator', 'district_pbe_coordinator', 'district_programs_coordinator'].includes(role);
+        const isDistrictRole = [
+            'district_official', 'district_director', 'district_treasurer', 'district_secretary', 
+            'district_committee', 'district_curriculum_coordinator', 'district_masterguide_coordinator', 
+            'district_communication_coordinator', 'district_music_coordinator', 'district_welfare_coordinator', 
+            'district_pbe_coordinator', 'district_programs_coordinator'
+        ].includes(role);
         if (!isDistrictRole && role !== 'director') return;
 
         const checkStatus = async () => {
@@ -58,7 +63,12 @@ export default function OnboardingIndex({ role, church_status, church_name }) {
 
     // ── Approved state — celebration screen ──────────────────────────────────
     if (approved) {
-        const isDistrict = ['district_official', 'district_director', 'district_treasurer', 'district_secretary', 'district_committee', 'district_curriculum_coordinator', 'district_communication_coordinator', 'district_music_coordinator', 'district_welfare_coordinator', 'district_pbe_coordinator', 'district_programs_coordinator'].includes(role);
+        const isDistrict = [
+            'district_official', 'district_director', 'district_treasurer', 'district_secretary', 
+            'district_committee', 'district_curriculum_coordinator', 'district_masterguide_coordinator', 
+            'district_communication_coordinator', 'district_music_coordinator', 'district_welfare_coordinator', 
+            'district_pbe_coordinator', 'district_programs_coordinator'
+        ].includes(role);
         return (
             <GuestLayout>
                 <Head title="Approved! — EmPFC" />
@@ -83,7 +93,12 @@ export default function OnboardingIndex({ role, church_status, church_name }) {
     }
 
     // ── Waiting Room for leadership roles ────────────────────────────────────
-    if (['district_official', 'district_director', 'district_treasurer', 'district_secretary', 'district_committee', 'district_curriculum_coordinator', 'district_communication_coordinator', 'district_music_coordinator', 'district_welfare_coordinator', 'district_pbe_coordinator', 'district_programs_coordinator'].includes(role)) {
+    if ([
+        'district_official', 'district_director', 'district_treasurer', 'district_secretary', 
+        'district_committee', 'district_curriculum_coordinator', 'district_masterguide_coordinator', 
+        'district_communication_coordinator', 'district_music_coordinator', 'district_welfare_coordinator', 
+        'district_pbe_coordinator', 'district_programs_coordinator'
+    ].includes(role)) {
         return (
             <GuestLayout>
                 <Head title="Pending Verification — EmPFC" />

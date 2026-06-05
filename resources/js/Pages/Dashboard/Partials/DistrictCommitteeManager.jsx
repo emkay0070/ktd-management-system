@@ -26,6 +26,7 @@ export default function DistrictCommitteeManager({ committee, invite_links, read
         if (role === 'district_secretary') return 'District Secretary';
         if (role === 'district_treasurer') return 'District Treasurer';
         if (role === 'district_curriculum_coordinator') return 'Curriculum Coordinator';
+        if (role === 'district_masterguide_coordinator') return 'Master Guide Coordinator';
         if (role === 'district_communication_coordinator') return 'Communication Coordinator';
         if (role === 'district_music_coordinator') return 'Music Coordinator';
         if (role === 'district_welfare_coordinator') return 'Welfare Coordinator';
@@ -144,6 +145,7 @@ export default function DistrictCommitteeManager({ committee, invite_links, read
                                 { id: 'secretary', name: 'District Secretary', link: invite_links?.secretary },
                                 { id: 'treasurer', name: 'District Treasurer', link: invite_links?.treasurer },
                                 { id: 'curriculum', name: 'Curriculum Coordinator', link: invite_links?.curriculum },
+                                { id: 'masterguide', name: 'Master Guide Coordinator', link: invite_links?.masterguide },
                                 { id: 'communication', name: 'Communication Coordinator', link: invite_links?.communication },
                                 { id: 'music', name: 'Music Coordinator', link: invite_links?.music },
                                 { id: 'welfare', name: 'Welfare Coordinator', link: invite_links?.welfare },
