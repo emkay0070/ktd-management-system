@@ -77,6 +77,12 @@ class VerificationController extends Controller
             ]);
         }
 
+        // Mark user as active since they now have an approved role
+        if ($user->status === 'pending_onboarding') {
+            $user->status = 'active';
+            $user->save();
+        }
+
         return back()->with('success', "Role approved for {$user->name}.");
     }
 

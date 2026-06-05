@@ -75,10 +75,20 @@ class DashboardRouterService
         // 2. Route by explicit context rather than highest possible permission
         return match ($context) {
             'super_admin'       => $this->renderSuperAdmin($user, $section),
-            'district_official' => $this->renderDistrict($user, $section),
-            'district_director' => $this->renderDistrict($user, $section),
-            'district_treasurer'=> $this->renderDistrict($user, $section),
-            'district_committee'=> $this->renderDistrict($user, $section),
+            
+            'district_official', 
+            'district_director', 
+            'district_treasurer', 
+            'district_secretary', 
+            'district_committee',
+            'district_curriculum_coordinator',
+            'district_masterguide_coordinator',
+            'district_communication_coordinator',
+            'district_music_coordinator',
+            'district_welfare_coordinator',
+            'district_pbe_coordinator',
+            'district_programs_coordinator' => $this->renderDistrict($user, $section),
+
             'director'          => $this->renderDirector($user, $section),
             'master_guide'      => $this->renderMasterGuide($user, $section),
             'parent'            => $this->renderParent($user, $section),
