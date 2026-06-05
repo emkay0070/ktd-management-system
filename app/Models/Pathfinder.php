@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Pathfinder extends Model
 {
@@ -74,6 +75,16 @@ class Pathfinder extends Model
     public function classAssignment(): HasOne
     {
         return $this->hasOne(ClassAssignment::class);
+    }
+
+    /**
+     * Honours earned by the pathfinder.
+     */
+    public function honours(): BelongsToMany
+    {
+        return $this->belongsToMany(Honour::class, 'pathfinder_honour')
+            ->withPivot('status', 'earned_at', 'verified_by')
+            ->withTimestamps();
     }
 
     public function assignedClass(): HasOneThrough

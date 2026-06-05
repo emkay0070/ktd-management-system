@@ -317,6 +317,9 @@ class DashboardRouterService
         ];
 
         $curriculumStats = [];
+        $districtHonoursEarned = 0;
+        $honourCounts = [];
+
         $investitureCandidates = \App\Models\ClassAssignment::whereIn('pathfinder_id', function($q) use ($district) {
                 $q->select('id')->from('pathfinders')->whereIn('church_id', $district->churches->pluck('id'));
             })
@@ -364,11 +367,15 @@ class DashboardRouterService
 
         foreach ($district->churches as $church) {
             $stats = ['Friend' => 0, 'Companion' => 0, 'Explorer' => 0, 'Ranger' => 0, 'Voyager' => 0, 'Guide' => 0, 'Ready' => 0];
-            $pathfinders = \App\Models\Pathfinder::where('church_id', $church->id)->with('classAssignment.pathfinderClass')->get();
+            $pathfinders = \App\Models\Pathfinder::where('church_id', $church->id)
+                ->with(['classAssignment.pathfinderClass', 'honours'])
+                ->get();
             
             $pfCount = $pathfinders->count();
+            $churchHonours = 0;
 
             foreach ($pathfinders as $pf) {
+                // Class Stats
                 if ($pf->classAssignment && $pf->classAssignment->pathfinderClass) {
                     $className = $pf->classAssignment->pathfinderClass->name;
                     if (isset($stats[$className])) {
@@ -379,12 +386,19 @@ class DashboardRouterService
                         $stats['Ready']++;
                     }
                 }
+
+                // Honour Stats
+                foreach ($pf->honours as $honour) {
+                    $churchHonours++;
+                    $districtHonoursEarned++;
+                    $honourCounts[$honour->name] = ($honourCounts[$honour->name] ?? 0) + 1;
+                }
             }
 
             // Enhanced Health Score Calculation
             // 1. Staffing Ratio (30%) - Target 1 instructor per 8 pathfinders
             $instructors = $instructorStats[$church->id]['active_instructors'] ?? 0;
-            $staffingRatio = $pfCount > 0 ? min(1, $instructors / (ceil($pfCount / 8))) : 0;
+            $staffingRatio = $pfCount > 0 ? min(1, $instructors / (max(1, ceil($pfCount / 8)))) : 0;
             
             // 2. Investiture Readiness (40%)
             $readyRatio = $pfCount > 0 ? $stats['Ready'] / $pfCount : 0;
@@ -401,10 +415,18 @@ class DashboardRouterService
             $curriculumStats[] = [
                 'church' => ['id' => $church->id, 'name' => $church->name],
                 'stats' => $stats,
+                'honours_earned' => $churchHonours,
                 'health_score' => $healthScore,
                 'attendance_avg' => round($attendanceStats[$church->id] ?? 0),
                 'instructors' => $instructorStats[$church->id] ?? ['count' => 0, 'active_instructors' => 0, 'classes_covered' => 0],
             ];
+        }
+
+        arsort($honourCounts);
+        $topHonours = array_slice($honourCounts, 0, 5, true);
+        $topHonoursFormatted = [];
+        foreach ($topHonours as $name => $count) {
+            $topHonoursFormatted[] = ['name' => $name, 'count' => $count];
         }
 
         $curriculumStandards = \App\Models\CurriculumStandard::where('district_id', $district->id)
@@ -479,6 +501,10 @@ class DashboardRouterService
             'pending_approvals' => $pendingApprovals,
             'permissions' => $permissions,
             'curriculum_stats' => $curriculumStats,
+            'honour_analytics' => [
+                'total_earned' => $districtHonoursEarned,
+                'top_honours' => $topHonoursFormatted,
+            ],
             'investiture_candidates' => $investitureCandidates,
             'curriculum_standards' => $curriculumStandards,
             'welfare_cases' => $welfareCases,

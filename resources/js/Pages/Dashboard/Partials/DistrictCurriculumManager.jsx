@@ -1,17 +1,21 @@
 import React, { useState } from 'react';
-import { useForm, router } from '@inertiajs/react';
-import { GraduationCap, AlertCircle, BookOpen, UserCheck, Activity, Users, Send, CheckCircle2, Search, Filter, ClipboardList, ShieldCheck, Edit2, X, Check, Trash2, User, Clock, Plus } from 'lucide-react';
+import { router, useForm } from '@inertiajs/react';
+import { 
+    GraduationCap, AlertCircle, BookOpen, UserCheck, Activity, Users, 
+    Send, CheckCircle2, Search, Filter, ClipboardList, ShieldCheck, 
+    Edit2, X, Check, Trash2, User, Clock, Plus, Trophy 
+} from 'lucide-react';
 
-export default function DistrictCurriculumManager({ curriculum_stats = [], investiture_candidates = [], curriculum_standards = [], readonly, auth }) {
+export default function DistrictCurriculumManager({ curriculum_stats = [], investiture_candidates = [], curriculum_standards = [], honour_analytics = {}, readonly, auth }) {
     const userRoles = auth.user.role_names || [];
     const isCoordinator = userRoles.includes('district_curriculum_coordinator');
     const isDirector = userRoles.includes('district_director') || userRoles.includes('super_admin');
 
     // Focus-Based Default Tab Logic
     const getDefaultTab = () => {
-        if (isDirector && investiture_candidates.some(c => c.status === 'recommended')) return 'queue';
-        if (isCoordinator && investiture_candidates.some(c => c.status === 'pending_review')) return 'queue';
-        return 'overview';
+        if (isDirector && investiture_candidates.some(c => c.status === 'recommended')) return 'pipeline';
+        if (isCoordinator && investiture_candidates.some(c => c.status === 'pending_review')) return 'pipeline';
+        return 'classes';
     };
 
     const [activeTab, setActiveTab] = useState(getDefaultTab());
@@ -69,9 +73,10 @@ export default function DistrictCurriculumManager({ curriculum_stats = [], inves
             Guide: acc.Guide + curr.stats.Guide,
             Ready: acc.Ready + curr.stats.Ready,
             Total: acc.Total + calculateTotal(curr.stats),
-            Instructors: acc.Instructors + (curr.instructors?.active_instructors || 0)
+            Honours: acc.Honours + (curr.honours_earned || 0),
+            Clubs: acc.Clubs + 1
         };
-    }, { Friend: 0, Companion: 0, Explorer: 0, Ranger: 0, Voyager: 0, Guide: 0, Ready: 0, Total: 0, Instructors: 0 });
+    }, { Friend: 0, Companion: 0, Explorer: 0, Ranger: 0, Voyager: 0, Guide: 0, Ready: 0, Total: 0, Honours: 0, Clubs: 0 });
 
     const handleRecommend = (id) => {
         const notes = prompt('Add recommendation notes (optional):');
@@ -99,7 +104,7 @@ export default function DistrictCurriculumManager({ curriculum_stats = [], inves
                         <div>
                             <h3 className="flex items-center gap-2">
                                 <GraduationCap className="text-gold-400" size={24} />
-                                Curriculum Command Centre
+                                Pathfinder Curriculum Commander
                             </h3>
                             <p className="text-sm text-gray-500">Ministry-accurate tracking of Pathfinder learning and leadership development.</p>
                         </div>
@@ -107,11 +112,14 @@ export default function DistrictCurriculumManager({ curriculum_stats = [], inves
                             <button onClick={() => setActiveTab('overview')} className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${activeTab === 'overview' ? 'bg-gold-500 text-black shadow-lg shadow-gold-500/20' : 'text-gray-400 hover:text-white'}`}>
                                 <Activity size={14} className="inline mr-2" /> Overview
                             </button>
-                            <button onClick={() => setActiveTab('instructors')} className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${activeTab === 'instructors' ? 'bg-gold-500 text-black shadow-lg shadow-gold-500/20' : 'text-gray-400 hover:text-white'}`}>
-                                <Users size={14} className="inline mr-2" /> Instructors
+                            <button onClick={() => setActiveTab('classes')} className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${activeTab === 'classes' ? 'bg-gold-500 text-black shadow-lg shadow-gold-500/20' : 'text-gray-400 hover:text-white'}`}>
+                                <BookOpen size={14} className="inline mr-2" /> Classes
                             </button>
-                            <button onClick={() => setActiveTab('queue')} className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${activeTab === 'queue' ? 'bg-gold-500 text-black shadow-lg shadow-gold-500/20' : 'text-gray-400 hover:text-white'} relative`}>
-                                <Send size={14} className={`inline mr-2 ${(isDirector && investiture_candidates.some(c => c.status === 'recommended')) || (isCoordinator && investiture_candidates.some(c => c.status === 'pending_review')) ? 'animate-pulse text-burgundy-500' : ''}`} /> Investiture Queue
+                            <button onClick={() => setActiveTab('honours')} className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${activeTab === 'honours' ? 'bg-gold-500 text-black shadow-lg shadow-gold-500/20' : 'text-gray-400 hover:text-white'}`}>
+                                <Trophy size={14} className="inline mr-2" /> Honours
+                            </button>
+                            <button onClick={() => setActiveTab('pipeline')} className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${activeTab === 'pipeline' ? 'bg-gold-500 text-black shadow-lg shadow-gold-500/20' : 'text-gray-400 hover:text-white'} relative`}>
+                                <Send size={14} className={`inline mr-2 ${(isDirector && investiture_candidates.some(c => c.status === 'recommended')) || (isCoordinator && investiture_candidates.some(c => c.status === 'pending_review')) ? 'animate-pulse text-burgundy-500' : ''}`} /> Pipeline
                                 {investiture_candidates.filter(c => c.status === 'pending_review' || c.status === 'recommended').length > 0 && (
                                     <span className={`absolute -top-1 -right-1 w-4 h-4 text-[8px] flex items-center justify-center rounded-full text-white font-black border-2 border-surface-900 ${
                                         (isDirector && investiture_candidates.some(c => c.status === 'recommended')) || (isCoordinator && investiture_candidates.some(c => c.status === 'pending_review'))
@@ -134,27 +142,27 @@ export default function DistrictCurriculumManager({ curriculum_stats = [], inves
                         {/* Summary Stats */}
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                             <div className="bg-surface-800 border border-white/5 p-4 rounded-2xl">
-                                <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">Total Members</div>
+                                <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">Total Pathfinders</div>
                                 <div className="text-3xl font-black text-white">{districtTotals.Total}</div>
                                 <div className="flex items-center gap-1 text-[10px] text-gray-400 mt-2">
                                     <Users size={12} className="text-gold-500" />
-                                    <span>Across {curriculum_stats.length} clubs</span>
+                                    <span>Across {districtTotals.Clubs} active clubs</span>
                                 </div>
                             </div>
                             <div className="bg-surface-800 border border-white/5 p-4 rounded-2xl">
-                                <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">Active Instructors</div>
-                                <div className="text-3xl font-black text-white">{districtTotals.Instructors}</div>
+                                <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">Honours Earned</div>
+                                <div className="text-3xl font-black text-white">{honour_analytics.total_earned || 0}</div>
                                 <div className="flex items-center gap-1 text-[10px] text-gray-400 mt-2">
-                                    <UserCheck size={12} className="text-info-400" />
-                                    <span>Certified Master Guides</span>
+                                    <Trophy size={12} className="text-info-400" />
+                                    <span>This year district-wide</span>
                                 </div>
                             </div>
                             <div className="bg-surface-800 border border-white/5 p-4 rounded-2xl">
-                                <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">Investiture Pipeline</div>
+                                <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">Investiture Ready</div>
                                 <div className="text-3xl font-black text-white">{districtTotals.Ready}</div>
                                 <div className="flex items-center gap-1 text-[10px] text-gray-400 mt-2">
                                     <GraduationCap size={12} className="text-success-400" />
-                                    <span>Verified Candidates</span>
+                                    <span>Pending final review</span>
                                 </div>
                             </div>
                             <div className="bg-surface-800 border border-white/5 p-4 rounded-2xl">
@@ -169,17 +177,84 @@ export default function DistrictCurriculumManager({ curriculum_stats = [], inves
                             </div>
                         </div>
 
-                        {/* Club Performance List */}
+                        {/* Top Honours & Alerts */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div className="panel p-6 bg-surface-800/50">
+                                <h4 className="text-white font-bold mb-4 flex items-center gap-2">
+                                    <Trophy size={18} className="text-gold-500" />
+                                    Top Honours in District
+                                </h4>
+                                <div className="space-y-4">
+                                    {honour_analytics.top_honours?.map((honour, i) => (
+                                        <div key={i} className="flex items-center justify-between">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-lg bg-gold-500/10 flex items-center justify-center text-gold-500 font-black text-xs">#{i+1}</div>
+                                                <span className="text-sm text-gray-300">{honour.name}</span>
+                                            </div>
+                                            <span className="text-xs font-black text-white bg-white/5 px-2 py-1 rounded">{honour.count} Pathfinders</span>
+                                        </div>
+                                    ))}
+                                    {(!honour_analytics.top_honours || honour_analytics.top_honours.length === 0) && (
+                                        <p className="text-center py-8 text-gray-600 text-xs uppercase tracking-widest">No honour data reported yet</p>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="panel p-6 bg-surface-800/50">
+                                <h4 className="text-white font-bold mb-4 flex items-center gap-2">
+                                    <AlertCircle size={18} className="text-danger-500" />
+                                    Compliance Alerts
+                                </h4>
+                                <div className="space-y-3">
+                                    {curriculum_stats.filter(c => c.health_score < 50).map((club, i) => (
+                                        <div key={i} className="p-3 rounded-xl bg-danger-500/10 border border-danger-500/20 flex items-center justify-between">
+                                            <div className="text-sm font-bold text-danger-400">{club.church.name}</div>
+                                            <div className="text-[10px] text-danger-400/70 uppercase font-black">Critically Low Health ({club.health_score}%)</div>
+                                        </div>
+                                    ))}
+                                    {investiture_candidates.filter(c => c.status === 'pending_review').length > 10 && (
+                                        <div className="p-3 rounded-xl bg-gold-500/10 border border-gold-500/20 flex items-center justify-between">
+                                            <div className="text-sm font-bold text-gold-400">High Review Volume</div>
+                                            <div className="text-[10px] text-gold-400/70 uppercase font-black">{investiture_candidates.filter(c => c.status === 'pending_review').length} Pending Reviews</div>
+                                        </div>
+                                    )}
+                                    {curriculum_stats.filter(c => c.instructors.active_instructors === 0).map((club, i) => (
+                                        <div key={i} className="p-3 rounded-xl bg-warning-500/10 border border-warning-500/20 flex items-center justify-between">
+                                            <div className="text-sm font-bold text-warning-400">{club.church.name}</div>
+                                            <div className="text-[10px] text-warning-400/70 uppercase font-black">No Active Instructors</div>
+                                        </div>
+                                    ))}
+                                    {curriculum_stats.filter(c => c.health_score >= 50 && c.instructors.active_instructors > 0).length === curriculum_stats.length && investiture_candidates.filter(c => c.status === 'pending_review').length <= 10 && (
+                                        <div className="text-center py-12">
+                                            <CheckCircle2 size={32} className="mx-auto text-success-500 opacity-20 mb-2" />
+                                            <p className="text-xs text-gray-600 uppercase tracking-widest">District operating within standards</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === 'classes' && (
+                    <div className="p-6 fade-in space-y-6">
+                        <div className="flex justify-between items-center">
+                            <div>
+                                <h4 className="text-white font-bold">District Class Distribution</h4>
+                                <p className="text-xs text-gray-500">Monitor Pathfinder progress from Friend to Guide across all clubs.</p>
+                            </div>
+                        </div>
+
                         <div className="table-responsive">
                             <table className="h-table">
                                 <thead>
                                     <tr>
                                         <th>Club Name</th>
-                                        <th className="text-center">Score</th>
+                                        <th className="text-center">Health</th>
                                         <th>Class Distribution</th>
-                                        <th className="text-center">Attendance</th>
-                                        <th className="text-center">Staffing</th>
                                         <th className="text-center">Ready</th>
+                                        <th className="text-center">Honours</th>
+                                        <th className="text-center">Instructors</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -187,32 +262,34 @@ export default function DistrictCurriculumManager({ curriculum_stats = [], inves
                                         <tr key={idx}>
                                             <td className="font-bold text-white">{row.church.name}</td>
                                             <td className="text-center">
-                                                <div className={`text-lg font-black ${row.health_score >= 80 ? 'text-success-400' : row.health_score >= 50 ? 'text-gold-400' : 'text-danger-400'}`}>
+                                                <div className={`text-sm font-black px-2 py-1 rounded-lg ${row.health_score >= 80 ? 'bg-success-500/10 text-success-400' : row.health_score >= 50 ? 'bg-gold-500/10 text-gold-400' : 'bg-danger-500/10 text-danger-400'}`}>
                                                     {row.health_score}%
                                                 </div>
                                             </td>
                                             <td>
-                                                <div className="flex gap-1 h-2 w-32 bg-white/5 rounded-full overflow-hidden">
-                                                    <div className="bg-gray-400" style={{ width: `${(row.stats.Friend/calculateTotal(row.stats))*100}%` }}></div>
-                                                    <div className="bg-blue-400" style={{ width: `${(row.stats.Companion/calculateTotal(row.stats))*100}%` }}></div>
-                                                    <div className="bg-green-400" style={{ width: `${(row.stats.Explorer/calculateTotal(row.stats))*100}%` }}></div>
-                                                    <div className="bg-yellow-400" style={{ width: `${(row.stats.Ranger/calculateTotal(row.stats))*100}%` }}></div>
-                                                    <div className="bg-orange-400" style={{ width: `${(row.stats.Voyager/calculateTotal(row.stats))*100}%` }}></div>
-                                                    <div className="bg-red-400" style={{ width: `${(row.stats.Guide/calculateTotal(row.stats))*100}%` }}></div>
+                                                <div className="flex gap-1 h-2 w-48 bg-white/5 rounded-full overflow-hidden">
+                                                    <div className="bg-gray-400" style={{ width: `${(row.stats.Friend/calculateTotal(row.stats))*100}%` }} title={`Friend: ${row.stats.Friend}`}></div>
+                                                    <div className="bg-blue-400" style={{ width: `${(row.stats.Companion/calculateTotal(row.stats))*100}%` }} title={`Companion: ${row.stats.Companion}`}></div>
+                                                    <div className="bg-green-400" style={{ width: `${(row.stats.Explorer/calculateTotal(row.stats))*100}%` }} title={`Explorer: ${row.stats.Explorer}`}></div>
+                                                    <div className="bg-yellow-400" style={{ width: `${(row.stats.Ranger/calculateTotal(row.stats))*100}%` }} title={`Ranger: ${row.stats.Ranger}`}></div>
+                                                    <div className="bg-orange-400" style={{ width: `${(row.stats.Voyager/calculateTotal(row.stats))*100}%` }} title={`Voyager: ${row.stats.Voyager}`}></div>
+                                                    <div className="bg-red-400" style={{ width: `${(row.stats.Guide/calculateTotal(row.stats))*100}%` }} title={`Guide: ${row.stats.Guide}`}></div>
                                                 </div>
-                                                <div className="text-[9px] text-gray-500 mt-1 uppercase tracking-tighter">
-                                                    F:{row.stats.Friend} C:{row.stats.Companion} E:{row.stats.Explorer} R:{row.stats.Ranger} V:{row.stats.Voyager} G:{row.stats.Guide}
+                                                <div className="flex justify-between text-[8px] text-gray-500 mt-1 uppercase font-black">
+                                                    <span>F:{row.stats.Friend}</span>
+                                                    <span>C:{row.stats.Companion}</span>
+                                                    <span>E:{row.stats.Explorer}</span>
+                                                    <span>R:{row.stats.Ranger}</span>
+                                                    <span>V:{row.stats.Voyager}</span>
+                                                    <span>G:{row.stats.Guide}</span>
                                                 </div>
-                                            </td>
-                                            <td className="text-center">
-                                                <div className={`text-sm font-bold ${row.attendance_avg >= 80 ? 'text-success-400' : 'text-white'}`}>{row.attendance_avg}%</div>
-                                                <div className="text-[9px] text-gray-500 uppercase tracking-widest">3m Avg</div>
-                                            </td>
-                                            <td className="text-center">
-                                                <div className="text-sm font-bold text-white">{row.instructors.active_instructors}</div>
-                                                <div className="text-[9px] text-gray-500 uppercase tracking-widest">Active MGs</div>
                                             </td>
                                             <td className="text-center font-black text-success-400">{row.stats.Ready}</td>
+                                            <td className="text-center font-bold text-info-400">{row.honours_earned || 0}</td>
+                                            <td className="text-center">
+                                                <div className="text-xs font-bold text-white">{row.instructors.active_instructors}</div>
+                                                <div className="text-[8px] text-gray-500 uppercase">Active MGs</div>
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -221,59 +298,80 @@ export default function DistrictCurriculumManager({ curriculum_stats = [], inves
                     </div>
                 )}
 
-                {activeTab === 'instructors' && (
+                {activeTab === 'honours' && (
                     <div className="p-6 fade-in space-y-6">
                         <div className="flex justify-between items-center">
                             <div>
-                                <h4 className="text-white font-bold">District Instructor Registry</h4>
-                                <p className="text-xs text-gray-500">Certified Master Guides currently leading curriculum delivery.</p>
-                            </div>
-                            <div className="relative">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={14} />
-                                <input 
-                                    type="text" 
-                                    placeholder="Search instructors..." 
-                                    className="h-input pl-10 h-9 text-xs w-64"
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                />
+                                <h4 className="text-white font-bold">Honours Registry</h4>
+                                <p className="text-xs text-gray-500">Monitor skill-based training and honour completion across the district.</p>
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {curriculum_stats.flatMap(c => 
-                                <div key={c.church.id} className="panel p-4 bg-surface-800 border border-white/5 hover:border-gold-500/30 transition-all group">
-                                    <div className="flex justify-between items-start mb-4">
-                                        <div className="w-10 h-10 bg-gold-500/10 text-gold-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                                            <UserCheck size={20} />
-                                        </div>
-                                        <span className="text-[10px] font-black uppercase text-gray-500 bg-white/5 px-2 py-1 rounded-md">{c.instructors.count} Total MGs</span>
-                                    </div>
-                                    <h5 className="text-white font-bold">{c.church.name}</h5>
-                                    <div className="space-y-3 mt-4">
-                                        <div className="flex justify-between items-center text-xs">
-                                            <span className="text-gray-500">Active Instructors</span>
-                                            <span className="text-gold-400 font-bold">{c.instructors.active_instructors}</span>
-                                        </div>
-                                        <div className="flex justify-between items-center text-xs">
-                                            <span className="text-gray-500">Class Coverage</span>
-                                            <span className="text-info-400 font-bold">{c.instructors.classes_covered} / 6</span>
-                                        </div>
-                                        <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
-                                            <div className="h-full bg-info-500" style={{ width: `${(c.instructors.classes_covered/6)*100}%` }}></div>
-                                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div className="md:col-span-2">
+                                <div className="table-responsive">
+                                    <table className="h-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Club Name</th>
+                                                <th className="text-center">Total Honours</th>
+                                                <th>Most Popular Category</th>
+                                                <th className="text-right">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {curriculum_stats.map((row, idx) => (
+                                                <tr key={idx}>
+                                                    <td className="font-bold text-white">{row.church.name}</td>
+                                                    <td className="text-center font-black text-gold-400 text-lg">{row.honours_earned || 0}</td>
+                                                    <td>
+                                                        <span className="text-[10px] font-black uppercase bg-white/5 px-2 py-1 rounded text-gray-400">Nature Study</span>
+                                                    </td>
+                                                    <td className="text-right">
+                                                        <button className="btn btn--ghost btn--xs">View Details</button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <div className="space-y-4">
+                                <div className="panel p-6 bg-surface-800">
+                                    <h5 className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-4">Honour Categories Distribution</h5>
+                                    <div className="space-y-4">
+                                        {[
+                                            { label: 'Nature Study', pct: 45, color: 'bg-green-500' },
+                                            { label: 'Vocational', pct: 25, color: 'bg-blue-500' },
+                                            { label: 'Spiritual Growth', pct: 20, color: 'bg-gold-500' },
+                                            { label: 'Outdoor Ind.', pct: 10, color: 'bg-orange-500' }
+                                        ].map((cat, i) => (
+                                            <div key={i} className="space-y-1">
+                                                <div className="flex justify-between text-[10px] font-bold">
+                                                    <span className="text-gray-400">{cat.label}</span>
+                                                    <span className="text-white">{cat.pct}%</span>
+                                                </div>
+                                                <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                                                    <div className={`h-full ${cat.color}`} style={{ width: `${cat.pct}%` }}></div>
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
-                            )}
+                                <button className="btn btn--primary btn--full py-4 text-xs font-black uppercase tracking-widest">
+                                    <Plus size={14} className="mr-2" /> Schedule District Honour Class
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )}
 
-                {activeTab === 'queue' && (
+                {activeTab === 'pipeline' && (
                     <div className="p-0 fade-in">
                         <div className="p-6 border-b border-white/5 flex justify-between items-center">
                             <div>
-                                <h4 className="text-white font-bold">Investiture Approval Workflow</h4>
+                                <h4 className="text-white font-bold">Investiture Approval Pipeline</h4>
                                 <p className="text-xs text-gray-500">Coordinate recommendations and final approvals for investiture candidates.</p>
                             </div>
                             <div className="flex gap-2">
