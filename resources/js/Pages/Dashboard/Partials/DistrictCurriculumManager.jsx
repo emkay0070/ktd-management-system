@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { 
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
-    PieChart, Pie, Cell, Bar as ReBar
+    PieChart, Pie, Cell, Bar as ReBar, LineChart, Line, AreaChart, Area
 } from 'recharts';
 
 export default function DistrictCurriculumManager({ 
@@ -17,6 +17,7 @@ export default function DistrictCurriculumManager({
     curriculum_standards = [], 
     honour_analytics = {}, 
     district_resources = [],
+    growth_pulse = [],
     readonly, 
     auth 
 }) {
@@ -25,6 +26,7 @@ export default function DistrictCurriculumManager({
     const isDirector = userRoles.includes('district_director') || userRoles.includes('super_admin');
 
     const [activeTab, setActiveTab] = useState('overview');
+    const [search, setSearch] = useState('');
     const [showStandardForm, setShowStandardForm] = useState(false);
     const [editingStandard, setEditingStandard] = useState(null);
     const [showResourceUpload, setShowResourceUpload] = useState(false);
@@ -128,7 +130,7 @@ export default function DistrictCurriculumManager({
 
     return (
         <div className="space-y-8">
-            {/* 1. TOP NAVIGATION ROW - Above KPI Cards */}
+            {/* 1. TOP NAVIGATION ROW - Sticky Command Center */}
             <div className="flex flex-wrap items-center justify-between gap-4 bg-surface-800 p-2 rounded-[2rem] border border-white/5 sticky top-0 z-40 backdrop-blur-md bg-surface-800/80">
                 <div className="flex flex-wrap gap-1">
                     {[
@@ -181,48 +183,80 @@ export default function DistrictCurriculumManager({
                 </div>
             </div>
 
-            {/* 2. KPI CARDS - Standalone Elevation */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {[
-                    { label: 'Pathfinders', value: districtTotals.Total, icon: Users, color: 'text-gold-500', bg: 'bg-gold-500/10', sub: `${districtTotals.Clubs} Active Clubs` },
-                    { label: 'Honours', value: honour_analytics.total_earned || 0, icon: Trophy, color: 'text-info-400', bg: 'bg-info-400/10', sub: 'District Wide' },
-                    { label: 'Pipeline', value: districtTotals.Ready, icon: Send, color: 'text-success-400', bg: 'bg-success-400/10', sub: 'Awaiting Review' },
-                    { label: 'Compliance', value: `${curriculum_stats.length > 0 ? Math.round(curriculum_stats.reduce((acc, c) => acc + c.health_score, 0) / curriculum_stats.length) : 0}%`, icon: Activity, color: 'text-burgundy-400', bg: 'bg-burgundy-400/10', sub: 'District Health' }
-                ].map((stat, i) => (
-                    <div key={i} className="bg-surface-900 border border-white/5 p-8 rounded-[2.5rem] shadow-2xl shadow-black/40 hover:border-white/10 transition-all group relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-white/[0.02] rounded-full -translate-y-16 translate-x-16"></div>
-                        <div className="flex items-center justify-between relative z-10">
-                            <div className={`p-4 rounded-3xl ${stat.bg} ${stat.color}`}>
-                                <stat.icon size={28} />
-                            </div>
-                            <div className="text-right">
-                                <div className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-1">{stat.label}</div>
-                                <div className="text-4xl font-black text-white tabular-nums">{stat.value}</div>
-                                <div className="text-[10px] font-bold text-gray-600 mt-1 uppercase">{stat.sub}</div>
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-
-            {/* 3. ACTIVE TAB CONTENT - Single Viewport */}
+            {/* 2. ACTIVE TAB CONTENT - Single Viewport */}
             <div className="min-h-[500px]">
                 {activeTab === 'overview' && (
-                    <div className="space-y-6 fade-in">
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="space-y-8 fade-in">
+                        {/* KPI CARDS - Only visible on Overview */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            {[
+                                { label: 'Pathfinders', value: districtTotals.Total, icon: Users, color: 'text-gold-500', bg: 'bg-gold-500/10', sub: `${districtTotals.Clubs} Active Clubs` },
+                                { label: 'Honours', value: honour_analytics.total_earned || 0, icon: Trophy, color: 'text-info-400', bg: 'bg-info-400/10', sub: 'District Wide' },
+                                { label: 'Pipeline', value: districtTotals.Ready, icon: Send, color: 'text-success-400', bg: 'bg-success-400/10', sub: 'Awaiting Review' },
+                                { label: 'Compliance', value: `${curriculum_stats.length > 0 ? Math.round(curriculum_stats.reduce((acc, c) => acc + c.health_score, 0) / curriculum_stats.length) : 0}%`, icon: Activity, color: 'text-burgundy-400', bg: 'bg-burgundy-400/10', sub: 'District Health' }
+                            ].map((stat, i) => (
+                                <div key={i} className="bg-surface-900 border border-white/5 p-8 rounded-[2.5rem] shadow-2xl shadow-black/40 hover:border-white/10 transition-all group relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/[0.02] rounded-full -translate-y-16 translate-x-16"></div>
+                                    <div className="flex items-center justify-between relative z-10">
+                                        <div className={`p-4 rounded-3xl ${stat.bg} ${stat.color}`}>
+                                            <stat.icon size={28} />
+                                        </div>
+                                        <div className="text-right">
+                                            <div className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-1">{stat.label}</div>
+                                            <div className="text-4xl font-black text-white tabular-nums">{stat.value}</div>
+                                            <div className="text-[10px] font-bold text-gray-600 mt-1 uppercase">{stat.sub}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* ANALYTICS ROW */}
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                            {/* Growth Pulse - New Line Chart */}
+                            <div className="lg:col-span-8 bg-surface-800 p-8 rounded-[2.5rem] border border-white/5">
+                                <div className="flex justify-between items-center mb-8">
+                                    <h4 className="text-white font-black uppercase tracking-widest text-xs flex items-center gap-2">
+                                        <Activity size={16} className="text-gold-500" />
+                                        District Growth Pulse
+                                    </h4>
+                                    <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Last 12 Months</div>
+                                </div>
+                                <div className="h-72 w-full">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <AreaChart data={growth_pulse}>
+                                            <defs>
+                                                <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="5%" stopColor="#eab308" stopOpacity={0.3}/>
+                                                    <stop offset="95%" stopColor="#eab308" stopOpacity={0}/>
+                                                </linearGradient>
+                                            </defs>
+                                            <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
+                                            <XAxis dataKey="label" stroke="#4b5563" fontSize={10} axisLine={false} tickLine={false} />
+                                            <YAxis stroke="#4b5563" fontSize={10} axisLine={false} tickLine={false} />
+                                            <Tooltip 
+                                                contentStyle={{ backgroundColor: '#111827', border: 'none', borderRadius: '16px', fontSize: '12px', fontWeight: 'bold' }}
+                                                itemStyle={{ color: '#fff' }}
+                                            />
+                                            <Area type="monotone" dataKey="value" stroke="#eab308" strokeWidth={4} fillOpacity={1} fill="url(#colorValue)" />
+                                        </AreaChart>
+                                    </ResponsiveContainer>
+                                </div>
+                            </div>
+
                             {/* Class Distribution Chart */}
-                            <div className="bg-surface-800 p-8 rounded-[2.5rem] border border-white/5">
+                            <div className="lg:col-span-4 bg-surface-800 p-8 rounded-[2.5rem] border border-white/5">
                                 <h4 className="text-white font-black uppercase tracking-widest text-xs mb-8 flex items-center gap-2">
                                     <BookOpen size={16} className="text-gold-500" />
-                                    Class Enrollment Distribution
+                                    Class Enrollment
                                 </h4>
                                 <div className="h-72 w-full">
                                     <ResponsiveContainer width="100%" height="100%">
                                         <PieChart>
                                             <Pie
                                                 data={classDistributionData}
-                                                innerRadius={70}
-                                                outerRadius={90}
+                                                innerRadius={60}
+                                                outerRadius={85}
                                                 paddingAngle={8}
                                                 dataKey="value"
                                                 stroke="none"
@@ -238,25 +272,27 @@ export default function DistrictCurriculumManager({
                                         </PieChart>
                                     </ResponsiveContainer>
                                 </div>
-                                <div className="grid grid-cols-3 gap-4 mt-6">
+                                <div className="flex flex-wrap justify-center gap-2 mt-4">
                                     {classDistributionData.map(c => (
-                                        <div key={c.name} className="flex items-center gap-2 p-2 rounded-xl bg-white/5">
-                                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: c.color }}></div>
-                                            <span className="text-[10px] font-black text-gray-400 uppercase">{c.name}: {c.value}</span>
+                                        <div key={c.name} className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white/5 border border-white/5">
+                                            <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: c.color }}></div>
+                                            <span className="text-[8px] font-black text-gray-500 uppercase">{c.name}</span>
                                         </div>
                                     ))}
                                 </div>
                             </div>
+                        </div>
 
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             {/* Club Comparison Chart */}
                             <div className="bg-surface-800 p-8 rounded-[2.5rem] border border-white/5">
                                 <h4 className="text-white font-black uppercase tracking-widest text-xs mb-8 flex items-center gap-2">
-                                    <Activity size={16} className="text-gold-500" />
-                                    Top Clubs Performance
+                                    <Trophy size={16} className="text-gold-500" />
+                                    Club Performance & Scale
                                 </h4>
                                 <div className="h-72 w-full">
                                     <ResponsiveContainer width="100%" height="100%">
-                                        <BarChart data={clubComparisonData.slice(0, 6)}>
+                                        <BarChart data={clubComparisonData.slice(0, 8)}>
                                             <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
                                             <XAxis dataKey="name" stroke="#4b5563" fontSize={10} axisLine={false} tickLine={false} />
                                             <YAxis stroke="#4b5563" fontSize={10} axisLine={false} tickLine={false} />
@@ -265,42 +301,58 @@ export default function DistrictCurriculumManager({
                                                 contentStyle={{ backgroundColor: '#111827', border: 'none', borderRadius: '16px', fontSize: '12px' }}
                                             />
                                             <ReBar dataKey="Total" fill="#eab308" radius={[6, 6, 0, 0]} barSize={24} />
+                                            <ReBar dataKey="Health" fill="#ef4444" radius={[6, 6, 0, 0]} barSize={24} />
                                         </BarChart>
                                     </ResponsiveContainer>
                                 </div>
-                                <p className="text-[10px] text-gray-500 uppercase font-black text-center mt-4 tracking-widest">Total Pathfinder Enrollment per Club</p>
+                                <div className="flex justify-center gap-6 mt-6">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-3 h-3 rounded bg-gold-500"></div>
+                                        <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Enrollment</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-3 h-3 rounded bg-burgundy-500"></div>
+                                        <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Compliance %</span>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
 
-                        {/* Alerts Grid */}
-                        <div className="bg-surface-800 p-8 rounded-[2.5rem] border border-white/5">
-                            <h4 className="text-white font-black uppercase tracking-widest text-xs mb-6 flex items-center gap-2">
-                                <AlertCircle size={16} className="text-burgundy-500" />
-                                Strategic Intervention Alerts
-                            </h4>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {curriculum_stats.filter(c => c.health_score < 60).map((club, i) => (
-                                    <div key={i} className="p-6 rounded-[2rem] bg-burgundy-500/5 border border-burgundy-500/10 flex items-center justify-between group hover:bg-burgundy-500/10 transition-all">
-                                        <div>
-                                            <div className="text-sm font-black text-white mb-1">{club.church.name.substring(0, 20)}</div>
-                                            <div className="text-[10px] text-burgundy-400 font-black uppercase tracking-tighter">Low Compliance</div>
+                            {/* Strategic Alerts */}
+                            <div className="bg-surface-800 p-8 rounded-[2.5rem] border border-white/5">
+                                <h4 className="text-white font-black uppercase tracking-widest text-xs mb-6 flex items-center gap-2">
+                                    <AlertCircle size={16} className="text-burgundy-500" />
+                                    Department Action Items
+                                </h4>
+                                <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                                    {curriculum_stats.filter(c => c.health_score < 60).map((club, i) => (
+                                        <div key={i} className="p-6 rounded-[2rem] bg-burgundy-500/5 border border-burgundy-500/10 flex items-center justify-between group hover:bg-burgundy-500/10 transition-all">
+                                            <div>
+                                                <div className="text-sm font-black text-white mb-1">{club.church.name.replace('SDA Church ', '')}</div>
+                                                <div className="text-[10px] text-burgundy-400 font-black uppercase tracking-tighter">Immediate Intervention Needed</div>
+                                            </div>
+                                            <div className="text-2xl font-black text-burgundy-500">{club.health_score}%</div>
                                         </div>
-                                        <div className="text-2xl font-black text-burgundy-500">{club.health_score}%</div>
-                                    </div>
-                                ))}
-                                {investiture_candidates.filter(c => c.status === 'pending_review').length > 0 && (
-                                    <div className="p-6 rounded-[2rem] bg-gold-500/5 border border-gold-500/10 flex items-center justify-between group hover:bg-gold-500/10 transition-all">
-                                        <div>
-                                            <div className="text-sm font-black text-white mb-1">Pipeline Backlog</div>
-                                            <div className="text-[10px] text-gold-400 font-black uppercase tracking-tighter">Awaiting Action</div>
+                                    ))}
+                                    {investiture_candidates.filter(c => c.status === 'pending_review').length > 0 && (
+                                        <div className="p-6 rounded-[2rem] bg-gold-500/5 border border-gold-500/10 flex items-center justify-between group hover:bg-gold-500/10 transition-all">
+                                            <div>
+                                                <div className="text-sm font-black text-white mb-1">Investiture Backlog</div>
+                                                <div className="text-[10px] text-gold-400 font-black uppercase tracking-tighter">{investiture_candidates.filter(c => c.status === 'pending_review').length} Candidates Waiting</div>
+                                            </div>
+                                            <Send size={20} className="text-gold-500" />
                                         </div>
-                                        <div className="text-2xl font-black text-gold-500">{investiture_candidates.filter(c => c.status === 'pending_review').length}</div>
-                                    </div>
-                                )}
+                                    )}
+                                    {curriculum_stats.filter(c => c.health_score >= 60).length === curriculum_stats.length && (
+                                        <div className="py-20 text-center flex flex-col items-center">
+                                            <CheckCircle2 size={48} className="text-success-500/20 mb-4" />
+                                            <p className="text-[10px] text-gray-600 font-black uppercase tracking-widest">No Critical Alerts</p>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>
-                )}
+                )}}
 
                 {activeTab === 'classes' && (
                     <div className="bg-surface-800 rounded-[2.5rem] border border-white/5 overflow-hidden fade-in">
