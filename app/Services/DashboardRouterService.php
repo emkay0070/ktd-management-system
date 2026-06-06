@@ -429,6 +429,17 @@ class DashboardRouterService
             $topHonoursFormatted[] = ['name' => $name, 'count' => $count];
         }
 
+        $allSystemHonours = \App\Models\Honour::orderBy('category')->orderBy('name')->get();
+        $recentHonours = \Illuminate\Support\Facades\DB::table('pathfinder_honour')
+            ->join('pathfinders', 'pathfinder_honour.pathfinder_id', '=', 'pathfinders.id')
+            ->join('honours', 'pathfinder_honour.honour_id', '=', 'honours.id')
+            ->join('churches', 'pathfinders.church_id', '=', 'churches.id')
+            ->whereIn('churches.id', $district->churches->pluck('id'))
+            ->select('pathfinders.name as pathfinder_name', 'honours.name as honour_name', 'churches.name as church_name', 'pathfinder_honour.earned_at')
+            ->orderBy('pathfinder_honour.earned_at', 'desc')
+            ->limit(10)
+            ->get();
+
         $curriculumStandards = \App\Models\CurriculumStandard::where('district_id', $district->id)
             ->when(!$user->hasAnyRole(['district_director', 'district_curriculum_coordinator', 'super_admin']), function($q) {
                 $q->where('workflow_status', 'published');
@@ -504,9 +515,12 @@ class DashboardRouterService
             'honour_analytics' => [
                 'total_earned' => $districtHonoursEarned,
                 'top_honours' => $topHonoursFormatted,
+                'all_honours' => $allSystemHonours,
+                'recent_completions' => $recentHonours,
             ],
             'investiture_candidates' => $investitureCandidates,
             'curriculum_standards' => $curriculumStandards,
+            'district_resources' => \App\Models\DistrictResource::where('district_id', $district->id)->latest()->get(),
             'welfare_cases' => $welfareCases,
             'social_events' => $socialEvents,
             'retention_metrics' => [
