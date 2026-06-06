@@ -130,6 +130,10 @@ Route::middleware(['auth', 'verified', 'onboarded'])->group(function () {
     Route::post('/curriculum/standards/{standard}/toggle', [\App\Http\Controllers\CurriculumController::class, 'toggleStandardStatus'])->name('curriculum.standards.toggle');
     Route::delete('/curriculum/standards/{standard}', [\App\Http\Controllers\CurriculumController::class, 'destroyStandard'])->name('curriculum.standards.destroy');
 
+    // Curriculum Exports
+    Route::get('/curriculum/exports/pdf', [\App\Http\Controllers\CurriculumController::class, 'exportPdf'])->name('curriculum.exports.pdf');
+    Route::get('/curriculum/exports/docx', [\App\Http\Controllers\CurriculumController::class, 'exportDocx'])->name('curriculum.exports.docx');
+
     Route::post('/club/mg-training', [MgTrainingController::class, 'store'])->name('mg_training.store');
     Route::put('/club/mg-training/{mgTraining}', [MgTrainingController::class, 'update'])->name('mg_training.update');
     Route::delete('/club/mg-training/{mgTraining}', [MgTrainingController::class, 'destroy'])->name('mg_training.destroy');

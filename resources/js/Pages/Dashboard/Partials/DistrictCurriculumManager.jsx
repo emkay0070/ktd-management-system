@@ -112,12 +112,18 @@ export default function DistrictCurriculumManager({
 
     const handleResourceSubmit = (e) => {
         e.preventDefault();
-        resourceForm.post(route('district.resources.store'), {
+        resourceForm.post(route('district_resources.store'), {
             onSuccess: () => {
                 setShowResourceUpload(false);
                 resourceForm.reset();
             }
         });
+    };
+
+    const handleDeleteResource = (id) => {
+        if (confirm('Remove this resource from the district library?')) {
+            router.delete(route('district_resources.destroy', id), { preserveScroll: true });
+        }
     };
 
     return (
@@ -154,9 +160,21 @@ export default function DistrictCurriculumManager({
                 </div>
                 
                 <div className="flex gap-2 pr-2">
-                    <button className="p-3 rounded-xl bg-white/5 text-gray-400 hover:text-white transition-all" title="Export PDF">
+                    <a 
+                        href={route('curriculum.exports.pdf')} 
+                        target="_blank"
+                        className="p-3 rounded-xl bg-white/5 text-gray-400 hover:text-white transition-all" 
+                        title="Export PDF Report"
+                    >
                         <Download size={18} />
-                    </button>
+                    </a>
+                    <a 
+                        href={route('curriculum.exports.docx')} 
+                        className="p-3 rounded-xl bg-white/5 text-gray-400 hover:text-white transition-all" 
+                        title="Export Word Document"
+                    >
+                        <FileText size={18} />
+                    </a>
                     <button className="p-3 rounded-xl bg-white/5 text-gray-400 hover:text-white transition-all" title="Share District Link">
                         <Share2 size={18} />
                     </button>
@@ -478,7 +496,18 @@ export default function DistrictCurriculumManager({
                                         <div className="p-4 rounded-3xl bg-white/5 text-gold-500 group-hover:scale-110 transition-transform">
                                             <FileText size={28} />
                                         </div>
-                                        <span className="text-[10px] font-black uppercase bg-white/5 px-3 py-1 rounded-full text-gray-500 tracking-widest">{res.file_type}</span>
+                                        <div className="flex flex-col items-end gap-2">
+                                            <span className="text-[10px] font-black uppercase bg-white/5 px-3 py-1 rounded-full text-gray-500 tracking-widest">{res.file_type}</span>
+                                            {(isCoordinator || isDirector || res.uploaded_by === auth.user.id) && (
+                                                <button 
+                                                    onClick={() => handleDeleteResource(res.id)}
+                                                    className="p-1.5 rounded-lg bg-burgundy-500/10 text-burgundy-400 opacity-0 group-hover:opacity-100 transition-all hover:bg-burgundy-500 hover:text-white"
+                                                    title="Delete Resource"
+                                                >
+                                                    <Trash2 size={12} />
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
                                     <h5 className="text-white font-black text-lg mb-2 line-clamp-1">{res.title}</h5>
                                     <div className="flex items-center gap-3 text-[10px] text-gray-500 font-black uppercase tracking-widest mb-6">
