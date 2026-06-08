@@ -51,7 +51,7 @@ class ClubCommandCenterService
             ->orderBy('full_name')
             ->get();
 
-        $pathfinders = Pathfinder::query()
+        $pathfinderModels = Pathfinder::query()
             ->where('church_id', $church->id)
             ->with([
                 'classAssignment.pathfinderClass:id,name',
@@ -78,39 +78,9 @@ class ClubCommandCenterService
                 'medical_conditions',
                 'consent',
                 'church_id',
-            ])->map(function ($p) {
-            return [
-                'id' => $p->id,
-                'name' => $p->name,
-                'age' => $p->age,
-                'gender' => $p->gender,
-                'guardian_name' => $p->guardian_name,
-                'guardian_phone' => $p->guardian_phone,
-                'father_name' => $p->father_name,
-                'mother_name' => $p->mother_name,
-                'religion_id' => $p->religion_id,
-                'other_religion' => $p->other_religion,
-                'residence' => $p->residence,
-                'school_class' => $p->school_class,
-                'is_inducted' => $p->is_inducted,
-                'insured_yearly' => $p->insured_yearly,
-                'boarding_status' => $p->boarding_status,
-                'medical_conditions' => $p->medical_conditions,
-                'consent' => $p->consent,
-                'church_id' => $p->church_id,
-                'avatar_url' => $p->avatar_url,
-                'class_assignment_id' => $p->classAssignment?->id,
-                'investiture_status' => $p->classAssignment?->investiture_status ?? 'not_ready',
-                'assigned_class' => $p->classAssignment?->pathfinderClass ? [
-                    'id' => $p->classAssignment->pathfinderClass->id,
-                    'name' => $p->classAssignment->pathfinderClass->name,
-                ] : null,
-                'unit' => $p->unitMembership?->unit ? [
-                    'id' => $p->unitMembership->unit->id,
-                    'name' => $p->unitMembership->unit->name,
-                ] : null,
-            ];
-        });
+            ]);
+
+        $pathfinders = $pathfinderModels->map(fn (Pathfinder $p) => $this->serializePathfinder($p));
 
         $latestSession = AttendanceSession::query()
             ->where('church_id', $church->id)
@@ -173,7 +143,7 @@ class ClubCommandCenterService
         foreach ($classes as $c) {
             $classTotals[$c->id] = 0;
         }
-        foreach ($pathfinders as $p) {
+        foreach ($pathfinderModels as $p) {
             $classId = $p->classAssignment?->class_id;
             if ($classId && isset($classTotals[$classId])) {
                 $classTotals[$classId] += 1;
@@ -323,10 +293,10 @@ class ClubCommandCenterService
                 'location' => $church->location,
             ],
             'overview' => [
-                'total_pathfinders' => $pathfinders->count(),
+                'total_pathfinders' => $pathfinderModels->count(),
                 'boarding_stats' => [
-                    'boarding' => $pathfinders->where('boarding_status', 'boarding')->count(),
-                    'day' => $pathfinders->where('boarding_status', 'day')->count(),
+                    'boarding' => $pathfinderModels->where('boarding_status', 'boarding')->count(),
+                    'day' => $pathfinderModels->where('boarding_status', 'day')->count(),
                 ],
                 'latest_attendance' => $attendanceSummary,
                 'class_totals' => $classes->map(fn ($c) => [
@@ -341,38 +311,7 @@ class ClubCommandCenterService
             'units' => $unitsPayload,
             'committees' => $committeePayload,
             'derived_pathfinder_committee' => $derivedPathfinderCommittee,
-            'pathfinders' => $pathfinders->map(fn ($p) => [
-                'id' => $p->id,
-                'name' => $p->name,
-                'age' => $p->age,
-                'gender' => $p->gender,
-                'guardian_name' => $p->guardian_name,
-                'guardian_phone' => $p->guardian_phone,
-                'father_name' => $p->father_name,
-                'mother_name' => $p->mother_name,
-                'religion' => $p->religion ? ['id' => $p->religion->id, 'name' => $p->religion->name] : null,
-                'other_religion' => $p->other_religion,
-                'residence' => $p->residence,
-                'school_class' => $p->school_class,
-                'boarding_status' => $p->boarding_status,
-                'is_inducted' => (bool) $p->is_inducted,
-                'insured_yearly' => (bool) $p->insured_yearly,
-                'medical_conditions' => $p->medical_conditions,
-                'consent' => (bool) $p->consent,
-                'assigned_class' => $p->classAssignment?->pathfinderClass
-                    ? [
-                        'id' => $p->classAssignment->pathfinderClass->id,
-                        'name' => $p->classAssignment->pathfinderClass->name,
-                    ]
-                    : null,
-                'unit' => $p->unitMembership?->unit
-                    ? [
-                        'id' => $p->unitMembership->unit->id,
-                        'name' => $p->unitMembership->unit->name,
-                        'gender' => $p->unitMembership->unit->gender,
-                    ]
-                    : null,
-            ])->values(),
+            'pathfinders' => $pathfinders->values(),
             'master_guides' => $masterGuides->map(fn ($mg) => [
                 'id' => $mg->id,
                 'full_name' => $mg->full_name,
@@ -409,7 +348,7 @@ class ClubCommandCenterService
             // Useful pick-lists for the Director UI
             'picklists' => [
                 'classes' => $classes->values(),
-                'pathfinders' => $pathfinders->map(fn ($p) => ['id' => $p->id, 'name' => $p->name, 'gender' => $p->gender])->values(),
+                'pathfinders' => $pathfinders->map(fn ($p) => ['id' => $p['id'], 'name' => $p['name'], 'gender' => $p['gender']])->values(),
                 'master_guides' => $masterGuides->map(fn ($mg) => ['id' => $mg->id, 'full_name' => $mg->full_name, 'role' => $mg->role])->values(),
                 'units' => $units->map(fn ($u) => ['id' => $u->id, 'name' => $u->name, 'gender' => $u->gender])->values(),
                 'religions' => Religion::query()
@@ -423,6 +362,47 @@ class ClubCommandCenterService
                     ->limit(10)
                     ->get(),
             ],
+        ];
+    }
+
+    private function serializePathfinder(Pathfinder $p): array
+    {
+        return [
+            'id' => $p->id,
+            'name' => $p->name,
+            'age' => $p->age,
+            'gender' => $p->gender,
+            'guardian_name' => $p->guardian_name,
+            'guardian_phone' => $p->guardian_phone,
+            'father_name' => $p->father_name,
+            'mother_name' => $p->mother_name,
+            'religion_id' => $p->religion_id,
+            'religion' => $p->religion ? ['id' => $p->religion->id, 'name' => $p->religion->name] : null,
+            'other_religion' => $p->other_religion,
+            'residence' => $p->residence,
+            'school_class' => $p->school_class,
+            'boarding_status' => $p->boarding_status,
+            'is_inducted' => (bool) $p->is_inducted,
+            'insured_yearly' => (bool) $p->insured_yearly,
+            'medical_conditions' => $p->medical_conditions,
+            'consent' => (bool) $p->consent,
+            'church_id' => $p->church_id,
+            'avatar_url' => $p->avatar_url,
+            'class_assignment_id' => $p->classAssignment?->id,
+            'investiture_status' => $p->classAssignment?->investiture_status ?? 'not_ready',
+            'assigned_class' => $p->classAssignment?->pathfinderClass
+                ? [
+                    'id' => $p->classAssignment->pathfinderClass->id,
+                    'name' => $p->classAssignment->pathfinderClass->name,
+                ]
+                : null,
+            'unit' => $p->unitMembership?->unit
+                ? [
+                    'id' => $p->unitMembership->unit->id,
+                    'name' => $p->unitMembership->unit->name,
+                    'gender' => $p->unitMembership->unit->gender,
+                ]
+                : null,
         ];
     }
 }
