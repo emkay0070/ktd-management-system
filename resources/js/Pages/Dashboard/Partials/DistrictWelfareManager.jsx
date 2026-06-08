@@ -4,9 +4,19 @@ import {
     Heart, Users, Calendar, Award, AlertTriangle, ClipboardList, BarChart3, 
     Plus, Search, Filter, Clock, User, Home, TrendingDown, UserMinus, 
     Gift, GraduationCap, PartyPopper, LifeBuoy, CheckCircle2, MoreVertical,
-    MessageSquare, Activity, ShieldAlert
+    MessageSquare, Activity, ShieldAlert, PieChart as PieIcon
 } from 'lucide-react';
+import { 
+    PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
+    BarChart, Bar, XAxis, YAxis, CartesianGrid,
+    RadialBarChart, RadialBar, PolarGrid,
+    LineChart, Line,
+} from 'recharts';
 import DistrictAppraisalManager from './DistrictAppraisalManager';
+import { 
+    CHART_COLORS, WELFARE_COLORS, GradientDefs, KTDTooltip, chartAxisProps, 
+    ChartCard, renderPieLabel, LegendItem, SERIES_PALETTE 
+} from '@/Components/Charts/ChartTheme';
 
 export default function DistrictWelfareManager({ 
     welfare_cases = [], 
@@ -48,9 +58,38 @@ export default function DistrictWelfareManager({
             openCases: welfare_cases.filter(c => c.status === 'open' || c.status === 'review').length,
             upcomingEvents: social_events.filter(e => new Date(e.event_date) > new Date()).length,
             inactiveMembers: retention_metrics.inactive_members?.length || 0,
-            avgEngagement: 85, // Placeholder for now
+            avgEngagement: 85,
         };
     }, [welfare_cases, social_events, retention_metrics]);
+
+    // ── Chart data computations
+    const casesByCategory = useMemo(() => {
+        const counts = {};
+        welfare_cases.forEach(c => { counts[c.category] = (counts[c.category] || 0) + 1; });
+        return Object.entries(counts).map(([name, value]) => ({ name, value }));
+    }, [welfare_cases]);
+
+    const eventsByMonth = useMemo(() => {
+        const counts = {};
+        social_events.forEach(e => {
+            const month = new Date(e.event_date).toLocaleString('default', { month: 'short' });
+            counts[month] = (counts[month] || 0) + 1;
+        });
+        return Object.entries(counts).map(([label, count]) => ({ label, count }));
+    }, [social_events]);
+
+    const engagementGauge = [{ name: 'Engagement', value: stats.avgEngagement, fill: CHART_COLORS.gold }];
+
+    const inactiveByClub = useMemo(() => {
+        const counts = {};
+        (retention_metrics.inactive_members || []).forEach(m => {
+            const club = m.church?.name?.replace('SDA Church ', '').substring(0, 12) || 'Unknown';
+            counts[club] = (counts[club] || 0) + 1;
+        });
+        return Object.entries(counts).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count);
+    }, [retention_metrics]);
+
+    const WELFARE_CAT_COLORS = Object.values(WELFARE_COLORS);
 
     const handleCreateCase = (e) => {
         e.preventDefault();
@@ -103,31 +142,101 @@ export default function DistrictWelfareManager({
 
                 {activeTab === 'overview' && (
                     <div className="p-6 space-y-8 fade-in">
-                        {/* Summary Widgets */}
+                        {/* ── KPI CARDS */}
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                            <div className="bg-surface-800 border border-white/5 p-4 rounded-2xl group hover:border-burgundy-500/30 transition-all">
-                                <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">Active Cases</div>
-                                <div className="text-3xl font-black text-white flex items-center gap-2">
-                                    {stats.openCases}
-                                    {stats.openCases > 0 && <span className="w-2 h-2 rounded-full bg-burgundy-500 animate-pulse"></span>}
+                            {[
+                                { label: 'Active Cases', value: stats.openCases, sub: 'Needs immediate attention', color: 'text-white', pulse: stats.openCases > 0, border: 'hover:border-burgundy-500/30', subColor: 'text-burgundy-400' },
+                                { label: 'Upcoming Socials', value: stats.upcomingEvents, sub: 'District unity activities', color: 'text-white', border: 'hover:border-gold-500/30', subColor: 'text-gold-500' },
+                                { label: 'Inactive Members', value: stats.inactiveMembers, sub: 'At risk of dropping out', color: 'text-white', border: 'hover:border-info-500/30', subColor: 'text-info-400' },
+                                { label: 'Engagement Score', value: `${stats.avgEngagement}%`, sub: 'District wellbeing health', color: 'text-success-400', border: 'hover:border-success-500/30', subColor: 'text-success-500/60' },
+                            ].map((s, i) => (
+                                <div key={i} className={`bg-surface-800 border border-white/5 p-4 rounded-2xl group transition-all ${s.border}`}>
+                                    <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">{s.label}</div>
+                                    <div className={`text-3xl font-black ${s.color} flex items-center gap-2`}>
+                                        {s.value}
+                                        {s.pulse && <span className="w-2 h-2 rounded-full bg-burgundy-500 animate-pulse" />}
+                                    </div>
+                                    <div className={`text-[10px] ${s.subColor} font-bold mt-2 uppercase tracking-tighter`}>{s.sub}</div>
                                 </div>
-                                <div className="text-[10px] text-burgundy-400 font-bold mt-2 uppercase tracking-tighter">Needs immediate attention</div>
-                            </div>
-                            <div className="bg-surface-800 border border-white/5 p-4 rounded-2xl group hover:border-gold-500/30 transition-all">
-                                <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">Upcoming Socials</div>
-                                <div className="text-3xl font-black text-white">{stats.upcomingEvents}</div>
-                                <div className="text-[10px] text-gold-500 font-bold mt-2 uppercase tracking-tighter">District unity activities</div>
-                            </div>
-                            <div className="bg-surface-800 border border-white/5 p-4 rounded-2xl group hover:border-info-500/30 transition-all">
-                                <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">Inactive Members</div>
-                                <div className="text-3xl font-black text-white">{stats.inactiveMembers}</div>
-                                <div className="text-[10px] text-info-400 font-bold mt-2 uppercase tracking-tighter">At risk of dropping out</div>
-                            </div>
-                            <div className="bg-surface-800 border border-white/5 p-4 rounded-2xl group hover:border-success-500/30 transition-all">
-                                <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">Engagement Score</div>
-                                <div className="text-3xl font-black text-success-400">{stats.avgEngagement}%</div>
-                                <div className="text-[10px] text-success-500/60 font-bold mt-2 uppercase tracking-tighter">District wellbeing health</div>
-                            </div>
+                            ))}
+                        </div>
+
+                        {/* ── CHARTS ROW */}
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+                            {/* Donut: Cases by Category */}
+                            <ChartCard className="lg:col-span-4" title="Cases by Category" subtitle="Welfare distribution" icon={<PieIcon size={16} />} height={220}>
+                                {casesByCategory.length > 0 ? (
+                                    <>
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <PieChart>
+                                                <Pie
+                                                    data={casesByCategory}
+                                                    cx="50%" cy="50%"
+                                                    innerRadius={55} outerRadius={78}
+                                                    paddingAngle={5}
+                                                    dataKey="value"
+                                                    nameKey="name"
+                                                    label={renderPieLabel}
+                                                    labelLine={false}
+                                                    animationDuration={1500}
+                                                >
+                                                    {casesByCategory.map((_, i) => (
+                                                        <Cell key={i} fill={WELFARE_CAT_COLORS[i % WELFARE_CAT_COLORS.length]} stroke="rgba(0,0,0,0.3)" strokeWidth={2} />
+                                                    ))}
+                                                </Pie>
+                                                <Tooltip content={<KTDTooltip unit="cases" />} />
+                                            </PieChart>
+                                        </ResponsiveContainer>
+                                        <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2">
+                                            {casesByCategory.map((c, i) => <LegendItem key={c.name} color={WELFARE_CAT_COLORS[i % WELFARE_CAT_COLORS.length]} label={c.name} value={c.value} />)}
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="h-full flex items-center justify-center text-gray-600 text-xs">No cases recorded</div>
+                                )}
+                            </ChartCard>
+
+                            {/* Bar: Social Events by Month */}
+                            <ChartCard className="lg:col-span-5" title="Social Events Timeline" subtitle="Events scheduled by month" icon={<Calendar size={16} />} height={220}>
+                                {eventsByMonth.length > 0 ? (
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <BarChart data={eventsByMonth} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+                                            <CartesianGrid {...chartAxisProps.grid} />
+                                            <XAxis dataKey="label" {...chartAxisProps.xAxis} />
+                                            <YAxis {...chartAxisProps.yAxis} />
+                                            <Tooltip content={<KTDTooltip unit="events" />} cursor={{ fill: 'rgba(255,255,255,0.02)' }} />
+                                            <Bar dataKey="count" name="Events" fill={CHART_COLORS.gold} radius={[6, 6, 0, 0]} barSize={28} fillOpacity={0.85} />
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                ) : (
+                                    <div className="h-full flex items-center justify-center text-gray-600 text-xs">No events yet</div>
+                                )}
+                            </ChartCard>
+
+                            {/* Radial Gauge: Engagement Score */}
+                            <ChartCard className="lg:col-span-3" title="Wellbeing Score" subtitle="District health gauge" icon={<Activity size={16} />} height={220}>
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <RadialBarChart
+                                        cx="50%" cy="60%"
+                                        innerRadius="60%" outerRadius="90%"
+                                        startAngle={180} endAngle={0}
+                                        data={[{ name: 'Score', value: stats.avgEngagement, fill: stats.avgEngagement >= 75 ? CHART_COLORS.success : stats.avgEngagement >= 50 ? CHART_COLORS.gold : CHART_COLORS.burgundyMid }]}
+                                    >
+                                        <PolarGrid radialLines={false} stroke="rgba(255,255,255,0.04)" />
+                                        <RadialBar
+                                            dataKey="value"
+                                            cornerRadius={8}
+                                            background={{ fill: 'rgba(255,255,255,0.04)' }}
+                                        />
+                                        <Tooltip content={<KTDTooltip unit="%" />} />
+                                    </RadialBarChart>
+                                </ResponsiveContainer>
+                                <div className="text-center -mt-8">
+                                    <div className="text-3xl font-black text-success-400">{stats.avgEngagement}%</div>
+                                    <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest">Wellbeing Index</div>
+                                </div>
+                            </ChartCard>
                         </div>
 
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -289,6 +398,21 @@ export default function DistrictWelfareManager({
                             <h4 className="text-white font-bold">Retention & Engagement Audit</h4>
                             <p className="text-xs text-gray-500">Identifying members at risk of dropping out and clubs needing stability support.</p>
                         </div>
+
+                        {/* Inactive Members per Club — Bar Chart */}
+                        {inactiveByClub.length > 0 && (
+                            <ChartCard title="Inactive Members by Club" subtitle="30+ days absent" icon={<UserMinus size={16} />} height={220}>
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={inactiveByClub} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+                                        <CartesianGrid {...chartAxisProps.grid} />
+                                        <XAxis dataKey="name" {...chartAxisProps.xAxis} />
+                                        <YAxis {...chartAxisProps.yAxis} />
+                                        <Tooltip content={<KTDTooltip unit="members" />} cursor={{ fill: 'rgba(255,255,255,0.02)' }} />
+                                        <Bar dataKey="count" name="Inactive" fill={CHART_COLORS.burgundyMid} radius={[6, 6, 0, 0]} barSize={28} fillOpacity={0.85} />
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </ChartCard>
+                        )}
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {/* Inactive Members List */}

@@ -8,8 +8,14 @@ import {
 } from 'lucide-react';
 import { 
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
-    PieChart, Pie, Cell, LineChart, Line, AreaChart, Area
+    PieChart, Pie, Cell, LineChart, Line, AreaChart, Area,
+    RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
+    ComposedChart,
 } from 'recharts';
+import { 
+    CHART_COLORS, CLASS_COLORS, GradientDefs, KTDTooltip, chartAxisProps, 
+    ChartCard, renderPieLabel, LegendItem, SERIES_PALETTE 
+} from '@/Components/Charts/ChartTheme';
 
 export default function DistrictCurriculumManager({ 
     curriculum_stats = [], 
@@ -20,6 +26,9 @@ export default function DistrictCurriculumManager({
     district_bulletins = [],
     district_events = [],
     growth_pulse = [],
+    cmt_data = [],
+    honor_calendar = [],
+    audits = [],
     readonly, 
     auth 
 }) {
@@ -38,15 +47,8 @@ export default function DistrictCurriculumManager({
     const [editingEvent, setEditingEvent] = useState(null);
     const [selectedItem, setSelectedItem] = useState(null); // For Detailed View
 
-    // COLORS FOR CHARTS
-    const CHART_COLORS = {
-        Friend: '#94a3b8',
-        Companion: '#60a5fa',
-        Explorer: '#4ade80',
-        Ranger: '#facc15',
-        Voyager: '#fb923c',
-        Guide: '#f87171'
-    };
+    // Use canonical class colors from ChartTheme
+    const CHART_COLORS_MAP = CLASS_COLORS;
 
     const standardForm = useForm({
         title: '',
@@ -104,12 +106,12 @@ export default function DistrictCurriculumManager({
 
     // CHART DATA
     const classDistributionData = [
-        { name: 'Friend', value: districtTotals.Friend, color: CHART_COLORS.Friend },
-        { name: 'Companion', value: districtTotals.Companion, color: CHART_COLORS.Companion },
-        { name: 'Explorer', value: districtTotals.Explorer, color: CHART_COLORS.Explorer },
-        { name: 'Ranger', value: districtTotals.Ranger, color: CHART_COLORS.Ranger },
-        { name: 'Voyager', value: districtTotals.Voyager, color: CHART_COLORS.Voyager },
-        { name: 'Guide', value: districtTotals.Guide, color: CHART_COLORS.Guide },
+        { name: 'Friend',    value: districtTotals.Friend,    color: CLASS_COLORS.Friend },
+        { name: 'Companion', value: districtTotals.Companion, color: CLASS_COLORS.Companion },
+        { name: 'Explorer',  value: districtTotals.Explorer,  color: CLASS_COLORS.Explorer },
+        { name: 'Ranger',    value: districtTotals.Ranger,    color: CLASS_COLORS.Ranger },
+        { name: 'Voyager',   value: districtTotals.Voyager,   color: CLASS_COLORS.Voyager },
+        { name: 'Guide',     value: districtTotals.Guide,     color: CLASS_COLORS.Guide },
     ].filter(d => d.value > 0);
 
     const clubComparisonData = curriculum_stats.map(c => ({
@@ -254,7 +256,10 @@ export default function DistrictCurriculumManager({
                         { id: 'standards', label: 'Standards', icon: ShieldCheck },
                         { id: 'resources', label: 'Resources', icon: HardDrive },
                         { id: 'bulletins', label: 'Bulletins', icon: Megaphone },
-                        { id: 'events', label: 'Events', icon: Calendar }
+                        { id: 'events', label: 'Events', icon: Calendar },
+                        { id: 'cmt', label: 'CMT Program', icon: UserCheck },
+                        { id: 'honor_calendar', label: 'Honor Calendar', icon: Clock },
+                        { id: 'audits', label: 'Audits', icon: ClipboardList }
                     ].map(tab => (
                         <button
                             key={tab.id}
@@ -340,20 +345,12 @@ export default function DistrictCurriculumManager({
                                 <div className="h-72 w-full">
                                     <ResponsiveContainer width="100%" height="100%">
                                         <AreaChart data={growth_pulse}>
-                                            <defs>
-                                                <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                                                    <stop offset="5%" stopColor="#eab308" stopOpacity={0.3}/>
-                                                    <stop offset="95%" stopColor="#eab308" stopOpacity={0}/>
-                                                </linearGradient>
-                                            </defs>
-                                            <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
-                                            <XAxis dataKey="label" stroke="#4b5563" fontSize={10} axisLine={false} tickLine={false} />
-                                            <YAxis stroke="#4b5563" fontSize={10} axisLine={false} tickLine={false} />
-                                            <Tooltip 
-                                                contentStyle={{ backgroundColor: '#111827', border: 'none', borderRadius: '16px', fontSize: '12px', fontWeight: 'bold' }}
-                                                itemStyle={{ color: '#fff' }}
-                                            />
-                                            <Area type="monotone" dataKey="value" stroke="#eab308" strokeWidth={4} fillOpacity={1} fill="url(#colorValue)" />
+                                            <GradientDefs />
+                                            <CartesianGrid {...chartAxisProps.grid} />
+                                            <XAxis dataKey="label" {...chartAxisProps.xAxis} />
+                                            <YAxis {...chartAxisProps.yAxis} />
+                                            <Tooltip content={<KTDTooltip />} cursor={{ stroke: '#eab308', strokeWidth: 1, strokeDasharray: '4 4' }} />
+                                            <Area type="monotone" dataKey="value" stroke="#eab308" strokeWidth={4} fillOpacity={1} fill="url(#ktd-grad-gold)" />
                                         </AreaChart>
                                     </ResponsiveContainer>
                                 </div>
@@ -374,16 +371,15 @@ export default function DistrictCurriculumManager({
                                                 outerRadius={85}
                                                 paddingAngle={8}
                                                 dataKey="value"
+                                                label={renderPieLabel}
+                                                labelLine={false}
                                                 stroke="none"
                                             >
                                                 {classDistributionData.map((entry, index) => (
                                                     <Cell key={`cell-${index}`} fill={entry.color} />
                                                 ))}
                                             </Pie>
-                                            <Tooltip 
-                                                contentStyle={{ backgroundColor: '#111827', border: 'none', borderRadius: '16px', fontSize: '12px', fontWeight: 'bold' }}
-                                                itemStyle={{ color: '#fff' }}
-                                            />
+                                            <Tooltip content={<KTDTooltip unit="members" />} />
                                         </PieChart>
                                     </ResponsiveContainer>
                                 </div>
@@ -408,15 +404,12 @@ export default function DistrictCurriculumManager({
                                 <div className="h-72 w-full">
                                     <ResponsiveContainer width="100%" height="100%">
                                         <BarChart data={clubComparisonData.slice(0, 8)}>
-                                            <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
-                                            <XAxis dataKey="name" stroke="#4b5563" fontSize={10} axisLine={false} tickLine={false} />
-                                            <YAxis stroke="#4b5563" fontSize={10} axisLine={false} tickLine={false} />
-                                            <Tooltip 
-                                                cursor={{ fill: '#ffffff05' }}
-                                                contentStyle={{ backgroundColor: '#111827', border: 'none', borderRadius: '16px', fontSize: '12px' }}
-                                            />
-                                            <Bar dataKey="Total" fill="#eab308" radius={[6, 6, 0, 0]} barSize={24} />
-                                            <Bar dataKey="Health" fill="#ef4444" radius={[6, 6, 0, 0]} barSize={24} />
+                                            <CartesianGrid {...chartAxisProps.grid} />
+                                            <XAxis dataKey="name" {...chartAxisProps.xAxis} />
+                                            <YAxis {...chartAxisProps.yAxis} />
+                                            <Tooltip content={<KTDTooltip />} cursor={{ fill: 'rgba(255,255,255,0.02)' }} />
+                                            <Bar dataKey="Total" name="Enrollment" fill="#eab308" radius={[6, 6, 0, 0]} barSize={24} />
+                                            <Bar dataKey="Health" name="Compliance %" fill="#991b1b" radius={[6, 6, 0, 0]} barSize={24} />
                                         </BarChart>
                                     </ResponsiveContainer>
                                 </div>
@@ -1199,9 +1192,133 @@ export default function DistrictCurriculumManager({
                         </div>
                     </div>
                 )}
+
+                {activeTab === 'cmt' && (
+                    <div className="bg-surface-800 rounded-[2.5rem] border border-white/5 overflow-hidden fade-in">
+                        <div className="p-8 border-b border-white/5 flex justify-between items-center bg-white/[0.01]">
+                            <h4 className="text-white font-black uppercase tracking-widest text-xs">Club Ministry Training (CMT)</h4>
+                            {isCoordinator && (
+                                <button className="bg-gold-500 hover:bg-gold-600 text-black font-black px-6 py-2 rounded-xl text-xs flex items-center gap-2 transition-all">
+                                    <Plus size={16} /> Issue Certification
+                                </button>
+                            )}
+                        </div>
+                        <div className="p-4">
+                            <table className="w-full text-left border-separate border-spacing-y-3">
+                                <thead>
+                                    <tr className="text-[10px] text-gray-500 font-black uppercase tracking-[0.2em] px-4">
+                                        <th className="pb-2 pl-6">Staff Member</th>
+                                        <th className="pb-2">Club</th>
+                                        <th className="pb-2">Certification</th>
+                                        <th className="pb-2">Status</th>
+                                        <th className="pb-2">Certified At</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {cmt_data.map((cert) => (
+                                        <tr key={cert.id} className="bg-white/[0.02] hover:bg-white/[0.04] transition-all">
+                                            <td className="py-4 pl-6 rounded-l-[2rem]">
+                                                <div className="font-black text-white">{cert.user.name}</div>
+                                            </td>
+                                            <td className="py-4 text-gray-400 text-sm">{cert.user.church?.name}</td>
+                                            <td className="py-4 font-bold text-gold-400">{cert.certification_type}</td>
+                                            <td className="py-4">
+                                                <span className={`text-[10px] uppercase font-black px-3 py-1 rounded-full ${cert.status === 'completed' ? 'bg-success-500/10 text-success-400' : 'bg-info-500/10 text-info-400'}`}>
+                                                    {cert.status}
+                                                </span>
+                                            </td>
+                                            <td className="py-4 text-gray-500 text-sm rounded-r-[2rem]">
+                                                {cert.completed_at ? new Date(cert.completed_at).toLocaleDateString() : '-'}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    {cmt_data.length === 0 && (
+                                        <tr>
+                                            <td colSpan="5" className="py-8 text-center text-gray-500 text-sm">No CMT certifications found.</td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === 'honor_calendar' && (
+                    <div className="bg-surface-800 rounded-[2.5rem] border border-white/5 overflow-hidden fade-in">
+                        <div className="p-8 border-b border-white/5 flex justify-between items-center bg-white/[0.01]">
+                            <h4 className="text-white font-black uppercase tracking-widest text-xs">District Honor Calendar</h4>
+                            {isCoordinator && (
+                                <button className="bg-gold-500 hover:bg-gold-600 text-black font-black px-6 py-2 rounded-xl text-xs flex items-center gap-2 transition-all">
+                                    <Calendar size={16} /> Schedule Session
+                                </button>
+                            )}
+                        </div>
+                        <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {honor_calendar.map((session) => (
+                                <div key={session.id} className="bg-white/[0.02] p-6 rounded-[2rem] border border-white/5">
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div className="font-black text-lg text-white">{session.honour?.name}</div>
+                                        <span className={`text-[10px] uppercase font-black px-3 py-1 rounded-full ${session.session_type === 'practical' ? 'bg-gold-500/10 text-gold-400' : 'bg-info-500/10 text-info-400'}`}>
+                                            {session.session_type}
+                                        </span>
+                                    </div>
+                                    <div className="text-sm text-gray-400 mb-2"><Clock size={14} className="inline mr-2"/>{new Date(session.scheduled_date).toLocaleString()}</div>
+                                    <div className="text-sm text-gray-400 mb-4"><Calendar size={14} className="inline mr-2"/>{session.location || 'TBA'}</div>
+                                    <div className="flex justify-between items-center pt-4 border-t border-white/5">
+                                        <div className="text-xs text-gray-500">Instructor: {session.instructor?.name || 'TBA'}</div>
+                                        <div className="text-xs text-gold-500 font-bold">{session.target_audience}</div>
+                                    </div>
+                                </div>
+                            ))}
+                            {honor_calendar.length === 0 && (
+                                <div className="col-span-2 py-12 text-center text-gray-500">No honor sessions scheduled.</div>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === 'audits' && (
+                    <div className="bg-surface-800 rounded-[2.5rem] border border-white/5 overflow-hidden fade-in">
+                        <div className="p-8 border-b border-white/5 flex justify-between items-center bg-white/[0.01]">
+                            <h4 className="text-white font-black uppercase tracking-widest text-xs">Curriculum Audits</h4>
+                            {isCoordinator && (
+                                <button className="bg-gold-500 hover:bg-gold-600 text-black font-black px-6 py-2 rounded-xl text-xs flex items-center gap-2 transition-all">
+                                    <Plus size={16} /> New Audit
+                                </button>
+                            )}
+                        </div>
+                        <div className="p-6 space-y-4">
+                            {audits.map((audit) => (
+                                <div key={audit.id} className="bg-white/[0.02] p-6 rounded-[2rem] border border-white/5 flex flex-col lg:flex-row justify-between items-center gap-6">
+                                    <div className="flex-1">
+                                        <div className="font-black text-xl text-white mb-1">{audit.church?.name}</div>
+                                        <div className="text-xs text-gray-500 uppercase tracking-widest font-bold">Audited by {audit.auditor?.name} on {new Date(audit.audit_date).toLocaleDateString()}</div>
+                                    </div>
+                                    <div className="flex gap-6">
+                                        <div className="text-center">
+                                            <div className="text-2xl font-black text-gold-400">{audit.teaching_quality_score}/10</div>
+                                            <div className="text-[10px] uppercase text-gray-600 tracking-widest font-black">Teaching</div>
+                                        </div>
+                                        <div className="text-center">
+                                            <div className="text-2xl font-black text-gold-400">{audit.record_keeping_score}/10</div>
+                                            <div className="text-[10px] uppercase text-gray-600 tracking-widest font-black">Records</div>
+                                        </div>
+                                        <div className="text-center">
+                                            <div className="text-2xl font-black text-gold-400">{audit.facilities_score}/10</div>
+                                            <div className="text-[10px] uppercase text-gray-600 tracking-widest font-black">Facilities</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                            {audits.length === 0 && (
+                                <div className="py-12 text-center text-gray-500">No audits recorded yet.</div>
+                            )}
+                        </div>
+                    </div>
+                )}
             </div>
 
-            {/* 4. DETAILED REVIEW WORKSPACE (MODAL) */}
+            {/* Modal/Workspace Overlay for Detailed View */}
             {selectedItem && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-12">
                     <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setSelectedItem(null)}></div>

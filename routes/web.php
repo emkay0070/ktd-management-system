@@ -146,6 +146,17 @@ Route::middleware(['auth', 'verified', 'onboarded'])->group(function () {
     Route::get('/curriculum/exports/pdf', [\App\Http\Controllers\CurriculumController::class, 'exportPdf'])->name('curriculum.exports.pdf');
     Route::get('/curriculum/exports/docx', [\App\Http\Controllers\CurriculumController::class, 'exportDocx'])->name('curriculum.exports.docx');
 
+    // Curriculum Enhancements: CMT, Honor Sessions, Audits
+    Route::post('/curriculum/cmt', [\App\Http\Controllers\CmtCertificationController::class, 'store'])->name('curriculum.cmt.store');
+    Route::put('/curriculum/cmt/{certification}', [\App\Http\Controllers\CmtCertificationController::class, 'update'])->name('curriculum.cmt.update');
+    Route::delete('/curriculum/cmt/{certification}', [\App\Http\Controllers\CmtCertificationController::class, 'destroy'])->name('curriculum.cmt.destroy');
+
+    Route::post('/curriculum/honor-sessions', [\App\Http\Controllers\HonorCalendarSessionController::class, 'store'])->name('curriculum.honor_sessions.store');
+    Route::delete('/curriculum/honor-sessions/{session}', [\App\Http\Controllers\HonorCalendarSessionController::class, 'destroy'])->name('curriculum.honor_sessions.destroy');
+
+    Route::post('/curriculum/audits', [\App\Http\Controllers\CurriculumAuditController::class, 'store'])->name('curriculum.audits.store');
+    Route::delete('/curriculum/audits/{audit}', [\App\Http\Controllers\CurriculumAuditController::class, 'destroy'])->name('curriculum.audits.destroy');
+
     Route::post('/club/mg-training', [MgTrainingController::class, 'store'])->name('mg_training.store');
     Route::put('/club/mg-training/{mgTraining}', [MgTrainingController::class, 'update'])->name('mg_training.update');
     Route::delete('/club/mg-training/{mgTraining}', [MgTrainingController::class, 'destroy'])->name('mg_training.destroy');

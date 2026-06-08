@@ -448,6 +448,22 @@ class DashboardRouterService
             ->latest()
             ->get();
 
+        $cmtData = \App\Models\CmtCertification::whereHas('user', function($q) use ($district) {
+            $q->whereHas('church', function($q2) use ($district) {
+                $q2->where('district_id', $district->id);
+            });
+        })->with(['user.church', 'certifier:id,name'])->latest()->get();
+
+        $honorCalendar = \App\Models\HonorCalendarSession::where('district_id', $district->id)
+            ->with(['honour', 'instructor:id,name'])
+            ->orderBy('scheduled_date', 'asc')
+            ->get();
+
+        $audits = \App\Models\CurriculumAudit::where('district_id', $district->id)
+            ->with(['church:id,name', 'auditor:id,name'])
+            ->orderBy('audit_date', 'desc')
+            ->get();
+
         // Welfare & Social Data
         $welfareCases = \App\Models\WelfareCase::where('district_id', $district->id)
             ->with(['church:id,name', 'beneficiary:id,name', 'creator:id,name'])
@@ -520,6 +536,9 @@ class DashboardRouterService
             ],
             'investiture_candidates' => $investitureCandidates,
             'curriculum_standards' => $curriculumStandards,
+            'cmt_data' => $cmtData,
+            'honor_calendar' => $honorCalendar,
+            'audits' => $audits,
             'district_resources' => \App\Models\DistrictResource::where('district_id', $district->id)->with('uploader:id,name')->latest()->get(),
             'growth_pulse' => $growthPulse,
             'welfare_cases' => $welfareCases,
