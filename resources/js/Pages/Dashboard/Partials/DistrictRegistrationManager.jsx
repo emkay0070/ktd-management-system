@@ -2,10 +2,12 @@ import { useState, useMemo } from 'react';
 import { router } from '@inertiajs/react';
 import { 
     ShieldCheck, Search, Filter, CheckCircle, Clock, User, Church, 
-    Tent, AlertCircle, TrendingUp, DollarSign, PieChart, Printer,
+    Tent, AlertCircle, TrendingUp, DollarSign, PieChart as PieChartIcon, Printer,
     ArrowRight, ChevronRight, Download, FileText, CheckCircle2,
-    Calendar, History, Zap, ArrowUpCircle
+    Calendar, History, Zap, ArrowUpCircle, Wallet
 } from 'lucide-react';
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
+import { CHART_COLORS, KTDTooltip, ChartCard, renderPieLabel } from '@/Components/Charts/ChartTheme';
 
 export default function DistrictRegistrationManager({ registrations = [], district_events = [], treasury = [] }) {
     const [activeTab, setActiveTab] = useState('pulse');
@@ -118,7 +120,7 @@ export default function DistrictRegistrationManager({ registrations = [], distri
                                 UGX {eventStats?.remaining?.toLocaleString() ?? 0}
                             </div>
                         </div>
-                        <PieChart size={32} style={{ opacity: 0.2, color: 'var(--clr-info)' }} />
+                        <PieChartIcon size={32} style={{ opacity: 0.2, color: 'var(--clr-info)' }} />
                     </div>
                     <div style={{ marginTop: '16px', fontSize: '10px', color: 'var(--clr-text-secondary)', fontWeight: 700 }}>
                         {debtClubs.length} Clubs with pending payments
@@ -126,27 +128,60 @@ export default function DistrictRegistrationManager({ registrations = [], distri
                 </div>
             </div>
 
-            <div className="panel">
-                <div className="panel__header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                        <h4 style={{ margin: 0 }}>Enrollment Pulse</h4>
-                        <p className="text-xs text-muted">A summary of the current district mobilization.</p>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--clr-text-muted)' }}>
-                        <Tent size={14} /> Total Enrollments: <b style={{ color: 'var(--clr-text-primary)' }}>{eventStats?.total}</b>
-                    </div>
-                </div>
-                <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <div style={{ flex: 1, height: '12px', background: 'var(--clr-surface-600)', borderRadius: '6px', overflow: 'hidden' }}>
-                            <div style={{ height: '100%', width: `100%`, background: 'var(--clr-gold-500)', opacity: 0.1 }}></div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2">
+                    <ChartCard
+                        title="Enrollment Pulse"
+                        subtitle="A summary of the current district mobilization."
+                        icon={<Tent size={16} />}
+                        height={240}
+                        action={<span className="text-xs font-bold text-white bg-white/10 px-3 py-1 rounded-full">{eventStats?.total || 0} Total</span>}
+                    >
+                        <div style={{ padding: '0 24px', display: 'flex', flexDirection: 'column', gap: '16px', height: '100%', justifyContent: 'center' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <div style={{ flex: 1, height: '24px', background: 'var(--clr-surface-600)', borderRadius: '12px', overflow: 'hidden', display: 'flex' }}>
+                                    <div style={{ height: '100%', width: `${eventStats?.progress ?? 0}%`, background: 'var(--clr-success)' }}></div>
+                                    <div style={{ height: '100%', flex: 1, background: 'var(--clr-burgundy-500)', opacity: 0.8 }}></div>
+                                </div>
+                            </div>
+                            <p style={{ fontSize: '13px', color: 'var(--clr-text-secondary)', lineHeight: 1.6 }}>
+                                The district has reached <b>{eventStats?.total} registrations</b> for this event. 
+                                The average fee collection per head is <b>UGX {(eventStats?.collected / (eventStats?.total || 1)).toLocaleString()}</b>.
+                                Currently, <b>{eventStats?.progress?.toFixed(1) ?? 0}%</b> of expected revenue has been cleared.
+                            </p>
                         </div>
-                    </div>
-                    <p style={{ fontSize: '13px', color: 'var(--clr-text-secondary)', lineHeight: 1.6 }}>
-                        The district has reached <b>{eventStats?.total} registrations</b> for this event. 
-                        The average fee collection per head is <b>UGX {(eventStats?.collected / (eventStats?.total || 1)).toLocaleString()}</b>.
-                    </p>
+                    </ChartCard>
                 </div>
+                
+                <ChartCard
+                    title="Revenue Breakdown"
+                    subtitle="Collected vs Pending"
+                    icon={<Wallet size={16} />}
+                    height={240}
+                >
+                    <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                            <Pie
+                                data={[
+                                    { name: 'Collected', value: eventStats?.collected ?? 0, color: CHART_COLORS.success },
+                                    { name: 'Pending Debt', value: eventStats?.remaining ?? 0, color: CHART_COLORS.burgundyMid }
+                                ]}
+                                innerRadius={50}
+                                outerRadius={75}
+                                paddingAngle={5}
+                                dataKey="value"
+                                label={renderPieLabel}
+                                labelLine={false}
+                                stroke="none"
+                            >
+                                {[{color: CHART_COLORS.success}, {color: CHART_COLORS.burgundyMid}].map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={entry.color} />
+                                ))}
+                            </Pie>
+                            <Tooltip content={<KTDTooltip unit="UGX" />} />
+                        </PieChart>
+                    </ResponsiveContainer>
+                </ChartCard>
             </div>
         </div>
     );

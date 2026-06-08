@@ -110,7 +110,7 @@ class PathfinderController extends Controller
     public function storeBulk(Request $request)
     {
         $user = $request->user();
-        abort_unless($user && $user->hasAnyRole(['club_director', 'club_secretary', 'district_director', 'super_admin']), 403);
+        abort_unless($user && $user->hasAnyRole(['director', 'district_director', 'super_admin']), 403);
 
         $churchId = $user->church_id;
         if (!$churchId) {
