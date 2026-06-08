@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useForm } from '@inertiajs/react';
-import { Plus, Trash2, Users, Save, X } from 'lucide-react';
+import { Plus, Trash2, Users, Save, X, Camera } from 'lucide-react';
 import ReligionCombobox from './ReligionCombobox';
 
 export default function BulkMasterGuideForm({ picklists, onCancel, onSuccess }) {
@@ -35,6 +35,16 @@ export default function BulkMasterGuideForm({ picklists, onCancel, onSuccess }) 
     const updateRow = (id, field, value) => {
         setData('master_guides', data.master_guides.map(p => 
             p.id === id ? { ...p, [field]: value } : p
+        ));
+    };
+
+    const handleImageUpload = (id, e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const previewUrl = URL.createObjectURL(file);
+        setData('master_guides', data.master_guides.map(p => 
+            p.id === id ? { ...p, avatar: file, avatarPreview: previewUrl } : p
         ));
     };
 
@@ -77,39 +87,50 @@ export default function BulkMasterGuideForm({ picklists, onCancel, onSuccess }) 
                 </div>
             </div>
 
-            <div className="p-6 overflow-x-auto">
-                <table className="h-table w-full">
-                    <thead>
-                        <tr>
-                            <th style={{ width: '40px' }}>#</th>
-                            <th style={{ minWidth: '200px' }}>Full Name *</th>
-                            <th style={{ width: '150px' }}>Phone *</th>
-                            <th style={{ width: '120px' }}>Gender</th>
-                            <th style={{ width: '120px' }}>Role</th>
-                            <th style={{ width: '50px' }}></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {data.master_guides.map((row, index) => (
-                            <tr key={row.id}>
-                                <td className="text-muted text-xs font-bold text-center">{index + 1}</td>
-                                <td>
+            <div className="p-6 bg-surface-900/50">
+                <div className="flex flex-col gap-6">
+                    {data.master_guides.map((row, index) => (
+                        <div key={row.id} className="relative bg-surface-800 rounded-3xl border border-white/5 p-6 flex flex-col md:flex-row gap-6 hover:border-gold-500/20 transition-colors">
+                            <button 
+                                type="button"
+                                className="absolute top-4 right-4 p-2 text-muted hover:text-danger hover:bg-danger/10 rounded-full transition-colors"
+                                onClick={() => removeRow(row.id)}
+                                disabled={data.master_guides.length <= 1}
+                            >
+                                <Trash2 size={16} />
+                            </button>
+
+                            <div style={{ width: '180px', flexShrink: 0 }} className="flex flex-col gap-4">
+                                <label className="aspect-square bg-surface-900 border-2 border-dashed border-white/10 rounded-2xl flex items-center justify-center relative overflow-hidden group cursor-pointer hover:border-gold-500/50 transition-colors">
+                                    {row.avatarPreview ? (
+                                        <img src={row.avatarPreview} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <div className="text-center text-muted group-hover:text-gold-400 transition-colors flex flex-col items-center justify-center p-4">
+                                            <Camera size={28} className="mb-3 opacity-50 group-hover:opacity-100 transition-opacity" />
+                                            <span className="text-[10px] uppercase font-black tracking-widest leading-tight">Upload<br/>Photo</span>
+                                        </div>
+                                    )}
+                                    <input type="file" accept="image/*" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={(e) => handleImageUpload(row.id, e)} />
+                                </label>
+                                
+                                <div>
+                                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">Full Name *</label>
                                     <input 
                                         className={`h-input w-full ${getError(index, 'name') ? 'border-danger' : ''}`}
                                         value={row.name}
                                         onChange={(e) => updateRow(row.id, 'name', e.target.value)}
-                                        placeholder="Full Name"
+                                        placeholder="E.g. John Doe"
                                     />
-                                </td>
-                                <td>
-                                    <input 
-                                        className={`h-input w-full ${getError(index, 'phone') ? 'border-danger' : ''}`}
-                                        value={row.phone}
-                                        onChange={(e) => updateRow(row.id, 'phone', e.target.value)}
-                                        placeholder="Phone Number"
-                                    />
-                                </td>
-                                <td>
+                                </div>
+                            </div>
+
+                            <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4 content-start pt-1">
+                                <div className="sm:col-span-2 flex items-center justify-between border-b border-white/5 pb-2 mb-2">
+                                    <span className="text-xs font-black uppercase tracking-widest text-gold-500">Record #{index + 1}</span>
+                                </div>
+
+                                <div>
+                                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">Gender *</label>
                                     <select 
                                         className="h-input w-full"
                                         value={row.gender}
@@ -118,31 +139,32 @@ export default function BulkMasterGuideForm({ picklists, onCancel, onSuccess }) 
                                         <option value="Male">Male</option>
                                         <option value="Female">Female</option>
                                     </select>
-                                </td>
-                                <td>
+                                </div>
+
+                                <div>
+                                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">Role *</label>
                                     <select 
                                         className={`h-input w-full ${getError(index, 'role') ? 'border-danger' : ''}`}
                                         value={row.role}
                                         onChange={(e) => updateRow(row.id, 'role', e.target.value)}
                                     >
-                                        <option value="MGT">MGiT</option>
-                                        <option value="MG">Master Guide</option>
+                                        <option value="MGT">Master Guide in Training (MGiT)</option>
+                                        <option value="MG">Invested Master Guide</option>
                                     </select>
-                                </td>
-                                <td>
-                                    <button 
-                                        type="button"
-                                        className="p-1.5 text-muted hover:text-danger hover:bg-danger/10 rounded transition-colors"
-                                        onClick={() => removeRow(row.id)}
-                                        disabled={data.master_guides.length <= 1}
-                                    >
-                                        <Trash2 size={14} />
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                                </div>
+
+                                <div>
+                                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">Religion *</label>
+                                    <ReligionCombobox 
+                                        value={row.religion_id} 
+                                        onChange={(val) => updateRow(row.id, 'religion_id', val)}
+                                        religions={picklists?.religions || []}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
                 
                 {Object.keys(errors).length > 0 && (
                     <div className="mt-4 p-3 bg-danger-500/10 border border-danger-500/20 text-danger-400 text-sm rounded-lg">

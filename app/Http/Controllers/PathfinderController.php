@@ -126,9 +126,15 @@ class PathfinderController extends Controller
             'pathfinders.*.residence' => 'required|string|max:255',
             'pathfinders.*.boarding_status' => 'required|string|in:day,boarding',
             'pathfinders.*.religion_id' => 'required|integer|exists:religions,id',
+            'pathfinders.*.avatar' => 'nullable|image|max:2048',
         ]);
 
-        foreach ($request->pathfinders as $pf) {
+        foreach ($request->pathfinders as $index => $pf) {
+            $avatarPath = null;
+            if ($request->hasFile("pathfinders.{$index}.avatar")) {
+                $avatarPath = $request->file("pathfinders.{$index}.avatar")->store('avatars/pathfinders', 'public');
+            }
+
             $pathfinder = Pathfinder::create([
                 'name' => $pf['name'],
                 'age' => $pf['age'],
@@ -139,6 +145,10 @@ class PathfinderController extends Controller
                 'church_id' => $churchId,
                 'consent' => true,
                 'medical_consent' => true,
+                'is_inducted' => false,
+                'insured_yearly' => false,
+                'school_class' => 'N/A',
+                'avatar_path' => $avatarPath,
             ]);
 
             ClassAssignment::create([

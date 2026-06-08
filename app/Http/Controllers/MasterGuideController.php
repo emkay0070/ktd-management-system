@@ -60,16 +60,20 @@ class MasterGuideController extends Controller
         $request->validate([
             'master_guides' => 'required|array|min:1|max:10',
             'master_guides.*.name' => 'required|string|max:255',
-            'master_guides.*.phone' => 'nullable|string|max:255',
             'master_guides.*.gender' => 'required|string|in:Male,Female',
             'master_guides.*.role' => 'required|string|in:MG,MGiT',
             'master_guides.*.religion_id' => 'required|integer|exists:religions,id',
+            'master_guides.*.avatar' => 'nullable|image|max:2048',
         ]);
 
-        foreach ($request->master_guides as $mg) {
+        foreach ($request->master_guides as $index => $mg) {
+            $avatarPath = null;
+            if ($request->hasFile("master_guides.{$index}.avatar")) {
+                $avatarPath = $request->file("master_guides.{$index}.avatar")->store('avatars/leaders', 'public');
+            }
+
             MasterGuide::create([
                 'full_name' => $mg['name'],
-                'phone_number' => $mg['phone'], // Assuming db column might be phone or phone_number. Need to check what store() uses...
                 'gender' => $mg['gender'],
                 'role' => $mg['role'],
                 'religion_id' => $mg['religion_id'],
@@ -79,6 +83,7 @@ class MasterGuideController extends Controller
                 'insured_yearly' => false,
                 'actively_teaching' => false,
                 'other_church_responsibility' => 'none',
+                'avatar_path' => $avatarPath,
             ]);
         }
 
