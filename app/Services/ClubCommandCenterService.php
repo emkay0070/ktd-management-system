@@ -356,13 +356,51 @@ class ClubCommandCenterService
                     ->orWhere('church_id', $church->id)
                     ->orderBy('name')
                     ->get(['id', 'name']),
-                'attendance_sessions' => AttendanceSession::query()
-                    ->where('church_id', $church->id)
-                    ->orderByDesc('date')
-                    ->limit(10)
-                    ->get(),
+                'attendance_sessions' => $this->serializeAttendanceSessions($church->id),
             ],
         ];
+    }
+
+    private function serializeAttendanceSessions(int $churchId): \Illuminate\Support\Collection
+    {
+        return AttendanceSession::query()
+            ->where('church_id', $churchId)
+            ->with([
+                'records.pathfinder:id,name',
+                'records.masterGuide:id,full_name',
+            ])
+            ->withCount([
+                'records as present_count' => fn ($q) => $q->where('is_present', true),
+                'records as absent_count' => fn ($q) => $q->where('is_present', false),
+                'records as total_count',
+            ])
+            ->orderByDesc('date')
+            ->orderByDesc('id')
+            ->limit(50)
+            ->get()
+            ->map(function (AttendanceSession $session) {
+                $total = (int) $session->total_count;
+                $present = (int) $session->present_count;
+
+                return [
+                    'id' => $session->id,
+                    'date' => $session->date->toDateString(),
+                    'type' => $session->type,
+                    'description' => $session->description,
+                    'present_count' => $present,
+                    'absent_count' => (int) $session->absent_count,
+                    'total_count' => $total,
+                    'percent' => $total > 0 ? (int) round(($present / $total) * 100) : 0,
+                    'records' => $session->records->map(fn ($record) => [
+                        'id' => $record->id,
+                        'is_present' => (bool) $record->is_present,
+                        'name' => $record->pathfinder?->name ?? $record->masterGuide?->full_name ?? 'Unknown',
+                        'member_type' => $record->pathfinder_id ? 'pathfinder' : 'master_guide',
+                        'pathfinder_id' => $record->pathfinder_id,
+                        'master_guide_id' => $record->master_guide_id,
+                    ])->sortBy('name')->values(),
+                ];
+            });
     }
 
     private function serializePathfinder(Pathfinder $p): array

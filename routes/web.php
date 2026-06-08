@@ -170,6 +170,7 @@ Route::middleware(['auth', 'verified', 'onboarded'])->group(function () {
     Route::put('/club/operations', [ClubOperationsController::class, 'update'])->name('club.operations.update');
 
     Route::post('/club/attendance', [\App\Http\Controllers\AttendanceController::class, 'store'])->name('attendance.store');
+    Route::put('/club/attendance/{session}', [\App\Http\Controllers\AttendanceController::class, 'update'])->name('attendance.update');
     // Parent Linking & Management
     Route::post('/club/parent-links', [\App\Http\Controllers\ParentLinkController::class, 'store'])->name('parent_links.store');
     Route::post('/club/parent-links/{link}/approve', [\App\Http\Controllers\ParentLinkController::class, 'approve'])->name('parent_links.approve');
