@@ -12,21 +12,33 @@ class DistrictCommitteeController extends Controller
     {
         /** @var \App\Models\User $user */
         $user = $request->user();
-        abort_unless($user && $user->isDistrictExecutive(), 403, 'Unauthorized');
+        if (!$user || !$user->isDistrictExecutive()) {
+            abort(403, 'Unauthorized');
+        }
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
+            'role_name' => 'required|string|exists:roles,name'
         ]);
 
-        User::create([
+        $newMember = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
-            'role' => 'district_committee',
             'district_id' => $user->district_id,
         ]);
+
+        // Assign role
+        $role = \App\Models\Role::where('name', $validated['role_name'])->first();
+        if ($role) {
+            $newMember->roles()->attach($role->id, [
+                'status' => 'active',
+                'assigned_by' => $user->id,
+                'assigned_at' => now(),
+            ]);
+        }
 
         return back()->with('message', 'District committee member assigned successfully.');
     }

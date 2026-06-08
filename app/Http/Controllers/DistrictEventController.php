@@ -9,6 +9,8 @@ class DistrictEventController extends Controller
 {
     public function store(Request $request)
     {
+        /** @var \App\Models\User $user */
+        $user = $request->user();
         $this->authorize('create', DistrictEvent::class);
 
         $validated = $request->validate([
@@ -23,7 +25,7 @@ class DistrictEventController extends Controller
         ]);
 
         DistrictEvent::create([
-            'district_id' => auth()->user()->district_id,
+            'district_id' => $user->district_id,
             'name' => $validated['name'],
             'type' => $validated['type'],
             'start_date' => $validated['start_date'],
@@ -32,17 +34,63 @@ class DistrictEventController extends Controller
             'description' => $validated['description'],
             'registration_fee' => $validated['registration_fee'],
             'operational_status' => 'Scheduled',
-            'workflow_status' => 'draft', // Always defaults to draft for committee review
+            'workflow_status' => 'draft',
             'message_type' => $validated['message_type'],
         ]);
 
-        return back()->with('message', 'District event scheduled as draft.');
+        return back()->with('message', 'District event created as draft.');
+    }
+
+    public function requestApproval(Request $request, DistrictEvent $event)
+    {
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+        abort_unless($user->hasAnyRole(['district_programs_coordinator', 'district_curriculum_coordinator', 'super_admin']), 403);
+        abort_unless($event->district_id === $user->district_id, 403);
+
+        $event->update(['workflow_status' => 'pending_approval']);
+
+        return back()->with('message', 'Event submitted for District Director approval.');
+    }
+
+    public function approve(Request $request, DistrictEvent $event)
+    {
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+        abort_unless($user->hasAnyRole(['district_director', 'super_admin']), 403);
+        abort_unless($event->district_id === $user->district_id, 403);
+
+        $event->update([
+            'workflow_status' => 'approved',
+            'approved_by' => $user->id,
+            'approved_at' => now(),
+        ]);
+
+        return back()->with('message', 'Event approved. The coordinator can now publish it.');
+    }
+
+    public function publish(Request $request, DistrictEvent $event)
+    {
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+        abort_unless($user->hasAnyRole(['district_programs_coordinator', 'district_curriculum_coordinator', 'district_director', 'super_admin']), 403);
+        abort_unless($event->district_id === $user->district_id, 403);
+
+        if ($event->workflow_status !== 'approved' && !$user->hasAnyRole(['district_director', 'super_admin'])) {
+            return back()->withErrors(['event' => 'This event must be approved by the Director before publishing.']);
+        }
+
+        $event->update(['workflow_status' => 'published']);
+
+        return back()->with('message', 'Event published to the district.');
     }
 
     public function destroy(DistrictEvent $event)
     {
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
         $this->authorize('delete', $event);
-        abort_unless($event->district_id === auth()->user()->district_id, 403);
+        abort_unless($event->district_id === $user->district_id, 403);
 
         $event->delete();
         return back()->with('message', 'Event removed.');
@@ -50,8 +98,14 @@ class DistrictEventController extends Controller
 
     public function togglePublish(DistrictEvent $event)
     {
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
         $this->authorize('publish', $event);
-        abort_unless($event->district_id === auth()->user()->district_id, 403);
+        abort_unless($event->district_id === $user->district_id, 403);
+
+        if ($event->workflow_status === 'pending_approval') {
+            return back()->withErrors(['event' => 'This event requires District Director approval before publishing.']);
+        }
 
         $newStatus = $event->workflow_status === 'published' ? 'draft' : 'published';
         $event->workflow_status = $newStatus;

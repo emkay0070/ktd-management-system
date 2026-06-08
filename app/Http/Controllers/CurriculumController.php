@@ -243,6 +243,7 @@ class CurriculumController extends Controller
 
     public function storeStandard(Request $request)
     {
+        /** @var \App\Models\User $user */
         $user = $request->user();
         abort_unless($user->hasAnyRole(['district_curriculum_coordinator', 'district_director', 'super_admin']), 403);
 
@@ -262,6 +263,51 @@ class CurriculumController extends Controller
         ]);
 
         return back()->with('message', 'Curriculum standard created as draft.');
+    }
+
+    public function requestApprovalStandard(Request $request, CurriculumStandard $standard)
+    {
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+        abort_unless($user->hasAnyRole(['district_curriculum_coordinator', 'super_admin']), 403);
+        abort_unless($standard->district_id === $user->district_id, 403);
+
+        $standard->update(['workflow_status' => 'pending_approval']);
+
+        return back()->with('message', 'Standard submitted for District Director approval.');
+    }
+
+    public function approveStandard(Request $request, CurriculumStandard $standard)
+    {
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+        abort_unless($user->hasAnyRole(['district_director', 'super_admin']), 403);
+        abort_unless($standard->district_id === $user->district_id, 403);
+
+        $standard->update([
+            'workflow_status' => 'approved',
+            'approved_by' => $user->id,
+            'approved_at' => now(),
+        ]);
+
+        return back()->with('message', 'Standard approved. The coordinator can now publish it.');
+    }
+
+    public function publishStandard(Request $request, CurriculumStandard $standard)
+    {
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+        abort_unless($user->hasAnyRole(['district_curriculum_coordinator', 'district_director', 'super_admin']), 403);
+        abort_unless($standard->district_id === $user->district_id, 403);
+
+        // Only approved standards can be published by coordinator
+        if ($standard->workflow_status !== 'approved' && !$user->hasAnyRole(['district_director', 'super_admin'])) {
+            return back()->withErrors(['standard' => 'This standard must be approved by the Director before publishing.']);
+        }
+
+        $standard->update(['workflow_status' => 'published']);
+
+        return back()->with('message', 'Standard published to the district.');
     }
 
     public function updateStandard(Request $request, CurriculumStandard $standard)
@@ -284,10 +330,12 @@ class CurriculumController extends Controller
     public function toggleStandardStatus(Request $request, CurriculumStandard $standard)
     {
         $user = $request->user();
-        // Only Director can publish, but Coordinator can move to 'review' if we had that state.
-        // For now, let's allow both to toggle draft/published as requested.
         abort_unless($user->hasAnyRole(['district_curriculum_coordinator', 'district_director', 'super_admin']), 403);
         abort_unless($standard->district_id === $user->district_id, 403);
+
+        if ($standard->workflow_status === 'pending_approval') {
+            return back()->withErrors(['standard' => 'This standard requires District Director approval before publishing.']);
+        }
 
         $newStatus = $standard->workflow_status === 'published' ? 'draft' : 'published';
         $standard->update(['workflow_status' => $newStatus]);

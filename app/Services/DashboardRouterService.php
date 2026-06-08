@@ -444,7 +444,7 @@ class DashboardRouterService
             ->when(!$user->hasAnyRole(['district_director', 'district_curriculum_coordinator', 'super_admin']), function($q) {
                 $q->where('workflow_status', 'published');
             })
-            ->with('creator:id,name')
+            ->with(['creator:id,name'])
             ->latest()
             ->get();
 
@@ -495,13 +495,13 @@ class DashboardRouterService
             'churches' => $churches,
             'committee' => $committee->values(),
             'invite_links' => $inviteLinks,
-            'events' => $district->events()->orderBy('start_date', 'asc')->get(),
+            'events' => $district->events()->with('approver:id,name')->orderBy('start_date', 'asc')->get(),
             'tasks' => $district->tasks()->with(['submissions.church'])->orderBy('deadline', 'asc')->get(),
             'roster' => \App\Models\MasterGuide::whereIn('church_id', $district->churches->pluck('id'))->with(['church', 'assignedClass'])->get(),
-            'resources' => \App\Models\DistrictResource::where('district_id', $district->id)->with('uploader')->latest()->get(),
+            'resources' => \App\Models\DistrictResource::where('district_id', $district->id)->with('uploader:id,name')->latest()->get(),
             'bulletins' => $district->bulletins()
-                ->with(['author:id,name', 'acknowledgements.user:id,name', 'acknowledgements.church:id,name'])
-                ->orderBy('created_at', 'desc')
+                ->with(['author:id,name', 'approver:id,name'])
+                ->latest()
                 ->get(),
             'registrations' => \App\Models\Registration::whereIn('church_id', $district->churches->pluck('id'))->with(['pathfinder', 'church', 'event'])->latest()->get(),
             'treasury' => [], // Add proper treasury logic here later if needed
@@ -520,7 +520,8 @@ class DashboardRouterService
             ],
             'investiture_candidates' => $investitureCandidates,
             'curriculum_standards' => $curriculumStandards,
-            'district_resources' => \App\Models\DistrictResource::where('district_id', $district->id)->latest()->get(),
+            'district_resources' => \App\Models\DistrictResource::where('district_id', $district->id)->with('uploader:id,name')->latest()->get(),
+            'growth_pulse' => $growthPulse,
             'welfare_cases' => $welfareCases,
             'social_events' => $socialEvents,
             'retention_metrics' => [

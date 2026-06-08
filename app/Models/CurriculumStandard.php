@@ -14,7 +14,14 @@ class CurriculumStandard extends Model
         'department',
         'workflow_status',
         'created_by',
+        'approved_by',
+        'approved_at',
     ];
+
+    public function approver(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
 
     public function district(): BelongsTo
     {

@@ -8,6 +8,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\VerificationController;
 
 use App\Models\Church;
+use App\Models\User;
 use App\Http\Controllers\DistrictCommitteeController;
 use App\Http\Controllers\DistrictEventController;
 use App\Http\Controllers\DistrictResourceController;
@@ -51,6 +52,9 @@ Route::middleware(['auth', 'verified', 'onboarded'])->group(function () {
 
     // District Event Scheduling Actions
     Route::post('/district/events', [DistrictEventController::class, 'store'])->name('district_events.store');
+    Route::post('/district/events/{event}/request-approval', [DistrictEventController::class, 'requestApproval'])->name('district_events.request_approval');
+    Route::post('/district/events/{event}/approve', [DistrictEventController::class, 'approve'])->name('district_events.approve');
+    Route::post('/district/events/{event}/publish', [DistrictEventController::class, 'publish'])->name('district_events.publish');
     Route::delete('/district/events/{event}', [DistrictEventController::class, 'destroy'])->name('district_events.destroy');
     Route::post('/district/events/{event}/toggle-publish', [DistrictEventController::class, 'togglePublish'])->name('district_events.toggle_publish');
 
@@ -62,6 +66,9 @@ Route::middleware(['auth', 'verified', 'onboarded'])->group(function () {
     
     // District Resources Library
     Route::post('/district/resources', [DistrictResourceController::class, 'store'])->name('district_resources.store');
+    Route::post('/district/resources/{resource}/request-approval', [DistrictResourceController::class, 'requestApproval'])->name('district_resources.request_approval');
+    Route::post('/district/resources/{resource}/approve', [DistrictResourceController::class, 'approve'])->name('district_resources.approve');
+    Route::post('/district/resources/{resource}/publish', [DistrictResourceController::class, 'publish'])->name('district_resources.publish');
     Route::delete('/district/resources/{resource}', [DistrictResourceController::class, 'destroy'])->name('district_resources.destroy');
 
     // Welfare & Social Command Centre
@@ -72,9 +79,11 @@ Route::middleware(['auth', 'verified', 'onboarded'])->group(function () {
 
     // District Bulletins & Appraisals
     Route::post('/district/bulletins', [DistrictBulletinController::class, 'store'])->name('district_bulletins.store');
+    Route::post('/district/bulletins/{bulletin}/request-approval', [DistrictBulletinController::class, 'requestApproval'])->name('district_bulletins.request_approval');
     Route::delete('/district/bulletins/{bulletin}', [DistrictBulletinController::class, 'destroy'])->name('district_bulletins.destroy');
     Route::post('/district/bulletins/{bulletin}/toggle', [DistrictBulletinController::class, 'toggle'])->name('district_bulletins.toggle');
     Route::post('/district/bulletins/{bulletin}/approve', [DistrictBulletinController::class, 'approve'])->name('district_bulletins.approve');
+    Route::post('/district/bulletins/{bulletin}/publish', [DistrictBulletinController::class, 'publish'])->name('district_bulletins.publish');
     Route::post('/district/bulletins/{bulletin}/acknowledge', [DistrictBulletinController::class, 'acknowledge'])->name('district_bulletins.acknowledge');
 
     Route::post('/district/appraisals', [DistrictAppraisalController::class, 'store'])->name('district_appraisals.store');
@@ -126,8 +135,11 @@ Route::middleware(['auth', 'verified', 'onboarded'])->group(function () {
 
     // Curriculum Standards
     Route::post('/curriculum/standards', [\App\Http\Controllers\CurriculumController::class, 'storeStandard'])->name('curriculum.standards.store');
+    Route::post('/curriculum/standards/{standard}/request-approval', [\App\Http\Controllers\CurriculumController::class, 'requestApprovalStandard'])->name('curriculum.standards.request_approval');
     Route::put('/curriculum/standards/{standard}', [\App\Http\Controllers\CurriculumController::class, 'updateStandard'])->name('curriculum.standards.update');
     Route::post('/curriculum/standards/{standard}/toggle', [\App\Http\Controllers\CurriculumController::class, 'toggleStandardStatus'])->name('curriculum.standards.toggle');
+    Route::post('/curriculum/standards/{standard}/approve', [\App\Http\Controllers\CurriculumController::class, 'approveStandard'])->name('curriculum.standards.approve');
+    Route::post('/curriculum/standards/{standard}/publish', [\App\Http\Controllers\CurriculumController::class, 'publishStandard'])->name('curriculum.standards.publish');
     Route::delete('/curriculum/standards/{standard}', [\App\Http\Controllers\CurriculumController::class, 'destroyStandard'])->name('curriculum.standards.destroy');
 
     // Curriculum Exports

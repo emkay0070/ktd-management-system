@@ -44,13 +44,59 @@ class DistrictResourceController extends Controller
             'category' => $request->category,
             'department' => $request->department,
             'uploaded_by' => $user->id,
+            'workflow_status' => 'draft',
         ]);
 
-        return back()->with('message', 'Resource uploaded to district library.');
+        return back()->with('message', 'Resource created as draft.');
+    }
+
+    public function requestApproval(Request $request, DistrictResource $resource)
+    {
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+        abort_unless($user->hasAnyRole(['district_curriculum_coordinator', 'super_admin']), 403);
+        abort_unless($resource->district_id === $user->district_id, 403);
+
+        $resource->update(['workflow_status' => 'pending_approval']);
+
+        return back()->with('message', 'Resource submitted for District Director approval.');
+    }
+
+    public function approve(Request $request, DistrictResource $resource)
+    {
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+        abort_unless($user->hasAnyRole(['district_director', 'super_admin']), 403);
+        abort_unless($resource->district_id === $user->district_id, 403);
+
+        $resource->update([
+            'workflow_status' => 'approved',
+            'approved_by' => $user->id,
+            'approved_at' => now(),
+        ]);
+
+        return back()->with('message', 'Resource approved. The coordinator can now publish it.');
+    }
+
+    public function publish(Request $request, DistrictResource $resource)
+    {
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+        abort_unless($user->hasAnyRole(['district_curriculum_coordinator', 'district_director', 'super_admin']), 403);
+        abort_unless($resource->district_id === $user->district_id, 403);
+
+        if ($resource->workflow_status !== 'approved' && !$user->hasAnyRole(['district_director', 'super_admin'])) {
+            return back()->withErrors(['resource' => 'This resource must be approved by the Director before publishing.']);
+        }
+
+        $resource->update(['workflow_status' => 'published']);
+
+        return back()->with('message', 'Resource published to the district library.');
     }
 
     public function destroy(Request $request, DistrictResource $resource)
     {
+        /** @var \App\Models\User $user */
         $user = $request->user();
         
         // Only director, secretary or the uploader can delete

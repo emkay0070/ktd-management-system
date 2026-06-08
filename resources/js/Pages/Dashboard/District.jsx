@@ -224,7 +224,16 @@ export default function District({
                     />}
                     {isPulse && <DistrictPulseView analytics={analytics} />}
                     {isRegistration && <DistrictRegistrationManager registrations={registrations} district_events={events} treasury={treasury} readonly={!permissions?.edit_programs} />}
-                    {isCurriculum && <DistrictCurriculumManager curriculum_stats={curriculum_stats} investiture_candidates={investiture_candidates} curriculum_standards={curriculum_standards} readonly={!permissions?.edit_curriculum} auth={auth} />}
+                    {isCurriculum && <DistrictCurriculumManager 
+                        curriculum_stats={curriculum_stats} 
+                        investiture_candidates={investiture_candidates} 
+                        curriculum_standards={curriculum_standards} 
+                        district_resources={resources}
+                        district_bulletins={bulletins}
+                        district_events={events}
+                        readonly={!permissions?.edit_curriculum} 
+                        auth={auth} 
+                    />}
                     {isMasterGuide && <MasterGuideManager master_guides={roster} readonly={!permissions?.edit_masterguide} />}
                 </div>
             </div>

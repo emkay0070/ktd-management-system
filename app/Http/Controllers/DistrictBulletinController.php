@@ -23,21 +23,16 @@ class DistrictBulletinController extends Controller
             'requires_acknowledgement' => 'boolean',
         ]);
 
+        /** @var \App\Models\User $user */
         $user = $request->user();
-        $isDirector = $user->hasAnyRole(['district_director', 'super_admin']);
         
-        // If it's a directive and not drafted by a director, it needs approval
-        $workflowStatus = ($validated['message_type'] === 'directive' && !$isDirector) 
-            ? 'pending_approval' 
-            : 'draft';
-
         DistrictBulletin::create([
             'district_id' => $user->district_id,
             'author_id' => $user->id,
             'title' => $validated['title'],
             'content' => $validated['content'],
             'level' => $validated['level'],
-            'workflow_status' => $workflowStatus,
+            'workflow_status' => 'draft',
             'message_type' => $validated['message_type'],
             'department' => $validated['department'],
             'target_audience' => $validated['target_audience'],
@@ -45,17 +40,27 @@ class DistrictBulletinController extends Controller
             'expires_at' => $validated['expires_at'],
         ]);
 
-        $msg = $workflowStatus === 'pending_approval' 
-            ? 'Directive submitted for District Director approval.' 
-            : 'District bulletin created as draft.';
+        return back()->with('message', 'District bulletin created as draft.');
+    }
 
-        return back()->with('message', $msg);
+    public function requestApproval(Request $request, DistrictBulletin $bulletin)
+    {
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+        abort_unless($user->hasAnyRole(['district_communication_coordinator', 'district_curriculum_coordinator', 'super_admin']), 403);
+        abort_unless($bulletin->district_id === $user->district_id, 403);
+
+        $bulletin->update(['workflow_status' => 'pending_approval']);
+
+        return back()->with('message', 'Bulletin submitted for District Director approval.');
     }
 
     public function destroy(Request $request, DistrictBulletin $bulletin)
     {
+        /** @var \App\Models\User $user */
+        $user = $request->user();
         $this->authorize('delete', $bulletin);
-        abort_unless($bulletin->district_id === $request->user()->district_id, 403);
+        abort_unless($bulletin->district_id === $user->district_id, 403);
 
         $bulletin->delete();
         return back()->with('message', 'Bulletin removed.');
@@ -63,8 +68,10 @@ class DistrictBulletinController extends Controller
 
     public function toggle(Request $request, DistrictBulletin $bulletin)
     {
+        /** @var \App\Models\User $user */
+        $user = $request->user();
         $this->authorize('publish', $bulletin);
-        abort_unless($bulletin->district_id === $request->user()->district_id, 403);
+        abort_unless($bulletin->district_id === $user->district_id, 403);
 
         // Can't publish if pending approval
         if ($bulletin->workflow_status === 'pending_approval') {
@@ -78,17 +85,34 @@ class DistrictBulletinController extends Controller
 
     public function approve(Request $request, DistrictBulletin $bulletin)
     {
+        /** @var \App\Models\User $user */
         $user = $request->user();
         abort_unless($user->hasAnyRole(['district_director', 'super_admin']), 403);
         abort_unless($bulletin->district_id === $user->district_id, 403);
 
         $bulletin->update([
-            'workflow_status' => 'published',
+            'workflow_status' => 'approved',
             'approved_by' => $user->id,
             'approved_at' => now(),
         ]);
 
-        return back()->with('message', 'Directive approved and published to the district.');
+        return back()->with('message', 'Bulletin approved. The coordinator can now publish it.');
+    }
+
+    public function publish(Request $request, DistrictBulletin $bulletin)
+    {
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+        abort_unless($user->hasAnyRole(['district_communication_coordinator', 'district_curriculum_coordinator', 'district_director', 'super_admin']), 403);
+        abort_unless($bulletin->district_id === $user->district_id, 403);
+
+        if ($bulletin->workflow_status !== 'approved' && !$user->hasAnyRole(['district_director', 'super_admin'])) {
+            return back()->withErrors(['bulletin' => 'This bulletin must be approved by the Director before publishing.']);
+        }
+
+        $bulletin->update(['workflow_status' => 'published']);
+
+        return back()->with('message', 'Bulletin published to the district.');
     }
 
     public function acknowledge(Request $request, DistrictBulletin $bulletin)

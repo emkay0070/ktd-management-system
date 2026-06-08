@@ -4,6 +4,12 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Role;
+use App\Models\Church;
+use App\Models\District;
+use App\Models\ParentProfile;
+use App\Models\Pathfinder;
+use App\Models\PendingParentLink;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -38,6 +44,7 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        /** @var \App\Models\User $user */
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
@@ -58,7 +65,7 @@ class RegisteredUserController extends Controller
 
         // Create new church if requested (Status: pending_verification)
         if (!$churchId && $request->new_church_name) {
-            $church = \App\Models\Church::create([
+            $church = Church::create([
                 'name' => $request->new_church_name,
                 'district_id' => $request->district_id,
                 'status' => 'pending_verification',
@@ -83,13 +90,13 @@ class RegisteredUserController extends Controller
         ]);
 
         // 2. Assign Default Role (Observer)
-        $observerRole = \App\Models\Role::where('name', 'observer')->first();
+        $observerRole = Role::where('name', 'observer')->first();
         if ($observerRole) {
             $user->roles()->attach($observerRole->id, ['status' => 'active']);
         }
 
         // 3. Assign Intent Role
-        $intentRole = \App\Models\Role::where('name', $request->role)->first();
+        $intentRole = Role::where('name', $request->role)->first();
         if ($intentRole && $request->role !== 'observer') {
             $isDistrictRole = in_array($request->role, User::getAllDistrictRoles());
             $roleStatus = ($request->role === 'director' || $isDistrictRole) ? 'pending' : 'active';
@@ -98,10 +105,10 @@ class RegisteredUserController extends Controller
             
             // Scope assignment
             if ($isDistrictRole && $request->district_id) {
-                $pivotData['entity_type'] = \App\Models\District::class;
+                $pivotData['entity_type'] = District::class;
                 $pivotData['entity_id'] = $request->district_id;
             } elseif ($request->role === 'director' && $request->church_id) {
-                $pivotData['entity_type'] = \App\Models\Church::class;
+                $pivotData['entity_type'] = Church::class;
                 $pivotData['entity_id'] = $request->church_id;
             }
 
@@ -110,21 +117,21 @@ class RegisteredUserController extends Controller
 
         // 4. Role-specific profile initialization
         if ($request->role === 'parent') {
-            \App\Models\ParentProfile::create([
+            ParentProfile::create([
                 'user_id' => $user->id,
                 'is_master_guide' => $request->is_master_guide ?? false,
                 'club_role' => $request->club_role,
             ]);
 
             // Automatic Linking Logic
-            $potentialChildren = \App\Models\Pathfinder::query()
+            $potentialChildren = Pathfinder::query()
                 ->where('father_name', 'ILIKE', $user->name)
                 ->orWhere('mother_name', 'ILIKE', $user->name)
                 ->orWhere('guardian_name', 'ILIKE', $user->name)
                 ->get();
 
             foreach ($potentialChildren as $child) {
-                \App\Models\PendingParentLink::create([
+                PendingParentLink::create([
                     'user_id' => $user->id,
                     'pathfinder_id' => $child->id,
                     'status' => 'pending',

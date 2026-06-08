@@ -10,6 +10,10 @@ use App\Models\Pathfinder;
 use App\Models\MasterGuide;
 use App\Models\PendingParentLink;
 use App\Models\Role;
+use App\Models\Church;
+use App\Models\PathfinderClass;
+use App\Models\ClassAssignment;
+use Carbon\Carbon;
 
 class OnboardingController extends Controller
 {
@@ -34,11 +38,12 @@ class OnboardingController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        /** @var \App\Models\User $user */
         $user = $request->user();
         
         // Handle church selection / creation if provided
         if ($request->filled('new_church_name') && $request->filled('district_id')) {
-            $church = \App\Models\Church::create([
+            $church = Church::create([
                 'name' => $request->new_church_name,
                 'district_id' => $request->district_id,
                 'status' => 'pending_verification'
@@ -71,7 +76,7 @@ class OnboardingController extends Controller
                 'current_class' => 'required|string',
             ]);
 
-            $dob = \Carbon\Carbon::parse($request->dob);
+            $dob = Carbon::parse($request->dob);
             $age = $dob->age;
 
             $pathfinder = Pathfinder::create([
@@ -83,8 +88,8 @@ class OnboardingController extends Controller
                 // Additional pathfinder fields...
             ]);
 
-            $class = \App\Models\PathfinderClass::firstOrCreate(['name' => $request->current_class]);
-            \App\Models\ClassAssignment::create([
+            $class = PathfinderClass::firstOrCreate(['name' => $request->current_class]);
+            ClassAssignment::create([
                 'pathfinder_id' => $pathfinder->id,
                 'class_id' => $class->id,
             ]);

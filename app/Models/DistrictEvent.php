@@ -21,7 +21,14 @@ class DistrictEvent extends Model
         'workflow_status',
         'message_type',
         'registration_fee',
+        'approved_by',
+        'approved_at',
     ];
+
+    public function approver()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
 
     protected $casts = [
         'start_date' => 'date',
