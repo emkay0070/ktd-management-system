@@ -4,6 +4,7 @@ import { Plus, GraduationCap, Shield, UserPlus, Search, User, Edit2, Eye, Layout
 import ReligionCombobox from './ReligionCombobox';
 import LeadershipManager from './LeadershipManager';
 import BulkMasterGuideForm from './BulkMasterGuideForm';
+import InputError from '@/Components/InputError';
 
 export default function MasterGuideManager({ master_guides, mg_training, picklists, readonly, committees, classes, derived_pathfinder_committee }) {
     const [view, setView] = useState('list'); // 'list', 'register', 'bulk_register'
@@ -421,6 +422,7 @@ export default function MasterGuideManager({ master_guides, mg_training, picklis
                                     <div className="form-group">
                                         <label>Full Name</label>
                                         <input className="h-input" value={mgForm.data.full_name} onChange={e => mgForm.setData('full_name', e.target.value)} required />
+                                        <InputError message={mgForm.errors.full_name} />
                                     </div>
                                     
                                     <div className="form-grid-2">
@@ -430,6 +432,7 @@ export default function MasterGuideManager({ master_guides, mg_training, picklis
                                                 <option value="MG">Master Guide (Invested)</option>
                                                 <option value="MGT">Master Guide in Training (MGT)</option>
                                             </select>
+                                            <InputError message={mgForm.errors.role} />
                                         </div>
                                         <div className="form-group">
                                             <label>Occupation</label>
@@ -438,6 +441,7 @@ export default function MasterGuideManager({ master_guides, mg_training, picklis
                                                 <option value="schooling">Schooling</option>
                                                 <option value="unemployed">Unemployed</option>
                                             </select>
+                                            <InputError message={mgForm.errors.occupation_status} />
                                         </div>
                                     </div>
                                     
@@ -446,10 +450,12 @@ export default function MasterGuideManager({ master_guides, mg_training, picklis
                                         value={mgForm.data.religion_id}
                                         onChange={val => mgForm.setData('religion_id', val)}
                                     />
+                                    <InputError message={mgForm.errors.religion_id} />
 
                                     <div className="form-group">
                                         <label>Residence</label>
                                         <input className="h-input" value={mgForm.data.residence} onChange={e => mgForm.setData('residence', e.target.value)} />
+                                        <InputError message={mgForm.errors.residence} />
                                     </div>
                                 </div>
 
@@ -458,10 +464,12 @@ export default function MasterGuideManager({ master_guides, mg_training, picklis
                                     <div className="form-group">
                                         <label>Primary Club Responsibility</label>
                                         <input className="h-input" placeholder="e.g. Deputy Director, Drill Instructor" value={mgForm.data.responsibility} onChange={e => mgForm.setData('responsibility', e.target.value)} />
+                                        <InputError message={mgForm.errors.responsibility} />
                                     </div>
                                     <div className="form-group">
                                         <label>Other Church Responsibilities</label>
                                         <textarea className="h-input" rows={2} placeholder="e.g. Deacon, Youth Leader" value={mgForm.data.other_church_responsibility} onChange={e => mgForm.setData('other_church_responsibility', e.target.value)} />
+                                        <InputError message={mgForm.errors.other_church_responsibility} />
                                     </div>
                                     <div className="form-group">
                                         <label>Assigned Class</label>
@@ -471,6 +479,7 @@ export default function MasterGuideManager({ master_guides, mg_training, picklis
                                                 <option key={c.id} value={c.id}>{c.name}</option>
                                             ))}
                                         </select>
+                                        <InputError message={mgForm.errors.assigned_class_id} />
                                     </div>
                                     <div className="h-checkbox-group bg-white/5 p-4 rounded-lg">
                                         <input id="mg-insured" type="checkbox" className="h-checkbox" checked={mgForm.data.insured_yearly} onChange={e => mgForm.setData('insured_yearly', e.target.checked)} />
