@@ -11,6 +11,7 @@ export default function OnboardingIndex({ role, church_status, church_name }) {
         current_class: 'Friend',
         children_names: '',
         investiture_year: '',
+        mg_status: 'MGT', // Default to Master Guide in Training
     });
 
     const submit = (e) => {
@@ -269,15 +270,29 @@ export default function OnboardingIndex({ role, church_status, church_name }) {
                     </div>
 
                     <div>
-                        <label className="onboard-label">Year of Investiture (Optional)</label>
-                        <input
-                            type="number"
-                            value={data.investiture_year}
-                            onChange={e => setData('investiture_year', e.target.value)}
+                        <label className="onboard-label">Investiture Status</label>
+                        <select
+                            value={data.mg_status}
+                            onChange={e => setData('mg_status', e.target.value)}
                             className="onboard-input"
-                            placeholder="e.g. 2018"
-                        />
+                        >
+                            <option value="MGT">Master Guide in Training (MGT)</option>
+                            <option value="MG">Invested Master Guide (MG)</option>
+                        </select>
                     </div>
+
+                    {data.mg_status === 'MG' && (
+                        <div>
+                            <label className="onboard-label">Year of Investiture (Optional)</label>
+                            <input
+                                type="number"
+                                value={data.investiture_year}
+                                onChange={e => setData('investiture_year', e.target.value)}
+                                className="onboard-input"
+                                placeholder="e.g. 2018"
+                            />
+                        </div>
+                    )}
                 </div>
             );
         }

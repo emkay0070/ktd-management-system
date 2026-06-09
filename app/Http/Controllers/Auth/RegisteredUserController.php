@@ -27,7 +27,7 @@ class RegisteredUserController extends Controller
      */
     public function create(?string $intent = null): Response
     {
-        $validIntents = ['pathfinder', 'parent', 'leader', 'district'];
+        $validIntents = ['pathfinder', 'parent', 'leader', 'district', 'master_guide'];
         if ($intent && !in_array($intent, $validIntents)) {
             return redirect()->route('register');
         }

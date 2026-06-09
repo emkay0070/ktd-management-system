@@ -13,6 +13,7 @@ use App\Models\Role;
 use App\Models\Church;
 use App\Models\PathfinderClass;
 use App\Models\ClassAssignment;
+use App\Models\StaffCredential;
 use Carbon\Carbon;
 
 class OnboardingController extends Controller
@@ -108,13 +109,26 @@ class OnboardingController extends Controller
         } elseif ($roleName === 'master_guide') {
             $request->validate([
                 'investiture_year' => 'nullable|integer',
+                'mg_status' => 'nullable|string|in:MG,MGT',
             ]);
 
-            MasterGuide::create([
+            $mg = MasterGuide::create([
                 'user_id' => $user->id,
                 'full_name' => $user->name,
+                'role' => $request->mg_status ?? 'MGT',
                 'church_id' => $user->church_id,
             ]);
+
+            if ($request->mg_status === 'MG') {
+                StaffCredential::create([
+                    'staff_id' => $mg->id,
+                    'credential_type' => 'master_guide',
+                    'status' => StaffCredential::STATUS_CERTIFIED,
+                    'certified_at' => $request->investiture_year ? Carbon::createFromDate($request->investiture_year, 1, 1) : null,
+                    'notes' => 'Self-reported during onboarding',
+                ]);
+            }
+
             $user->status = 'active';
             $user->save();
         } elseif ($roleName === 'director') {

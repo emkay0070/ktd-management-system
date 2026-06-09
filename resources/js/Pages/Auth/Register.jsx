@@ -91,6 +91,7 @@ export default function Register({ intent = null }) {
         'pathfinder': 'pathfinder',
         'parent': 'parent',
         'leader': 'director',
+        'master_guide': 'master_guide',
         'district': 'district_official'
     };
 
@@ -203,6 +204,7 @@ export default function Register({ intent = null }) {
             { id: 'pathfinder', label: 'Pathfinder', desc: 'Join a club, track classes & honours', icon: UserCircle },
             { id: 'parent', label: 'Parent / Guardian', desc: 'Monitor your child\'s progress', icon: Users },
             { id: 'leader', label: 'Club Director', desc: 'Manage a local church club', icon: Shield },
+            { id: 'master_guide', label: 'Master Guide / MGT', desc: 'Invested or Master Guide in Training', icon: GraduationCap },
             { id: 'district', label: 'District Officer', desc: 'Oversee clubs in your district', icon: GraduationCap },
         ];
 
