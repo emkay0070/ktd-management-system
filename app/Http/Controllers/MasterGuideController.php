@@ -61,7 +61,7 @@ class MasterGuideController extends Controller
             'master_guides' => 'required|array|min:1|max:10',
             'master_guides.*.name' => 'required|string|max:255',
             'master_guides.*.gender' => 'required|string|in:Male,Female',
-            'master_guides.*.role' => 'required|string|in:MG,MGiT',
+            'master_guides.*.role' => 'required|string|in:MG,MGT',
             'master_guides.*.religion_id' => 'required|integer|exists:religions,id',
             'master_guides.*.avatar' => 'nullable|image|max:2048',
         ]);

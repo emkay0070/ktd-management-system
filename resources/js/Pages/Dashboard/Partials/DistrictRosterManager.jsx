@@ -18,7 +18,7 @@ export default function DistrictRosterManager({ roster = [] }) {
         return {
             total: roster.length,
             mg: roster.filter(m => m.role === 'MG').length,
-            mgt: roster.filter(m => m.role === 'MGT' || m.role === 'MGiT').length,
+            mgt: roster.filter(m => m.role === 'MGT').length,
             insured: roster.filter(m => m.insured_yearly).length
         };
     }, [roster]);
@@ -67,8 +67,7 @@ export default function DistrictRosterManager({ roster = [] }) {
                     <select className="h-select" value={roleFilter} onChange={e => setRoleFilter(e.target.value)} style={{ width: '160px' }}>
                         <option value="all">All Roles</option>
                         <option value="MG">Master Guide</option>
-                        <option value="MGiT">MG in Training</option>
-                        <option value="MGT">MGT</option>
+                        <option value="MGT">Master Guide in Training</option>
                     </select>
                 </div>
             </div>

@@ -283,7 +283,7 @@ class ClubCommandCenterService
         $mgTotals = [
             'total' => $masterGuides->count(),
             'mg' => $masterGuides->where('role', 'MG')->count(),
-            'mgt' => $masterGuides->whereIn('role', ['MGT', 'MGiT'])->count(),
+            'mgt' => $masterGuides->where('role', 'MGT')->count(),
         ];
 
         return [

@@ -68,7 +68,7 @@ export default function SuperAdmin(props) {
     const totalPathfinders = churches.reduce((s, c) => s + (c.total ?? 0), 0);
     const totalMedical = medical_alerts.length;
     const totalMasterGuides = churches.reduce((s, c) => s + (c.master_guides ?? 0), 0);
-    const totalMGiT = churches.reduce((s, c) => s + (c.mgit ?? 0), 0);
+    const totalMGT = churches.reduce((s, c) => s + (c.mgt ?? 0), 0);
     const totalUnits = churches.reduce((s, c) => s + (c.units ?? 0), 0);
     const activeChurches = churches.filter((c) => c.status === 'active').length;
 
@@ -242,7 +242,7 @@ export default function SuperAdmin(props) {
                     <div className="stat-icon stat-icon--success"><Shield size={22} /></div>
                     <div className="stat-value">{totalMasterGuides}</div>
                     <div className="stat-label">Master Guides</div>
-                    <div className="stat-sub">{totalMGiT} MGiT</div>
+                    <div className="stat-sub">{totalMGT} MGT</div>
                 </div>
 
                 <div className="stat-card stat-card--info transition-transform hover:scale-[1.02] cursor-pointer">
@@ -272,7 +272,7 @@ export default function SuperAdmin(props) {
                                 <th>Pathfinders</th>
                                 <th>Units</th>
                                 <th>Master Guides</th>
-                                <th>MGiT</th>
+                                <th>MGT</th>
                                 <th>Clinical Alerts</th>
                                 <th>Status</th>
                                 <th>Actions</th>
@@ -290,7 +290,7 @@ export default function SuperAdmin(props) {
                                     <td><span className="cell-primary font-black text-gold-500">{church.total ?? 0}</span></td>
                                     <td>{church.units ?? 0}</td>
                                     <td>{church.master_guides ?? 0}</td>
-                                    <td>{church.mgit ?? 0}</td>
+                                    <td>{church.mgt ?? 0}</td>
                                     <td>
                                         {church.medical > 0 ? (
                                             <span className="badge badge--warning font-bold">

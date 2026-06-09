@@ -49,8 +49,8 @@ export default function MasterGuideManager({ master_guides, mg_training, picklis
         mg.full_name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    // MGTs are leaders with role MGT (renamed from MGiT)
-    const mgtCandidates = filteredMGs.filter(mg => mg.role === 'MGT' || mg.role === 'MGiT');
+    // MGTs are leaders with role MGT
+    const mgtCandidates = filteredMGs.filter(mg => mg.role === 'MGT');
     const fullMGs = filteredMGs.filter(mg => mg.role === 'MG');
 
     return (

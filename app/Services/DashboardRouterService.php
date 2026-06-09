@@ -169,7 +169,7 @@ class DashboardRouterService
                 'pathfinders as total_pathfinders',
                 'pathfinders as medical_flags' => fn($q) => $q->whereNotNull('medical_conditions')->where('medical_conditions', '!=', ''),
                 'masterGuides as total_master_guides',
-                'masterGuides as total_mgit' => fn($q) => $q->where('role', 'MGiT'),
+                'masterGuides as total_mgt' => fn($q) => $q->where('role', 'MGT'),
                 'units as total_units',
             ])
             ->orderBy('name')
@@ -181,7 +181,7 @@ class DashboardRouterService
                 'total' => (int) $c->total_pathfinders,
                 'medical' => (int) $c->medical_flags,
                 'master_guides' => (int) $c->total_master_guides,
-                'mgit' => (int) $c->total_mgit,
+                'mgt' => (int) $c->total_mgt,
                 'units' => (int) $c->total_units,
                 'status' => ((int) $c->total_pathfinders) > 0 ? 'active' : 'pending',
             ]);
@@ -237,7 +237,7 @@ class DashboardRouterService
             ->withCount([
                 'pathfinders as total_pathfinders',
                 'masterGuides as total_master_guides',
-                'masterGuides as total_mgt' => fn($q) => $q->whereIn('role', ['MGT', 'MGiT']),
+                'masterGuides as total_mgt' => fn($q) => $q->where('role', 'MGT'),
             ])
             ->orderBy('name')
             ->get()

@@ -9,7 +9,7 @@ import {
 
 export default function Details({ leader }) {
     // Determine level badge
-    const isMGT = leader.role === 'MGT' || leader.role === 'MGiT';
+    const isMGT = leader.role === 'MGT';
 
     return (
         <AuthenticatedLayout

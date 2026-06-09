@@ -75,7 +75,7 @@ export default function BulkMasterGuideForm({ picklists, onCancel, onSuccess }) 
                     <h3 className="flex items-center gap-2 text-lg text-white m-0">
                         <Users size={18} className="text-success" /> Bulk Register Master Guides
                     </h3>
-                    <p className="text-xs text-muted m-0 mt-1">Add up to 10 Master Guides / MGiTs at once. Empty rows will be ignored.</p>
+                    <p className="text-xs text-muted m-0 mt-1">Add up to 10 Master Guides / MGTs at once. Empty rows will be ignored.</p>
                 </div>
                 <div className="flex gap-2">
                     <button type="button" className="btn btn--secondary" onClick={onCancel} disabled={processing}>
