@@ -80,6 +80,8 @@ class DashboardRouterService
         return match ($context) {
             'super_admin'       => $this->renderSuperAdmin($user, $section),
             'director'          => $this->renderDirector($user, $section),
+            // DEPRECATED: master_guide is being removed as a login role (Phase 1)
+            // In Phase 3, staff members will access through director role or new staff context
             'master_guide'      => $this->renderMasterGuide($user, $section),
             'parent'            => $this->renderParent($user, $section),
             'pathfinder'        => $this->renderPathfinder($user, $section),
@@ -573,13 +575,23 @@ class DashboardRouterService
         ]);
     }
 
+    /**
+     * DEPRECATED: This method renders the Master Guide dashboard.
+     * In Phase 3, this will be replaced with a Staff dashboard that shows:
+     * - Staff profile (club_staff table)
+     * - Credentials (staff_credentials table)
+     * - Current assignments
+     * - Training progress
+     *
+     * For now, this is kept for backward compatibility during Phase 1 transition.
+     */
     protected function renderMasterGuide(User $user, $section)
     {
         $profile = $user->masterGuide()->with(['church', 'assignedClass', 'trainings'])->first();
-        
+
         $roster = collect();
         $curriculum = collect();
-        
+
         if ($profile && $profile->assigned_class_id && $profile->church_id) {
             $roster = \App\Models\Pathfinder::where('church_id', $profile->church_id)
                 ->whereHas('classAssignment', function($q) use ($profile) {
@@ -588,7 +600,7 @@ class DashboardRouterService
                 ->with(['unitMembership.unit', 'progress.requirement'])
                 ->orderBy('name')
                 ->get();
-                
+
             $curriculum = \App\Models\CurriculumRequirement::where('class_id', $profile->assigned_class_id)
                 ->orderBy('category')
                 ->get();

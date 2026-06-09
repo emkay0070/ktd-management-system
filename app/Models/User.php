@@ -89,16 +89,22 @@ class User extends Authenticatable
         return session('active_role_context') ?? $this->getDefaultContext();
     }
 
+    /**
+     * Active context role (for multi-role switcher). Stored in session.
+     *
+     * NOTE: master_guide is NOT a login role - it is a credential stored in staff_credentials.
+     * Login roles are for authentication/identity only. Credentials unlock assignments.
+     */
     protected function getDefaultContext(): string
     {
         $priority = [
-            'super_admin', 
-            'district_director', 'district_treasurer', 'district_secretary', 
+            'super_admin',
+            'district_director', 'district_treasurer', 'district_secretary',
             'district_committee', 'district_official',
             'district_curriculum_coordinator', 'district_masterguide_coordinator',
             'district_communication_coordinator', 'district_music_coordinator',
             'district_welfare_coordinator', 'district_pbe_coordinator', 'district_programs_coordinator',
-            'director', 'master_guide', 'pathfinder', 'parent', 'observer'
+            'director', 'pathfinder', 'parent', 'observer'
         ];
         foreach ($priority as $role) {
             if ($this->hasRole($role)) return $role;
@@ -230,11 +236,23 @@ class User extends Authenticatable
     }
 
     /**
-     * Get the associated master guide profile if any.
+     * Get the associated club staff profile if any.
+     *
+     * NOTE: This relationship points to the staff profile (currently master_guides table).
+     * In Phase 3, this will be renamed to clubStaff() pointing to club_staff table.
+     * Master Guide is a credential, not a staff type.
      */
     public function masterGuide()
     {
         return $this->hasOne(MasterGuide::class);
+    }
+
+    /**
+     * Get the associated club staff profile if any (alias for masterGuide during transition).
+     */
+    public function clubStaff()
+    {
+        return $this->masterGuide();
     }
 
     /**

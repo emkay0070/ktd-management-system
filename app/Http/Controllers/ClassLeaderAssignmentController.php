@@ -5,10 +5,18 @@ namespace App\Http\Controllers;
 use App\Models\ClassLeaderAssignment;
 use App\Models\MasterGuide;
 use App\Models\PathfinderClass;
+use App\Services\CredentialService;
 use Illuminate\Http\Request;
 
 class ClassLeaderAssignmentController extends Controller
 {
+    protected CredentialService $credentialService;
+
+    public function __construct(CredentialService $credentialService)
+    {
+        $this->credentialService = $credentialService;
+    }
+
     public function store(Request $request, PathfinderClass $class)
     {
         $user = $request->user();
@@ -27,6 +35,13 @@ class ClassLeaderAssignmentController extends Controller
 
         if (!$mg) {
             return back()->withErrors(['master_guide_id' => 'Invalid Master Guide for this church.']);
+        }
+
+        // Validate that the staff member has required credentials for this assignment
+        try {
+            $this->credentialService->validateAssignment($mg, $data['role']);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->withErrors(['credential' => $e->getMessage()]);
         }
 
         ClassLeaderAssignment::firstOrCreate([

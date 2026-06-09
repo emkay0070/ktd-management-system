@@ -57,6 +57,37 @@ class MasterGuide extends Model
         return $this->hasMany(MgTraining::class);
     }
 
+    /**
+     * Credentials held by this staff member.
+     * This represents what they are qualified to do (Master Guide, Instructor, Counselor, etc.).
+     */
+    public function credentials(): HasMany
+    {
+        return $this->hasMany(StaffCredential::class, 'staff_id');
+    }
+
+    /**
+     * Check if this staff member has a specific valid credential.
+     */
+    public function hasCredential(string $credentialType): bool
+    {
+        return $this->credentials()
+            ->where('credential_type', $credentialType)
+            ->valid()
+            ->exists();
+    }
+
+    /**
+     * Get the Master Guide credential if it exists and is valid.
+     */
+    public function getMasterGuideCredential()
+    {
+        return $this->credentials()
+            ->where('credential_type', 'master_guide')
+            ->valid()
+            ->first();
+    }
+
     public function religion(): BelongsTo
     {
         return $this->belongsTo(Religion::class);
