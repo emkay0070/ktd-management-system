@@ -116,6 +116,8 @@ class OnboardingController extends Controller
                 'user_id' => $user->id,
                 'full_name' => $user->name,
                 'role' => $request->mg_status ?? 'MGT',
+                'status' => 'unassigned', // Transitional: they are MGs but not yet assigned as club staff
+                'actively_teaching' => false, // Not teaching until assigned to a class
                 'church_id' => $user->church_id,
             ]);
 

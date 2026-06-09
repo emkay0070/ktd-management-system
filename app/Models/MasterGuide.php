@@ -12,6 +12,7 @@ class MasterGuide extends Model
         'user_id',
         'full_name',
         'role',
+        'status',
         'church_id',
         'assigned_class_id',
         'religion_id',

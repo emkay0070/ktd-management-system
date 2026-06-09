@@ -50,8 +50,9 @@ export default function MasterGuideManager({ master_guides, mg_training, picklis
     );
 
     // MGTs are leaders with role MGT
-    const mgtCandidates = filteredMGs.filter(mg => mg.role === 'MGT');
-    const fullMGs = filteredMGs.filter(mg => mg.role === 'MG');
+    const mgtCandidates = filteredMGs.filter(mg => mg.role === 'MGT' && mg.status === 'active');
+    const fullMGs = filteredMGs.filter(mg => mg.role === 'MG' && mg.status === 'active');
+    const unassignedMGs = filteredMGs.filter(mg => mg.status === 'unassigned');
 
     return (
         <div className="flex flex-col gap-6">
@@ -111,6 +112,13 @@ export default function MasterGuideManager({ master_guides, mg_training, picklis
                         >
                             MGT Training Tracker
                             <span className={`ml-2 px-2 py-0.5 rounded-full text-[10px] ${activeTab === 'training' ? 'bg-gold-500/20 text-gold-300' : 'bg-white/10'}`}>{mgtCandidates.length}</span>
+                        </button>
+                        <button 
+                            className={`px-6 py-4 font-bold text-xs tracking-widest uppercase transition-all ${activeTab === 'unassigned' ? 'text-blue-400 border-b-2 border-blue-500 bg-blue-500/5' : 'text-muted hover:text-white hover:bg-white/5'}`}
+                            onClick={() => setActiveTab('unassigned')}
+                        >
+                            Available MG/MGT
+                            <span className={`ml-2 px-2 py-0.5 rounded-full text-[10px] ${activeTab === 'unassigned' ? 'bg-blue-500/20 text-blue-300' : 'bg-white/10'}`}>{unassignedMGs.length}</span>
                         </button>
                         <button 
                             className={`px-6 py-4 font-bold text-xs tracking-widest uppercase transition-all ${activeTab === 'leadership' ? 'text-blue-400 border-b-2 border-blue-500 bg-blue-500/5' : 'text-muted hover:text-white hover:bg-white/5'}`}
@@ -256,6 +264,67 @@ export default function MasterGuideManager({ master_guides, mg_training, picklis
                                                     <td colSpan={4} className="py-16 text-center opacity-40">
                                                         <GraduationCap size={32} className="mb-3 text-gold-400 mx-auto" strokeWidth={1} />
                                                         <div className="text-[9px] font-black uppercase tracking-[0.2em] text-gold-400">Queue Empty</div>
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'unassigned' && (
+                            <div className="panel p-0 bg-blue-900/[0.01] border-blue-500/5 hover:border-blue-500/10 transition-colors">
+                                <div className="table-responsive">
+                                    <table className="h-table">
+                                        <thead>
+                                            <tr>
+                                                <th style={{ paddingLeft: '1.5rem' }}>Member Name</th>
+                                                <th>Investiture</th>
+                                                <th>Status</th>
+                                                <th style={{ width: 100 }}>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {unassignedMGs.map(mg => (
+                                                <tr key={mg.id}>
+                                                    <td className="cell-primary" style={{ minWidth: 250, paddingLeft: '1.5rem' }}>
+                                                        <div className="flex items-center gap-4">
+                                                            <div className="h-10 w-10 bg-blue-900/30 border border-blue-500/10 text-blue-400 flex items-center justify-center rounded-full shrink-0 font-bold overflow-hidden">
+                                                                {mg.avatar_url ? (
+                                                                    <img src={mg.avatar_url} alt="" className="w-full h-full object-cover" />
+                                                                ) : (
+                                                                    <span className="text-xs">{mg.full_name[0]}</span>
+                                                                )}
+                                                            </div>
+                                                            <div>
+                                                                <div className="font-bold text-sm text-gray-200">{mg.full_name}</div>
+                                                                <div className="text-[9px] text-blue-500/60 uppercase tracking-[0.15em] font-black mt-0.5">Available for Assignment</div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <span className="text-[10px] font-bold text-muted uppercase tracking-widest">{mg.role}</span>
+                                                    </td>
+                                                    <td>
+                                                        <div className="badge badge--info">Unassigned</div>
+                                                    </td>
+                                                    <td>
+                                                        <div className="flex gap-2">
+                                                            {!readonly && (
+                                                                <Link href={route('master_guides.edit', mg.id)} className="action-btn action-btn--info" title="Assign to Staff">
+                                                                    <UserPlus size={16} />
+                                                                </Link>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                            {unassignedMGs.length === 0 && (
+                                                <tr>
+                                                    <td colSpan={4} className="py-16 text-center opacity-40">
+                                                        <Users size={32} className="mb-3 text-blue-400 mx-auto" strokeWidth={1} />
+                                                        <div className="text-[9px] font-black uppercase tracking-[0.2em] text-blue-400">No unassigned members</div>
                                                     </td>
                                                 </tr>
                                             )}

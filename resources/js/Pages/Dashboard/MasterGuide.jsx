@@ -22,6 +22,62 @@ export default function MasterGuideDashboard({ profile, tasks = [], roster = [],
                         </div>
                     </div>
                 </div>
+            ) : profile.status === 'unassigned' ? (
+                <div className="space-y-8">
+                    <div className="panel bg-gradient-to-br from-blue-900/40 via-surface-800 to-surface-800 border-blue-500/20">
+                        <div className="panel__body flex flex-col md:flex-row items-center gap-8 p-10">
+                            <div className="h-24 w-24 rounded-2xl bg-blue-500 flex items-center justify-center text-white border-4 border-white/5 shadow-2xl font-black text-4xl">
+                                {profile.full_name?.substring(0, 1)}
+                            </div>
+                            <div className="flex-1 text-center md:text-left">
+                                <h1 className="text-3xl font-black text-white mb-2 uppercase tracking-tight">Welcome, {profile.full_name}</h1>
+                                <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
+                                    <div className="badge badge--info">{profile.role === 'MG' ? 'Invested Master Guide' : 'Master Guide in Training'}</div>
+                                    <div className="text-xs font-bold text-gray-500 uppercase tracking-widest">Status: Pending Club Assignment</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="panel p-8 text-center space-y-4">
+                            <Users size={40} className="mx-auto text-blue-400 opacity-50" />
+                            <h3 className="text-xl font-bold text-white">Not Currently Serving</h3>
+                            <p className="text-gray-400 text-sm leading-relaxed">
+                                You are registered as a Master Guide in the <strong>{profile.church?.name}</strong> district, 
+                                but you haven't been assigned to a specific club leadership role (Counselor, Instructor, etc.) yet.
+                            </p>
+                            <div className="pt-4">
+                                <div className="inline-block px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[11px] font-black uppercase tracking-widest text-gray-500">
+                                    Waiting for Director Assignment
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="panel p-8 space-y-6">
+                            <div className="flex items-center gap-3">
+                                <GraduationCap size={24} className="text-gold-400" />
+                                <h3 className="text-lg font-bold text-white">Your Credentials</h3>
+                            </div>
+                            <div className="space-y-4">
+                                <div className="p-4 bg-white/5 border border-white/5 rounded-2xl flex items-center justify-between">
+                                    <div>
+                                        <div className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1">Milestone</div>
+                                        <div className="font-bold text-white">{profile.role === 'MG' ? 'Master Guide Investiture' : 'Master Guide Candidate'}</div>
+                                    </div>
+                                    <CheckCircle2 size={20} className={profile.role === 'MG' ? 'text-success' : 'text-gray-600'} />
+                                </div>
+                                <div className="p-4 bg-white/5 border border-white/5 rounded-2xl flex items-center justify-between opacity-50">
+                                    <div>
+                                        <div className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1">Next Step</div>
+                                        <div className="font-bold text-white">Club Staff Appointment</div>
+                                    </div>
+                                    <Star size={20} />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             ) : (
                 <div className="space-y-8">
                     {/* MG Header Info */}
