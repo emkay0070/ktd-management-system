@@ -3,35 +3,8 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import { Map, Users, Shield, BookOpen, Layers, Calendar, Trophy, Megaphone, ClipboardCheck, Activity, Tent, Check, X, ChevronDown, ChevronUp, Church } from 'lucide-react';
 import { useState } from 'react';
 
-function VerifyChurchAction({ church }) {
-    const { post, processing } = useForm({});
-    return (
-        <div className="flex items-center gap-2">
-            <button disabled={processing} onClick={() => post(route('verification.churches.approve', church.id))} className="btn btn--sm bg-green-600/20 text-green-400 border border-green-600/30 hover:bg-green-600/40 disabled:opacity-50">
-                <Check size={13} className="mr-1" /> Approve
-            </button>
-            <button disabled={processing} onClick={() => post(route('verification.churches.reject', church.id))} className="btn btn--sm bg-danger-500/10 text-danger-400 border border-danger-500/20 hover:bg-danger-500/20 disabled:opacity-50">
-                <X size={13} className="mr-1" /> Reject
-            </button>
-        </div>
-    );
-}
-
-function VerifyRoleAction({ user }) {
-    const { post, processing } = useForm({});
-    return (
-        <div className="flex items-center gap-2">
-            <button disabled={processing} onClick={() => post(route('verification.roles.approve', user.id))} className="btn btn--sm bg-green-600/20 text-green-400 border border-green-600/30 hover:bg-green-600/40 disabled:opacity-50">
-                <Check size={13} className="mr-1" /> Approve
-            </button>
-            <button disabled={processing} onClick={() => post(route('verification.roles.reject', user.id))} className="btn btn--sm bg-danger-500/10 text-danger-400 border border-danger-500/20 hover:bg-danger-500/20 disabled:opacity-50">
-                <X size={13} className="mr-1" /> Reject
-            </button>
-        </div>
-    );
-}
-
 import ClubsDirectory from './Partials/ClubsDirectory';
+import ApprovalCenter from './Partials/ApprovalCenter';
 import DistrictCommitteeManager from './Partials/DistrictCommitteeManager';
 import DistrictEventsManager from './Partials/DistrictEventsManager';
 import DistrictTasksManager from './Partials/DistrictTasksManager';
@@ -71,10 +44,6 @@ export default function District({
     social_events = [], 
     retention_metrics = { inactive_members: [], declining_clubs: [] } 
 }) {
-    const [showChurchQueue, setShowChurchQueue] = useState(false);
-    const [showRoleQueue, setShowRoleQueue] = useState(false);
-    const actionCount = pending_churches.length + pending_approvals.length;
-    
     const userRoleNames = auth.user.role_names || [];
     const hasRole = (r) => userRoleNames.includes(r);
     
@@ -140,68 +109,13 @@ export default function District({
                     </header>
                 )}
 
-                {isClubs && actionCount > 0 && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                        {pending_churches.length > 0 && (
-                            <div className="space-y-2">
-                                <div className="alert alert--warning flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <Church size={18} className="text-warning-500" />
-                                        <span><strong>{pending_churches.length} New Church Application{pending_churches.length > 1 ? 's' : ''}</strong> waiting for verification.</span>
-                                    </div>
-                                    <button onClick={() => setShowChurchQueue(v => !v)} className="btn btn--white btn--sm font-bold flex items-center gap-1">
-                                        {showChurchQueue ? 'Hide' : 'Verify Now'}
-                                        {showChurchQueue ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
-                                    </button>
-                                </div>
-                                {showChurchQueue && (
-                                    <div className="bg-surface-800 border border-warning-500/20 rounded-2xl overflow-hidden fade-in divide-y divide-white/5">
-                                        {pending_churches.map(church => (
-                                            <div key={church.id} className="flex items-center justify-between px-5 py-3">
-                                                <div>
-                                                    <div className="font-bold text-white text-sm">{church.name}</div>
-                                                    <div className="text-[10px] text-gray-500 uppercase tracking-widest">{church.location ?? 'No location'}</div>
-                                                </div>
-                                                <VerifyChurchAction church={church} />
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                        {pending_approvals.length > 0 && (
-                            <div className="space-y-2">
-                                <div className="alert alert--info flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <Shield size={18} className="text-info-500" />
-                                        <span><strong>{pending_approvals.length} Leader Credential{pending_approvals.length > 1 ? 's' : ''}</strong> waiting for approval.</span>
-                                    </div>
-                                    <button onClick={() => setShowRoleQueue(v => !v)} className="btn btn--white btn--sm font-bold flex items-center gap-1">
-                                        {showRoleQueue ? 'Hide' : 'Review'}
-                                        {showRoleQueue ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
-                                    </button>
-                                </div>
-                                {showRoleQueue && (
-                                    <div className="bg-surface-800 border border-info-500/20 rounded-2xl overflow-hidden fade-in divide-y divide-white/5">
-                                        {pending_approvals.map(user => (
-                                            <div key={user.id} className="flex items-center justify-between px-5 py-3">
-                                                <div>
-                                                    <div className="font-bold text-white text-sm">
-                                                        {user.name}
-                                                        {user.district && <span className="ml-2 text-xs text-gold-500 font-normal">({user.district.name})</span>}
-                                                        {user.church && <span className="ml-2 text-xs text-burgundy-400 font-normal">({user.church.name})</span>}
-                                                    </div>
-                                                    <div className="text-[10px] text-gray-500 uppercase tracking-widest">
-                                                        {user.roles?.filter(r => r.pivot?.status === 'pending').map(r => r.display_name ?? r.name).join(', ')}
-                                                    </div>
-                                                </div>
-                                                <VerifyRoleAction user={user} />
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        )}
+                {section === 'overview' && (
+                    <div className="space-y-6 mb-10">
+                        <ApprovalCenter 
+                            pending_approvals={pending_approvals} 
+                            pending_churches={pending_churches} 
+                            level="district"
+                        />
                     </div>
                 )}
 

@@ -17,7 +17,19 @@ import ClubBulletinsView from './Partials/ClubBulletinsView';
 import RegistrationPortal from './Partials/RegistrationPortal';
 import ParentLinkManager from './Partials/ParentLinkManager';
 
-export default function Director({ club, registrations = [], district_events = [], district_tasks = [], district_resources = [], district_bulletins = [], parent_link_requests = [], parents = [], section = 'overview', readonly = false }) {
+export default function Director({ 
+    club, 
+    registrations = [], 
+    district_events = [], 
+    district_tasks = [], 
+    district_resources = [], 
+    district_bulletins = [], 
+    parent_link_requests = [], 
+    pending_approvals = [],
+    parents = [], 
+    section = 'overview', 
+    readonly = false 
+}) {
     const { flash } = usePage().props;
 
     if (!club) {
@@ -53,7 +65,16 @@ export default function Director({ club, registrations = [], district_events = [
     const renderSection = () => {
         switch (section) {
             case 'overview':
-                return <DirectorOverview overview={overview} units={units} district_events={district_events} district_bulletins={district_bulletins} />;
+                return (
+                    <DirectorOverview 
+                        overview={overview} 
+                        units={units} 
+                        district_events={district_events} 
+                        district_bulletins={district_bulletins} 
+                        pending_approvals={pending_approvals}
+                        parent_link_requests={parent_link_requests}
+                    />
+                );
             case 'pathfinders':
                 return <PathfinderManager pathfinders={pathfinders} units={units} picklists={picklists} readonly={readonly} />;
             case 'units':

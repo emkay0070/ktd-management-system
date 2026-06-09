@@ -50,10 +50,17 @@ class VerificationController extends Controller
     public function approveRole(Request $request, User $user): RedirectResponse
     {
         $actor = $request->user();
-        abort_unless($actor->hasAnyRole(['super_admin', 'district_director']), 403);
+        abort_unless($actor->hasAnyRole(['super_admin', 'district_director', 'director']), 403);
 
-        if (!$actor->hasRole('super_admin')) {
-            // Ensure the user being approved belongs to the same district as the actor
+        if ($actor->hasRole('director')) {
+            // Club Directors can only approve users in their own church
+            abort_unless(
+                (int)$user->church_id === (int)$actor->church_id,
+                403,
+                "You do not have permission to approve users outside your club."
+            );
+        } elseif (!$actor->hasRole('super_admin')) {
+            // District Directors: Ensure the user being approved belongs to the same district as the actor
             $targetDistrictId = $user->district_id ?? $user->church?->district_id;
             
             abort_unless(
@@ -92,9 +99,14 @@ class VerificationController extends Controller
     public function rejectRole(Request $request, User $user): RedirectResponse
     {
         $actor = $request->user();
-        abort_unless($actor->hasAnyRole(['super_admin', 'district_director']), 403);
+        abort_unless($actor->hasAnyRole(['super_admin', 'district_director', 'director']), 403);
 
-        if (!$actor->hasRole('super_admin')) {
+        if ($actor->hasRole('director')) {
+            abort_unless(
+                (int)$user->church_id === (int)$actor->church_id,
+                403
+            );
+        } elseif (!$actor->hasRole('super_admin')) {
             $targetDistrictId = $user->district_id ?? $user->church?->district_id;
             
             abort_unless(

@@ -570,6 +570,10 @@ class DashboardRouterService
                 ->with(['author:id,name', 'acknowledgements' => fn($q) => $q->where('user_id', $user->id)])
                 ->get(),
             'parent_link_requests' => \App\Models\PendingParentLink::whereIn('pathfinder_id', $pathfinders->pluck('id'))->where('status', 'pending')->with(['user', 'pathfinder'])->get(),
+            'pending_approvals' => User::whereHas('roles', fn($q) => $q->where('role_user.status', 'pending'))
+                ->where('church_id', $church->id)
+                ->with(['roles', 'church', 'district'])
+                ->get(),
             'parents' => User::where('church_id', $church->id)->get()->filter(fn($u) => $u->hasRole('parent'))->values(),
             'section' => $section,
         ]);

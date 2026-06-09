@@ -1,7 +1,15 @@
 import { Users, Shield, GraduationCap, CalendarClock, Tag, Clock, MapPin, Megaphone, AlertTriangle, Info, TrendingUp, ChevronRight } from 'lucide-react';
 import { useMemo } from 'react';
+import ApprovalCenter from './ApprovalCenter';
 
-export default function DirectorOverview({ overview, units, district_events = [], district_bulletins = [] }) {
+export default function DirectorOverview({ 
+    overview, 
+    units, 
+    district_events = [], 
+    district_bulletins = [],
+    pending_approvals = [],
+    parent_link_requests = []
+}) {
     const classTotalsText = useMemo(() => {
         const totals = overview?.class_totals ?? [];
         return totals.map((t) => `${t.name}: ${t.count}`).join(' • ');
@@ -56,6 +64,12 @@ export default function DirectorOverview({ overview, units, district_events = []
                     ))}
                 </div>
             )}
+
+            <ApprovalCenter 
+                pending_approvals={pending_approvals} 
+                parent_link_requests={parent_link_requests} 
+                level="club"
+            />
 
             <div className={`grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 ${fadeInUp}`} style={{ animationDelay: '100ms' }}>
                 <div className="stat-card stat-card--burgundy overflow-hidden group">
