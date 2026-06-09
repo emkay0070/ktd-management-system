@@ -29,6 +29,13 @@ class MasterGuideController extends Controller
         $request->validate([
             'full_name' => 'required|string|max:255',
             'role' => 'required|string|in:MG,MGT', // Investiture status: Master Guide or Master Guide in Training
+            'investiture_status' => 'nullable|string|in:in_training,certified,unknown,not_applicable',
+            'master_guide_level' => 'nullable|string|max:255',
+            'training_started_at' => 'nullable|date',
+            'training_completed_at' => 'nullable|date',
+            'investiture_date' => 'nullable|date',
+            'is_active_in_club' => 'nullable|boolean',
+            'can_serve_as_staff' => 'nullable|boolean',
             'assigned_class_id' => 'nullable|integer|exists:classes,id',
             'religion_id' => 'required|integer|exists:religions,id',
             'other_religion' => 'nullable|string|max:255',
@@ -46,11 +53,22 @@ class MasterGuideController extends Controller
             $avatarPath = $request->file('avatar')->store('avatars/leaders', 'public');
         }
 
+        // Set default investiture_status based on role if not provided
+        $investitureStatus = $request->investiture_status;
+        if (!$investitureStatus) {
+            $investitureStatus = ($request->role === 'MG') ? 'certified' : 'in_training';
+        }
+
         $mg = MasterGuide::create([
             ...$request->except('avatar'),
             'avatar_path' => $avatarPath,
             'church_id' => $user->church_id,
             'status' => 'active', // Manually registered by director = active staff
+            'investiture_status' => $investitureStatus,
+            'master_guide_level' => $request->master_guide_level ?? $request->role,
+            'onboarding_source' => 'manual_admin',
+            'is_active_in_club' => $request->is_active_in_club ?? true,
+            'can_serve_as_staff' => $request->can_serve_as_staff ?? true,
         ]);
 
         if ($mg->role === 'MG') {
@@ -76,7 +94,6 @@ class MasterGuideController extends Controller
         $request->validate([
             'master_guides' => 'required|array|min:1|max:10',
             'master_guides.*.name' => 'required|string|max:255',
-            'master_guides.*.gender' => 'required|string|in:Male,Female',
             'master_guides.*.role' => 'required|string|in:MG,MGT',
             'master_guides.*.religion_id' => 'required|integer|exists:religions,id',
             'master_guides.*.avatar' => 'nullable|image|max:2048',
@@ -90,11 +107,15 @@ class MasterGuideController extends Controller
 
             $mgModel = MasterGuide::create([
                 'full_name' => $mg['name'],
-                'gender' => $mg['gender'],
                 'role' => $mg['role'],
                 'religion_id' => $mg['religion_id'],
                 'church_id' => $user->church_id,
                 'status' => 'active', // Manually registered = active staff
+                'investiture_status' => ($mg['role'] === 'MG') ? 'certified' : 'in_training',
+                'master_guide_level' => $mg['role'],
+                'onboarding_source' => 'bulk_import',
+                'is_active_in_club' => true,
+                'can_serve_as_staff' => true,
                 'residence' => 'N/A', // defaults required by schema
                 'occupation_status' => 'working',
                 'insured_yearly' => false,
@@ -135,6 +156,13 @@ class MasterGuideController extends Controller
         $request->validate([
             'full_name' => 'required|string|max:255',
             'role' => 'required|string|in:MG,MGT', // Investiture status: Master Guide or Master Guide in Training
+            'investiture_status' => 'nullable|string|in:in_training,certified,unknown,not_applicable',
+            'master_guide_level' => 'nullable|string|max:255',
+            'training_started_at' => 'nullable|date',
+            'training_completed_at' => 'nullable|date',
+            'investiture_date' => 'nullable|date',
+            'is_active_in_club' => 'nullable|boolean',
+            'can_serve_as_staff' => 'nullable|boolean',
             'assigned_class_id' => 'nullable|integer|exists:classes,id',
             'religion_id' => 'required|integer|exists:religions,id',
             'other_religion' => 'nullable|string|max:255',

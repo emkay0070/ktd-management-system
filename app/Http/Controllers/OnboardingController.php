@@ -117,8 +117,14 @@ class OnboardingController extends Controller
                 'full_name' => $user->name,
                 'role' => $request->mg_status ?? 'MGT',
                 'status' => 'unassigned', // Transitional: they are MGs but not yet assigned as club staff
+                'investiture_status' => ($request->mg_status === 'MG') ? 'certified' : 'in_training',
+                'master_guide_level' => $request->mg_status ?? 'MGT',
+                'onboarding_source' => 'self_registration',
+                'is_active_in_club' => false, // Not active in club yet until assigned
+                'can_serve_as_staff' => true,
                 'actively_teaching' => false, // Not teaching until assigned to a class
                 'church_id' => $user->church_id,
+                'investiture_date' => $request->investiture_year ? Carbon::createFromDate($request->investiture_year, 1, 1) : null,
             ]);
 
             if ($request->mg_status === 'MG') {

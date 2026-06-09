@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useForm, router, Link } from '@inertiajs/react';
-import { Plus, GraduationCap, Shield, UserPlus, Search, User, Edit2, Eye, LayoutGrid, Trash2, Users } from 'lucide-react';
+import { Plus, GraduationCap, Shield, UserPlus, Search, User, Edit2, Eye, LayoutGrid, Trash2, Users, AlertTriangle } from 'lucide-react';
 import ReligionCombobox from './ReligionCombobox';
 import LeadershipManager from './LeadershipManager';
 import BulkMasterGuideForm from './BulkMasterGuideForm';
@@ -19,6 +19,13 @@ export default function MasterGuideManager({ master_guides, mg_training, picklis
     const mgForm = useForm({
         full_name: '',
         role: 'MG',
+        investiture_status: 'certified',
+        master_guide_level: 'MG',
+        training_started_at: '',
+        training_completed_at: '',
+        investiture_date: '',
+        is_active_in_club: true,
+        can_serve_as_staff: true,
         assigned_class_id: '',
         religion_id: defaultReligionId,
         other_religion: '',
@@ -50,9 +57,9 @@ export default function MasterGuideManager({ master_guides, mg_training, picklis
         mg.full_name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    // MGTs are leaders with role MGT
-    const mgtCandidates = filteredMGs.filter(mg => mg.role === 'MGT' && mg.status === 'active');
-    const fullMGs = filteredMGs.filter(mg => mg.role === 'MG' && mg.status === 'active');
+    const certifiedMGs = filteredMGs.filter(mg => mg.investiture_status === 'certified');
+    const trainingMGs = filteredMGs.filter(mg => mg.investiture_status === 'in_training');
+    const legacyMGs = filteredMGs.filter(mg => !mg.investiture_status || mg.investiture_status === 'unknown');
     const unassignedMGs = filteredMGs.filter(mg => mg.status === 'unassigned');
 
     return (
@@ -99,30 +106,37 @@ export default function MasterGuideManager({ master_guides, mg_training, picklis
                         </div>
                     </div>
 
-                    <div className="flex gap-1 border-b border-white/5 mb-6">
+                    <div className="flex gap-1 border-b border-white/5 mb-6 overflow-x-auto">
                         <button 
-                            className={`px-6 py-4 font-bold text-xs tracking-widest uppercase transition-all ${activeTab === 'invested' ? 'text-burgundy-400 border-b-2 border-burgundy-500 bg-burgundy-500/5' : 'text-muted hover:text-white hover:bg-white/5'}`}
+                            className={`px-6 py-4 font-bold text-xs tracking-widest uppercase transition-all whitespace-nowrap ${activeTab === 'invested' ? 'text-success border-b-2 border-success bg-success/5' : 'text-muted hover:text-white hover:bg-white/5'}`}
                             onClick={() => setActiveTab('invested')}
                         >
-                            Invested Master Guides
-                            <span className={`ml-2 px-2 py-0.5 rounded-full text-[10px] ${activeTab === 'invested' ? 'bg-burgundy-500/20 text-burgundy-300' : 'bg-white/10'}`}>{fullMGs.length}</span>
+                            🟢 Certified Master Guides
+                            <span className={`ml-2 px-2 py-0.5 rounded-full text-[10px] ${activeTab === 'invested' ? 'bg-success/20 text-success-300' : 'bg-white/10'}`}>{certifiedMGs.length}</span>
                         </button>
                         <button 
-                            className={`px-6 py-4 font-bold text-xs tracking-widest uppercase transition-all ${activeTab === 'training' ? 'text-gold-400 border-b-2 border-gold-500 bg-gold-500/5' : 'text-muted hover:text-white hover:bg-white/5'}`}
+                            className={`px-6 py-4 font-bold text-xs tracking-widest uppercase transition-all whitespace-nowrap ${activeTab === 'training' ? 'text-gold-400 border-b-2 border-gold-500 bg-gold-500/5' : 'text-muted hover:text-white hover:bg-white/5'}`}
                             onClick={() => setActiveTab('training')}
                         >
-                            MGT Training Tracker
-                            <span className={`ml-2 px-2 py-0.5 rounded-full text-[10px] ${activeTab === 'training' ? 'bg-gold-500/20 text-gold-300' : 'bg-white/10'}`}>{mgtCandidates.length}</span>
+                            🟡 In Training (MGT)
+                            <span className={`ml-2 px-2 py-0.5 rounded-full text-[10px] ${activeTab === 'training' ? 'bg-gold-500/20 text-gold-300' : 'bg-white/10'}`}>{trainingMGs.length}</span>
                         </button>
                         <button 
-                            className={`px-6 py-4 font-bold text-xs tracking-widest uppercase transition-all ${activeTab === 'unassigned' ? 'text-blue-400 border-b-2 border-blue-500 bg-blue-500/5' : 'text-muted hover:text-white hover:bg-white/5'}`}
+                            className={`px-6 py-4 font-bold text-xs tracking-widest uppercase transition-all whitespace-nowrap ${activeTab === 'legacy' ? 'text-muted border-b-2 border-white/20 bg-white/5' : 'text-muted hover:text-white hover:bg-white/5'}`}
+                            onClick={() => setActiveTab('legacy')}
+                        >
+                            ⚪ Unclassified / Legacy
+                            <span className={`ml-2 px-2 py-0.5 rounded-full text-[10px] ${activeTab === 'legacy' ? 'bg-white/20 text-white' : 'bg-white/10'}`}>{legacyMGs.length}</span>
+                        </button>
+                        <button 
+                            className={`px-6 py-4 font-bold text-xs tracking-widest uppercase transition-all whitespace-nowrap ${activeTab === 'unassigned' ? 'text-blue-400 border-b-2 border-blue-500 bg-blue-500/5' : 'text-muted hover:text-white hover:bg-white/5'}`}
                             onClick={() => setActiveTab('unassigned')}
                         >
                             Available MG/MGT
                             <span className={`ml-2 px-2 py-0.5 rounded-full text-[10px] ${activeTab === 'unassigned' ? 'bg-blue-500/20 text-blue-300' : 'bg-white/10'}`}>{unassignedMGs.length}</span>
                         </button>
                         <button 
-                            className={`px-6 py-4 font-bold text-xs tracking-widest uppercase transition-all ${activeTab === 'leadership' ? 'text-blue-400 border-b-2 border-blue-500 bg-blue-500/5' : 'text-muted hover:text-white hover:bg-white/5'}`}
+                            className={`px-6 py-4 font-bold text-xs tracking-widest uppercase transition-all whitespace-nowrap ${activeTab === 'leadership' ? 'text-blue-400 border-b-2 border-blue-500 bg-blue-500/5' : 'text-muted hover:text-white hover:bg-white/5'}`}
                             onClick={() => setActiveTab('leadership')}
                         >
                             Leadership Staff
@@ -131,7 +145,7 @@ export default function MasterGuideManager({ master_guides, mg_training, picklis
 
                     <div>
                         {activeTab === 'invested' && (
-                            <div className="panel p-0 bg-burgundy-900/[0.01] border-burgundy-500/5 hover:border-burgundy-500/10 transition-colors">
+                            <div className="panel p-0 bg-success-900/[0.01] border-success-500/5 hover:border-success-500/10 transition-colors">
                                 <div className="table-responsive">
                                     <table className="h-table">
                                         <thead>
@@ -145,11 +159,11 @@ export default function MasterGuideManager({ master_guides, mg_training, picklis
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {fullMGs.map(mg => (
+                                            {certifiedMGs.map(mg => (
                                                 <tr key={mg.id}>
                                                     <td className="cell-primary" style={{ minWidth: 250, paddingLeft: '1.5rem' }}>
                                                         <div className="flex items-center gap-4">
-                                                            <div className="h-10 w-10 bg-surface-700 border border-burgundy-500/30 text-burgundy-400 flex items-center justify-center rounded-full shrink-0 font-bold overflow-hidden shadow-sm">
+                                                            <div className="h-10 w-10 bg-surface-700 border border-success-500/30 text-success-400 flex items-center justify-center rounded-full shrink-0 font-bold overflow-hidden shadow-sm">
                                                                 {mg.avatar_url ? (
                                                                     <img src={mg.avatar_url} alt="" className="w-full h-full object-cover" />
                                                                 ) : (
@@ -158,17 +172,18 @@ export default function MasterGuideManager({ master_guides, mg_training, picklis
                                                             </div>
                                                             <div className="flex-1 min-w-0">
                                                                 <div className="font-extrabold text-sm text-gray-100 truncate">{mg.full_name}</div>
+                                                                <div className="text-[9px] text-success-500/60 uppercase tracking-widest font-black mt-0.5">Certified Master Guide</div>
                                                             </div>
                                                         </div>
                                                     </td>
                                                     <td>
                                                         <div className="flex items-center gap-2">
-                                                            <div className="w-1.5 h-1.5 rounded-full bg-burgundy-500 shadow-[0_0_5px_rgba(var(--clr-burgundy-500-rgb),0.5)]"></div>
-                                                            <span className="text-[10px] font-black text-burgundy-400 uppercase tracking-widest">{mg.responsibility || 'Club Leader'}</span>
+                                                            <div className="w-1.5 h-1.5 rounded-full bg-success-500 shadow-[0_0_5px_rgba(var(--clr-success-500-rgb),0.5)]"></div>
+                                                            <span className="text-[10px] font-black text-success-400 uppercase tracking-widest">{mg.responsibility || 'Club Leader'}</span>
                                                         </div>
                                                     </td>
                                                     <td>
-                                                        <span className="text-[10px] font-bold text-muted uppercase tracking-widest">{mg.role}</span>
+                                                        <span className="text-[10px] font-bold text-muted uppercase tracking-widest">{mg.master_guide_level || mg.role}</span>
                                                     </td>
                                                     <td>
                                                         <span className="text-[10px] text-muted font-bold uppercase tracking-widest">{mg.assigned_class?.name ?? 'Admin Staff'}</span>
@@ -192,10 +207,10 @@ export default function MasterGuideManager({ master_guides, mg_training, picklis
                                                     </td>
                                                 </tr>
                                             ))}
-                                            {fullMGs.length === 0 && (
+                                            {certifiedMGs.length === 0 && (
                                                 <tr>
                                                     <td colSpan={6} className="py-12 text-center text-[10px] text-muted/30 font-bold uppercase tracking-widest italic">
-                                                        No Invested Master Guides recorded
+                                                        No Certified Master Guides recorded
                                                     </td>
                                                 </tr>
                                             )}
@@ -218,7 +233,7 @@ export default function MasterGuideManager({ master_guides, mg_training, picklis
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {mgtCandidates.map(mg => (
+                                            {trainingMGs.map(mg => (
                                                 <tr key={mg.id}>
                                                     <td className="cell-primary" style={{ minWidth: 250, paddingLeft: '1.5rem' }}>
                                                         <div className="flex items-center gap-4">
@@ -236,14 +251,14 @@ export default function MasterGuideManager({ master_guides, mg_training, picklis
                                                         </div>
                                                     </td>
                                                     <td>
-                                                        <span className="text-[10px] font-bold text-muted uppercase tracking-widest">{mg.role}</span>
+                                                        <span className="text-[10px] font-bold text-muted uppercase tracking-widest">{mg.master_guide_level || mg.role}</span>
                                                     </td>
                                                     <td>
                                                         <div className="flex items-center gap-3">
                                                             <div className="h-7 w-7 rounded flex items-center justify-center text-gold-500/40 bg-white/[0.02]">
                                                                 <GraduationCap size={14} />
                                                             </div>
-                                                            <div className="text-[9px] font-black uppercase tracking-widest text-gold-400/50 italic leading-none">Not Initialized</div>
+                                                            <div className="text-[9px] font-black uppercase tracking-widest text-gold-400/50 italic leading-none">In Training</div>
                                                         </div>
                                                     </td>
                                                     <td>
@@ -260,11 +275,74 @@ export default function MasterGuideManager({ master_guides, mg_training, picklis
                                                     </td>
                                                 </tr>
                                             ))}
-                                            {mgtCandidates.length === 0 && (
+                                            {trainingMGs.length === 0 && (
                                                 <tr>
                                                     <td colSpan={4} className="py-16 text-center opacity-40">
                                                         <GraduationCap size={32} className="mb-3 text-gold-400 mx-auto" strokeWidth={1} />
                                                         <div className="text-[9px] font-black uppercase tracking-[0.2em] text-gold-400">Queue Empty</div>
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'legacy' && (
+                            <div className="panel p-0 bg-white/[0.01] border-white/5 hover:border-white/10 transition-colors">
+                                <div className="table-responsive">
+                                    <table className="h-table">
+                                        <thead>
+                                            <tr>
+                                                <th style={{ paddingLeft: '1.5rem' }}>Leader Name</th>
+                                                <th>Investiture</th>
+                                                <th>Status</th>
+                                                <th style={{ width: 100 }}>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {legacyMGs.map(mg => (
+                                                <tr key={mg.id}>
+                                                    <td className="cell-primary" style={{ minWidth: 250, paddingLeft: '1.5rem' }}>
+                                                        <div className="flex items-center gap-4">
+                                                            <div className="h-10 w-10 bg-surface-700 border border-white/10 text-muted flex items-center justify-center rounded-full shrink-0 font-bold overflow-hidden">
+                                                                {mg.avatar_url ? (
+                                                                    <img src={mg.avatar_url} alt="" className="w-full h-full object-cover" />
+                                                                ) : (
+                                                                    <span className="text-xs">{mg.full_name[0]}</span>
+                                                                )}
+                                                            </div>
+                                                            <div>
+                                                                <div className="font-bold text-sm text-gray-200">{mg.full_name}</div>
+                                                                <div className="text-[9px] text-muted uppercase tracking-[0.15em] font-black mt-0.5">Legacy Record</div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <span className="text-[10px] font-bold text-muted uppercase tracking-widest">{mg.role}</span>
+                                                    </td>
+                                                    <td>
+                                                        <div className="flex items-center gap-2">
+                                                            <AlertTriangle size={14} className="text-warning" />
+                                                            <span className="text-[9px] font-black uppercase tracking-widest text-warning italic leading-none">Requires Review</span>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div className="flex gap-2">
+                                                            {!readonly && (
+                                                                <Link href={route('master_guides.edit', mg.id)} className="action-btn" title="Review & Update">
+                                                                    <Edit2 size={16} />
+                                                                </Link>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                            {legacyMGs.length === 0 && (
+                                                <tr>
+                                                    <td colSpan={4} className="py-16 text-center opacity-40">
+                                                        <div className="text-[9px] font-black uppercase tracking-[0.2em] text-muted">All records classified</div>
                                                     </td>
                                                 </tr>
                                             )}
@@ -428,6 +506,47 @@ export default function MasterGuideManager({ master_guides, mg_training, picklis
                                     <div className="form-grid-2">
                                         <div className="form-group">
                                             <label>Investiture Status</label>
+                                            <select className="h-input" value={mgForm.data.investiture_status} onChange={e => mgForm.setData('investiture_status', e.target.value)}>
+                                                <option value="certified">Certified / Invested</option>
+                                                <option value="in_training">In Training (MGT)</option>
+                                                <option value="not_applicable">Not Applicable</option>
+                                                <option value="unknown">Unknown</option>
+                                            </select>
+                                            <InputError message={mgForm.errors.investiture_status} />
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Master Guide Level</label>
+                                            <select className="h-input" value={mgForm.data.master_guide_level} onChange={e => mgForm.setData('master_guide_level', e.target.value)}>
+                                                <option value="MGT">MGT (Candidate)</option>
+                                                <option value="MG">Master Guide</option>
+                                                <option value="MG+">Master Guide+</option>
+                                                <option value="Instructor-Certified MG">Instructor-Certified MG</option>
+                                            </select>
+                                            <InputError message={mgForm.errors.master_guide_level} />
+                                        </div>
+                                    </div>
+
+                                    <div className="form-grid-3">
+                                        <div className="form-group">
+                                            <label>Training Started</label>
+                                            <input type="date" className="h-input" value={mgForm.data.training_started_at} onChange={e => mgForm.setData('training_started_at', e.target.value)} />
+                                            <InputError message={mgForm.errors.training_started_at} />
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Training Finished</label>
+                                            <input type="date" className="h-input" value={mgForm.data.training_completed_at} onChange={e => mgForm.setData('training_completed_at', e.target.value)} />
+                                            <InputError message={mgForm.errors.training_completed_at} />
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Investiture Date</label>
+                                            <input type="date" className="h-input" value={mgForm.data.investiture_date} onChange={e => mgForm.setData('investiture_date', e.target.value)} />
+                                            <InputError message={mgForm.errors.investiture_date} />
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="form-grid-2">
+                                        <div className="form-group">
+                                            <label>Legacy Role (Compatibility)</label>
                                             <select className="h-input" value={mgForm.data.role} onChange={e => mgForm.setData('role', e.target.value)}>
                                                 <option value="MG">Master Guide (Invested)</option>
                                                 <option value="MGT">Master Guide in Training (MGT)</option>
@@ -487,6 +606,23 @@ export default function MasterGuideManager({ master_guides, mg_training, picklis
                                             Insured for current year?
                                             <span className="text-xs">Required for active leadership and outings.</span>
                                         </label>
+                                    </div>
+
+                                    <div className="form-grid-2 gap-4">
+                                        <div className="h-checkbox-group bg-white/5 p-4 rounded-lg">
+                                            <input id="mg-active-club" type="checkbox" className="h-checkbox" checked={mgForm.data.is_active_in_club} onChange={e => mgForm.setData('is_active_in_club', e.target.checked)} />
+                                            <label className="checkbox-label" htmlFor="mg-active-club">
+                                                Active in Club?
+                                                <span className="text-xs">Currently serving this year.</span>
+                                            </label>
+                                        </div>
+                                        <div className="h-checkbox-group bg-white/5 p-4 rounded-lg">
+                                            <input id="mg-can-serve" type="checkbox" className="h-checkbox" checked={mgForm.data.can_serve_as_staff} onChange={e => mgForm.setData('can_serve_as_staff', e.target.checked)} />
+                                            <label className="checkbox-label" htmlFor="mg-can-serve">
+                                                Can Serve as Staff?
+                                                <span className="text-xs">Eligible for appointment.</span>
+                                            </label>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

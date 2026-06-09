@@ -13,6 +13,14 @@ class MasterGuide extends Model
         'full_name',
         'role',
         'status',
+        'investiture_status',
+        'master_guide_level',
+        'training_started_at',
+        'training_completed_at',
+        'investiture_date',
+        'onboarding_source',
+        'is_active_in_club',
+        'can_serve_as_staff',
         'church_id',
         'assigned_class_id',
         'religion_id',
@@ -36,6 +44,11 @@ class MasterGuide extends Model
     protected $casts = [
         'actively_teaching' => 'boolean',
         'insured_yearly' => 'boolean',
+        'is_active_in_club' => 'boolean',
+        'can_serve_as_staff' => 'boolean',
+        'training_started_at' => 'date',
+        'training_completed_at' => 'date',
+        'investiture_date' => 'date',
     ];
 
     public function user(): BelongsTo

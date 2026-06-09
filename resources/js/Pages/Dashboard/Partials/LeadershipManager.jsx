@@ -8,7 +8,7 @@ export default function LeadershipManager({ classes, committees, derived_pathfin
     const classLeaderForm = useForm({
         class_id: picklists?.classes?.[0]?.id ?? '',
         master_guide_id: picklists?.master_guides?.[0]?.id ?? '',
-        role: 'master_guide',
+        role: 'instructor',
     });
 
     const committeeForm = useForm({
@@ -99,7 +99,6 @@ export default function LeadershipManager({ classes, committees, derived_pathfin
                                     <div className="flex-grow">
                                         <label>Role</label>
                                         <select className="h-input" value={classLeaderForm.data.role} onChange={(e) => classLeaderForm.setData('role', e.target.value)}>
-                                            <option value="master_guide">Master Guide</option>
                                             <option value="counselor">Counselor</option>
                                             <option value="instructor">Instructor</option>
                                         </select>

@@ -10,7 +10,6 @@ export default function BulkMasterGuideForm({ picklists, onCancel, onSuccess }) 
         id: crypto.randomUUID(),
         name: '',
         phone: '',
-        gender: 'Male',
         role: 'MGT', // Only MG or MGT allowed in bulk
         religion_id: defaultReligionId,
     });
@@ -127,18 +126,6 @@ export default function BulkMasterGuideForm({ picklists, onCancel, onSuccess }) 
                             <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4 content-start pt-1">
                                 <div className="sm:col-span-2 flex items-center justify-between border-b border-white/5 pb-2 mb-2">
                                     <span className="text-xs font-black uppercase tracking-widest text-gold-500">Record #{index + 1}</span>
-                                </div>
-
-                                <div>
-                                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">Gender *</label>
-                                    <select 
-                                        className="h-input w-full"
-                                        value={row.gender}
-                                        onChange={(e) => updateRow(row.id, 'gender', e.target.value)}
-                                    >
-                                        <option value="Male">Male</option>
-                                        <option value="Female">Female</option>
-                                    </select>
                                 </div>
 
                                 <div>
