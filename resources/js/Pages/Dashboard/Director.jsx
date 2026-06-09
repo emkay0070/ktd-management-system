@@ -16,6 +16,7 @@ import ClubEventsView from './Partials/ClubEventsView';
 import ClubBulletinsView from './Partials/ClubBulletinsView';
 import RegistrationPortal from './Partials/RegistrationPortal';
 import ParentLinkManager from './Partials/ParentLinkManager';
+import ApprovalCenter from './Partials/ApprovalCenter';
 
 export default function Director({ 
     club, 
@@ -99,8 +100,26 @@ export default function Director({
                 return <RegistrationPortal pathfinders={pathfinders} registrations={registrations} district_events={district_events} />;
             case 'parents':
                 return <ParentLinkManager requests={parent_link_requests} parents={parents} pathfinders={pathfinders} readonly={readonly} />;
+            case 'verifications':
+                return (
+                    <ApprovalCenter 
+                        pending_approvals={pending_approvals} 
+                        parent_link_requests={parent_link_requests} 
+                        level="club"
+                        fullPage={true}
+                    />
+                );
             default:
-                return <DirectorOverview overview={overview} units={units} district_events={district_events} />;
+                return (
+                    <DirectorOverview 
+                        overview={overview} 
+                        units={units} 
+                        district_events={district_events} 
+                        district_bulletins={district_bulletins} 
+                        pending_approvals={pending_approvals}
+                        parent_link_requests={parent_link_requests}
+                    />
+                );
         }
     };
 
@@ -118,6 +137,7 @@ export default function Director({
         events: 'District Events',
         bulletins: 'Official Bulletins',
         camp_portal: 'Camp Portal',
+        verifications: 'Verification Center',
     };
 
     return (

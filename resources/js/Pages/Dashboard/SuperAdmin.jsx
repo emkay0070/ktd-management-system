@@ -57,6 +57,12 @@ export default function SuperAdmin(props) {
                 >
                     <Layers size={16} /> Registrations
                 </Link>
+                <Link 
+                    href={route('dashboard', 'verifications')}
+                    className={`tab-item ${section === 'verifications' ? 'tab-item--active' : ''}`}
+                >
+                    <Shield size={16} /> Verification Center
+                </Link>
             </div>
 
             {section === 'overview' && (
@@ -207,6 +213,15 @@ export default function SuperAdmin(props) {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {section === 'verifications' && (
+                <ApprovalCenter 
+                    pending_approvals={pending_approvals} 
+                    pending_churches={pending_churches} 
+                    level="super"
+                    fullPage={true}
+                />
             )}
 
             {section === 'directors' && (

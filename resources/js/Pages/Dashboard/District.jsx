@@ -59,6 +59,7 @@ export default function District({
     const isRegistration = section === 'camp_registrations';
     const isCurriculum = section === 'curriculum';
     const isMasterGuide = section === 'masterguide';
+    const isVerifications = section === 'verifications';
 
     const totalPathfinders = churches.reduce((sum, c) => sum + (c.total ?? 0), 0);
     const totalMGs = churches.reduce((sum, c) => sum + (c.master_guides ?? 0), 0);
@@ -149,6 +150,14 @@ export default function District({
                         auth={auth} 
                     />}
                     {isMasterGuide && <MasterGuideManager master_guides={roster} readonly={!permissions?.edit_masterguide} />}
+                    {isVerifications && (
+                        <ApprovalCenter 
+                            pending_approvals={pending_approvals} 
+                            pending_churches={pending_churches} 
+                            level="district"
+                            fullPage={true}
+                        />
+                    )}
                 </div>
             </div>
         </AuthenticatedLayout>

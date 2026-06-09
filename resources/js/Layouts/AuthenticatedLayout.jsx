@@ -151,6 +151,18 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
                         active={route().current('dashboard', { section: 'overview' }) || (route().current('dashboard') && !route().params.section)}
                     />
 
+                    {(isSuperAdmin || isDistrictLeader || isDirector) && (
+                        <NavItem
+                            href={route('dashboard', 'verifications')}
+                            icon={Shield}
+                            label="Verification Center"
+                            isCollapsed={isCollapsed}
+                            isSidebarVisible={isSidebarVisible}
+                            isMobileOpen={isMobileOpen}
+                            active={route().current('dashboard', { section: 'verifications' })}
+                        />
+                    )}
+
                     {isDistrictLeader && (
                         <>
                             {(isSidebarVisible || isMobileOpen) && <span className="sidebar__section-label" style={{ marginTop: '12px' }}>District Headquarters</span>}

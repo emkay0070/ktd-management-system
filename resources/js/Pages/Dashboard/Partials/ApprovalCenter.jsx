@@ -72,12 +72,25 @@ export default function ApprovalCenter({
     pending_approvals = [], 
     pending_churches = [], 
     parent_link_requests = [],
-    level = 'club' // 'club', 'district', 'super'
+    level = 'club', // 'club', 'district', 'super'
+    fullPage = false
 }) {
     const [expanded, setExpanded] = useState(true);
     const totalCount = pending_approvals.length + pending_churches.length + parent_link_requests.length;
 
-    if (totalCount === 0) return null;
+    if (totalCount === 0 && !fullPage) return null;
+
+    if (totalCount === 0 && fullPage) {
+        return (
+            <div className="panel p-12 text-center flex flex-col items-center justify-center animate-in fade-in duration-500">
+                <div className="w-16 h-16 bg-success-500/10 text-success-500 rounded-full flex items-center justify-center mb-6">
+                    <Check size={32} />
+                </div>
+                <h3 className="text-xl font-black text-white mb-2">Queue Clear!</h3>
+                <p className="text-gray-500 max-w-sm">There are no pending verifications or approval requests at this time.</p>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-4 mb-8 animate-in fade-in slide-in-from-top-4 duration-500">
