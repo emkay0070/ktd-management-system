@@ -79,10 +79,9 @@ class DashboardRouterService
 
         return match ($context) {
             'super_admin'       => $this->renderSuperAdmin($user, $section),
-            'director'          => $this->renderDirector($user, $section),
-            // DEPRECATED: master_guide is being removed as a login role (Phase 1)
-            // In Phase 3, staff members will access through director role or new staff context
-            'master_guide'      => $this->renderMasterGuide($user, $section),
+            'director'          => $this->renderLeadershipDashboard($user, $section),
+            // master_guide context now uses the unified Leadership Dashboard
+            'master_guide'      => $this->renderLeadershipDashboard($user, $section),
             'parent'            => $this->renderParent($user, $section),
             'pathfinder'        => $this->renderPathfinder($user, $section),
             default             => $this->renderObserver($user, $section),
@@ -163,6 +162,28 @@ class DashboardRouterService
             ->with('church:id,name')
             ->get(['id', 'name', 'church_id', 'medical_conditions']);
 
+        $allUsers = [];
+        if ($section === 'registrations') {
+            $allUsers = User::with(['roles', 'church', 'district'])
+                ->orderBy('created_at', 'desc')
+                ->get()
+                ->map(fn($u) => [
+                    'id' => $u->id,
+                    'name' => $u->name,
+                    'email' => $u->email,
+                    'roles' => $u->roles->map(fn($r) => [
+                        'name' => $r->name,
+                        'display_name' => $r->display_name,
+                        'status' => $r->pivot->status,
+                    ]),
+                    'church' => $u->church ? $u->church->name : 'N/A',
+                    'district' => $u->district ? $u->district->name : ($u->church?->district?->name ?? 'N/A'),
+                    'status' => $u->status,
+                    'created_at' => $u->created_at->toDateTimeString(),
+                    'password_status' => 'Securely Hashed',
+                ]);
+        }
+
         $churches = Church::query()
             ->where('status', 'approved')
             ->withCount([
@@ -192,6 +213,7 @@ class DashboardRouterService
             'pending_churches' => $pendingChurches,
             'pending_approvals' => $pendingApprovals,
             'medical_alerts' => $medicalAlerts,
+            'all_users' => $allUsers,
         ]);
     }
 
@@ -466,7 +488,7 @@ class DashboardRouterService
             ->orderBy('audit_date', 'desc')
             ->get();
 
-        // Welfare & Social Data
+        // Welfare & Social Data (Filtered by permissions for attendance visibility)
         $welfareCases = \App\Models\WelfareCase::where('district_id', $district->id)
             ->with(['church:id,name', 'beneficiary:id,name', 'creator:id,name'])
             ->latest()
@@ -477,13 +499,20 @@ class DashboardRouterService
             ->latest()
             ->get();
 
-        // Member Engagement & Retention Metrics
-        $inactivePathfinders = \App\Models\Pathfinder::whereIn('church_id', $district->churches->pluck('id'))
-            ->whereDoesntHave('attendanceRecords', function($q) {
-                $q->where('created_at', '>=', now()->subDays(30));
-            })
-            ->with('church:id,name')
-            ->get(['id', 'name', 'church_id', 'gender', 'age']);
+        // Attendance Visibility Rules:
+        // Welfare and Curriculum coordinators see individual attendance records.
+        // Others see club-level summaries only.
+        $canSeeIndividualAttendance = $user->hasAnyRole(['super_admin', 'district_director', 'district_secretary', 'district_welfare_coordinator', 'district_curriculum_coordinator']);
+        
+        $inactivePathfinders = collect();
+        if ($canSeeIndividualAttendance) {
+            $inactivePathfinders = \App\Models\Pathfinder::whereIn('church_id', $district->churches->pluck('id'))
+                ->whereDoesntHave('attendanceRecords', function($q) {
+                    $q->where('created_at', '>=', now()->subDays(30));
+                })
+                ->with('church:id,name')
+                ->get(['id', 'name', 'church_id', 'gender', 'age']);
+        }
 
         // Declining Clubs: Compare last 30 days vs 30-60 days
         $decliningClubs = [];
@@ -508,6 +537,41 @@ class DashboardRouterService
             }
         }
 
+        $districtPathfinders = \App\Models\Pathfinder::whereIn('church_id', $district->churches->pluck('id'))
+            ->with(['church', 'classAssignment.pathfinderClass'])
+            ->get()
+            ->map(fn($p) => [
+                'id' => $p->id,
+                'name' => $p->name,
+                'type' => 'pathfinder',
+                'church' => $p->church?->name,
+                'class' => $p->classAssignment?->pathfinderClass?->name ?? 'Unassigned',
+                'status' => 'active', // For now
+                'gender' => $p->gender,
+                'age' => $p->age,
+            ]);
+
+        $districtMasterGuides = \App\Models\MasterGuide::whereIn('church_id', $district->churches->pluck('id'))
+            ->with(['church', 'assignedClass'])
+            ->get()
+            ->map(fn($mg) => [
+                'id' => $mg->id,
+                'name' => $mg->full_name,
+                'type' => 'master_guide',
+                'role' => $mg->role, // MG or MGT
+                'church' => $mg->church?->name,
+                'class' => $mg->assignedClass?->name ?? 'None',
+                'responsibility' => $mg->responsibility ?? 'Club Staff',
+                'insured' => $mg->insured_yearly,
+                'teaching' => $mg->actively_teaching,
+            ]);
+
+        $unifiedRoster = [
+            'pathfinders' => $districtPathfinders,
+            'master_guides' => $districtMasterGuides->where('role', 'MG')->values(),
+            'mgt' => $districtMasterGuides->where('role', 'MGT')->values(),
+        ];
+
         return Inertia::render('Dashboard/District', [
             'district' => ['id' => $district->id, 'name' => $district->name, 'conference' => $district->conference->name ?? 'Unknown'],
             'churches' => $churches,
@@ -515,7 +579,7 @@ class DashboardRouterService
             'invite_links' => $inviteLinks,
             'events' => $district->events()->with('approver:id,name')->orderBy('start_date', 'asc')->get(),
             'tasks' => $district->tasks()->with(['submissions.church'])->orderBy('deadline', 'asc')->get(),
-            'roster' => \App\Models\MasterGuide::whereIn('church_id', $district->churches->pluck('id'))->with(['church', 'assignedClass'])->get(),
+            'roster' => $unifiedRoster,
             'resources' => \App\Models\DistrictResource::where('district_id', $district->id)->with('uploader:id,name')->latest()->get(),
             'bulletins' => $district->bulletins()
                 ->with(['author:id,name', 'approver:id,name'])
@@ -546,9 +610,98 @@ class DashboardRouterService
             'welfare_cases' => $welfareCases,
             'social_events' => $socialEvents,
             'retention_metrics' => [
-                'inactive_members' => $inactivePathfinders,
+                'inactive_members' => $canSeeIndividualAttendance ? $inactivePathfinders : collect(),
                 'declining_clubs' => $decliningClubs,
+                'can_see_individual' => $canSeeIndividualAttendance
             ],
+        ]);
+    }
+
+    /**
+     * Unified Leadership Dashboard (Phase 1 Transition)
+     * This replaces renderDirector and renderMasterGuide with a role-independent
+     * portal that loads modules based on active assignments.
+     */
+    protected function renderLeadershipDashboard(User $user, $section)
+    {
+        $church = $user->church;
+        $profile = $user->masterGuide()->with(['church', 'assignedClass', 'trainings'])->first();
+        
+        // --- Layer 1: Identity & Personal Growth ---
+        $personalData = [
+            'profile' => $profile,
+            'is_mg' => $user->hasRole('master_guide') || ($profile && $profile->role === 'MG'),
+            'is_mgt' => $profile && $profile->role === 'MGT',
+            'trainings' => $profile ? $profile->trainings : [],
+            'credentials' => $profile ? $profile->credentials : [],
+        ];
+
+        // --- Layer 2: Ministry Assignments ---
+        $modules = [];
+
+        // 1. Instructor Module
+        if ($profile && $profile->assigned_class_id) {
+            $modules['instructor'] = [
+                'class' => $profile->assignedClass,
+                'roster' => \App\Models\Pathfinder::where('church_id', $profile->church_id)
+                    ->whereHas('classAssignment', function($q) use ($profile) {
+                        $q->where('class_id', $profile->assigned_class_id);
+                    })
+                    ->with(['unitMembership.unit', 'progress.requirement'])
+                    ->orderBy('name')
+                    ->get(),
+                'curriculum' => \App\Models\CurriculumRequirement::where('class_id', $profile->assigned_class_id)
+                    ->orderBy('category')
+                    ->get(),
+                'resources' => \App\Models\DistrictResource::where('district_id', $church?->district_id)
+                    ->where(function($q) use ($profile) {
+                        $q->whereNull('category')->orWhere('category', 'Curriculum');
+                    })->get(),
+            ];
+        }
+
+        // 2. Counselor Module
+        $unitAsCounselor = \App\Models\UnitRole::where('counselor_id', $profile?->id)->with('unit.pathfinders')->first();
+        if ($unitAsCounselor) {
+            $modules['counselor'] = [
+                'unit' => $unitAsCounselor->unit,
+                'pathfinders' => $unitAsCounselor->unit->pathfinders,
+            ];
+        }
+
+        // 3. Director/Secretary Module (Oversight)
+        if ($user->hasAnyRole(['director', 'secretary'])) {
+            $clubChannel = app(\App\Services\CommunicationService::class)->getOrCreateChannelForModel($church, 'club');
+            $modules['oversight'] = [
+                'club' => $church ? $this->clubService->buildForChurch($church) : null,
+                'club_channel_id' => $clubChannel->id,
+                'pending_approvals' => User::whereHas('roles', fn($q) => $q->where('role_user.status', 'pending'))
+                    ->where('church_id', $church?->id)
+                    ->with(['roles', 'church', 'district'])
+                    ->get(),
+                'parent_requests' => \App\Models\PendingParentLink::whereHas('pathfinder', fn($q) => $q->where('church_id', $church?->id))
+                    ->where('status', 'pending')
+                    ->with(['user', 'pathfinder'])
+                    ->get(),
+            ];
+        }
+
+        // --- Layer 3: Common District Context ---
+        $districtData = [
+            'tasks' => \App\Models\DistrictTask::where('district_id', $church?->district_id)->get(),
+            'events' => \App\Models\DistrictEvent::where('district_id', $church?->district_id)->where('workflow_status', 'published')->get(),
+            'bulletins' => \App\Models\DistrictBulletin::where('district_id', $church?->district_id)
+                ->where('workflow_status', 'published')
+                ->with(['author:id,name', 'acknowledgements' => fn($q) => $q->where('user_id', $user->id)])
+                ->get(),
+        ];
+
+        return Inertia::render('Dashboard/LeadershipDashboard', [
+            'section' => $section,
+            'personal' => $personalData,
+            'modules' => $modules,
+            'district' => $districtData,
+            'church' => $church ? $church->only(['id', 'name']) : null,
         ]);
     }
 

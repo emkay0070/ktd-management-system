@@ -1,9 +1,17 @@
 import { useState } from 'react';
 import { useForm, router } from '@inertiajs/react';
-import { Plus, UserPlus, Users, Trash2, ShieldCheck, Briefcase } from 'lucide-react';
+import { Plus, UserPlus, Users, Trash2, ShieldCheck, Briefcase, Eye, ArrowRight, X } from 'lucide-react';
+import Modal from '@/Components/Modal';
 
 export default function LeadershipManager({ classes, committees, derived_pathfinder_committee, picklists, readonly }) {
     const [activeTab, setActiveTab] = useState('executive'); // 'executive' or 'staff'
+    const [selectedMember, setSelectedMember] = useState(null);
+
+    const assignRoleForm = useForm({
+        role_name: '',
+        church_id: '',
+        district_id: '',
+    });
 
     const classLeaderForm = useForm({
         class_id: picklists?.classes?.[0]?.id ?? '',
@@ -52,6 +60,19 @@ export default function LeadershipManager({ classes, committees, derived_pathfin
                 preserveScroll: true,
             });
         }
+    }
+
+    function submitAssignRole(e) {
+        e.preventDefault();
+        if (!selectedMember || selectedMember.member_type !== 'user') return;
+
+        assignRoleForm.post(route('users.assign-role', selectedMember.member.id), {
+            preserveScroll: true,
+            onSuccess: () => {
+                assignRoleForm.reset();
+                setSelectedMember(null);
+            },
+        });
     }
 
     const executiveMembers = committees?.executive ?? [];
@@ -223,15 +244,26 @@ export default function LeadershipManager({ classes, committees, derived_pathfin
                                                 <div className="text-[10px] uppercase font-bold text-gold-500/80 tracking-widest">{m.role}</div>
                                             </div>
 
-                                            {!readonly && (
-                                                <button 
-                                                    className="text-danger p-2 hover:bg-danger/10 rounded-lg transition-all" 
-                                                    onClick={() => removeCommitteeMember(m.id)}
-                                                    title="Remove Member"
-                                                >
-                                                    <Trash2 size={16} />
-                                                </button>
-                                            )}
+                                            <div className="flex items-center gap-2">
+                                                {m.member_type === 'user' && (
+                                                    <button 
+                                                        className="text-gold-400 p-2 hover:bg-gold-400/10 rounded-lg transition-all" 
+                                                        onClick={() => setSelectedMember(m)}
+                                                        title="View Details & Roles"
+                                                    >
+                                                        <Eye size={16} />
+                                                    </button>
+                                                )}
+                                                {!readonly && (
+                                                    <button 
+                                                        className="text-danger p-2 hover:bg-danger/10 rounded-lg transition-all" 
+                                                        onClick={() => removeCommitteeMember(m.id)}
+                                                        title="Remove Member"
+                                                    >
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
                                     ))}
                                     {executiveMembers.length === 0 && <div className="text-muted text-sm italic py-4">No executive members added yet.</div>}
@@ -293,6 +325,115 @@ export default function LeadershipManager({ classes, committees, derived_pathfin
                     )}
                 </div>
             </div>
+
+            <Modal show={!!selectedMember} onClose={() => setSelectedMember(null)} maxWidth="md">
+                <div className="p-6 bg-surface-800">
+                    <div className="flex justify-between items-center mb-6">
+                        <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                            <Users size={20} className="text-gold-400" />
+                            Member Details
+                        </h3>
+                        <button onClick={() => setSelectedMember(null)} className="text-muted hover:text-white transition-colors">
+                            <X size={24} />
+                        </button>
+                    </div>
+
+                    {selectedMember && (
+                        <div className="space-y-8">
+                            <div className="flex items-center gap-6 p-4 rounded-2xl bg-white/[0.03] border border-white/5">
+                                <div className="h-20 w-20 rounded-full bg-burgundy-900/40 border-2 border-burgundy-500/20 flex items-center justify-center text-burgundy-400 font-bold text-2xl shadow-xl overflow-hidden">
+                                    {selectedMember.member?.avatar_url ? (
+                                        <img src={selectedMember.member.avatar_url} alt="" className="w-full h-full object-cover" />
+                                    ) : (
+                                        <span>{(selectedMember.member?.name ?? '?')[0]}</span>
+                                    )}
+                                </div>
+                                <div>
+                                    <div className="text-lg font-bold text-white">{selectedMember.member?.name}</div>
+                                    <div className="text-sm text-muted mb-1">{selectedMember.member?.email}</div>
+                                    <div className="inline-flex items-center px-2 py-0.5 rounded bg-gold-500/10 text-gold-500 text-[10px] font-bold uppercase tracking-widest border border-gold-500/20">
+                                        Current Role: {selectedMember.role}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {!readonly && (
+                                <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5">
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <UserPlus size={18} className="text-gold-400" />
+                                        <h4 className="text-sm font-bold text-white uppercase tracking-widest">Assign New Functional Role</h4>
+                                    </div>
+                                    <p className="text-xs text-muted mb-6">Assign this user another role in the system. They will be able to switch between their active roles from their dashboard.</p>
+
+                                    <form onSubmit={submitAssignRole} className="space-y-4">
+                                        <div className="form-group">
+                                            <label className="text-[10px] font-bold text-muted uppercase tracking-widest mb-2 block">Select Role</label>
+                                            <select 
+                                                className="h-input w-full"
+                                                value={assignRoleForm.data.role_name}
+                                                onChange={e => assignRoleForm.setData('role_name', e.target.value)}
+                                                required
+                                            >
+                                                <option value="">Choose a role...</option>
+                                                {(picklists?.roles ?? []).map(r => (
+                                                    <option key={r.id} value={r.name}>{r.display_name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+
+                                        {assignRoleForm.data.role_name === 'director' && (
+                                            <div className="form-group slide-in">
+                                                <label className="text-[10px] font-bold text-muted uppercase tracking-widest mb-2 block">Assign to Church</label>
+                                                <select 
+                                                    className="h-input w-full"
+                                                    value={assignRoleForm.data.church_id}
+                                                    onChange={e => assignRoleForm.setData('church_id', e.target.value)}
+                                                    required
+                                                >
+                                                    <option value="">Select Local Church...</option>
+                                                    {(picklists?.churches ?? []).map(c => (
+                                                        <option key={c.id} value={c.id}>{c.name}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        )}
+
+                                        {assignRoleForm.data.role_name && assignRoleForm.data.role_name.startsWith('district_') && (
+                                            <div className="form-group slide-in">
+                                                <label className="text-[10px] font-bold text-muted uppercase tracking-widest mb-2 block">Assign to District</label>
+                                                <select 
+                                                    className="h-input w-full"
+                                                    value={assignRoleForm.data.district_id}
+                                                    onChange={e => assignRoleForm.setData('district_id', e.target.value)}
+                                                    required
+                                                >
+                                                    <option value="">Select District...</option>
+                                                    {(picklists?.districts ?? []).map(d => (
+                                                        <option key={d.id} value={d.id}>{d.name}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        )}
+
+                                        <button 
+                                            type="submit" 
+                                            className="btn btn--primary w-full py-3 mt-4"
+                                            disabled={assignRoleForm.processing}
+                                        >
+                                            {assignRoleForm.processing ? 'Assigning...' : (
+                                                <>
+                                                    Assign Role
+                                                    <ArrowRight size={18} className="ml-2" />
+                                                </>
+                                            )}
+                                        </button>
+                                    </form>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+            </Modal>
         </div>
     );
 }

@@ -249,7 +249,12 @@ class ClubCommandCenterService
                             'id' => $m->id,
                             'role' => $m->role,
                             'member_type' => 'user',
-                            'member' => ['id' => $m->user->id, 'name' => $m->user->name],
+                            'member' => [
+                                'id' => $m->user->id, 
+                                'name' => $m->user->name,
+                                'email' => $m->user->email,
+                                'avatar_url' => $m->user->avatar_url,
+                            ],
                         ];
                     }
                     if ($m->masterGuide) {
@@ -357,6 +362,9 @@ class ClubCommandCenterService
                     ->orderBy('name')
                     ->get(['id', 'name']),
                 'attendance_sessions' => $this->serializeAttendanceSessions($church->id),
+                'churches' => \App\Models\Church::where('status', 'approved')->orderBy('name')->get(['id', 'name']),
+                'districts' => \App\Models\District::orderBy('name')->get(['id', 'name']),
+                'roles' => \App\Models\Role::where('name', '!=', 'super_admin')->orderBy('display_name')->get(['id', 'name', 'display_name']),
             ],
         ];
     }

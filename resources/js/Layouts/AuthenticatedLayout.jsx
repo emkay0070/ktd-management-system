@@ -3,7 +3,7 @@ import { Link, usePage, router } from '@inertiajs/react';
 import {
     LayoutDashboard, Users, Church, ClipboardList,
     LogOut, Bell, Settings, ChevronRight, ChevronDown, Star, Tent, GraduationCap, Shield, Calendar, Trophy, BookOpen, Megaphone, ClipboardCheck, Activity, Sun, Moon,
-    Menu, X, MapPin
+    Menu, X, MapPin, MessageSquare
 } from 'lucide-react';
 import ToastNotification from '@/Components/ToastNotification';
 
@@ -149,6 +149,36 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
                         isSidebarVisible={isSidebarVisible}
                         isMobileOpen={isMobileOpen}
                         active={route().current('dashboard', { section: 'overview' }) || (route().current('dashboard') && !route().params.section)}
+                    />
+
+                    <NavItem
+                        href={route('communication.index')}
+                        icon={MessageSquare}
+                        label="Communication"
+                        active={route().current('communication.index')}
+                        isCollapsed={isCollapsed}
+                        isSidebarVisible={isSidebarVisible}
+                        isMobileOpen={isMobileOpen}
+                    />
+
+                    <NavItem
+                        href={route('communication.feed')}
+                        icon={Star}
+                        label="Timeline"
+                        active={route().current('communication.feed')}
+                        isCollapsed={isCollapsed}
+                        isSidebarVisible={isSidebarVisible}
+                        isMobileOpen={isMobileOpen}
+                    />
+
+                    <NavItem
+                        href={route('resources.index')}
+                        icon={Book}
+                        label="Resources"
+                        active={route().current('resources.*')}
+                        isCollapsed={isCollapsed}
+                        isSidebarVisible={isSidebarVisible}
+                        isMobileOpen={isMobileOpen}
                     />
 
                     {(isSuperAdmin || isDistrictLeader || isDirector) && (

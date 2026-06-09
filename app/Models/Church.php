@@ -2,12 +2,16 @@
 
 namespace App\Models;
 
+use App\Traits\HasCommunicationChannels;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Church extends Model
 {
+    use HasFactory, HasCommunicationChannels;
+
     protected $fillable = ['name', 'location', 'district_id', 'status', 'is_school'];
 
     public function district()

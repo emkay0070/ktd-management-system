@@ -56,6 +56,7 @@ class InviteController extends Controller
             abort(403, 'This invitation link is invalid or has expired.');
         }
 
+        /** @var \App\Models\User $user */
         $user = Auth::user();
         if (!$user) {
             // Should not happen if UI forces login first, but handle just in case
@@ -87,6 +88,9 @@ class InviteController extends Controller
             if ($scopeType === 'App\Models\District' && !$user->district_id) {
                 $user->update(['district_id' => $scopeId]);
             }
+
+            // Sync to communication channels
+            app(\App\Services\CommunicationService::class)->syncUserToChannels($user);
         }
 
         return redirect()->route('dashboard')->with('message', 'Invitation accepted successfully.');

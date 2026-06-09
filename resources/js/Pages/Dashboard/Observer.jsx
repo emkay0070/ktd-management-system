@@ -104,6 +104,18 @@ export default function Observer({ user, bulletins = [], error_message }) {
                                 <h3 className="text-gray-500 text-xs font-black uppercase tracking-widest">Discovery</h3>
                             </div>
                             <div className="panel__body p-0">
+                                <Link href={route('communication.feed')} className="w-full flex items-center justify-between p-4 px-6 hover:bg-white/5 transition-colors border-b border-white/5 group">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-10 h-10 rounded-xl bg-burgundy-900/30 flex items-center justify-center text-burgundy-400">
+                                            <Star size={20} />
+                                        </div>
+                                        <div className="text-left">
+                                            <div className="text-sm font-bold text-white group-hover:text-burgundy-400 transition-colors">Ministry Timeline</div>
+                                            <div className="text-[10px] text-gray-500 uppercase tracking-widest">Global Updates</div>
+                                        </div>
+                                    </div>
+                                    <ArrowRight size={16} className="text-gray-700 group-hover:text-burgundy-400 transition-all" />
+                                </Link>
                                 <button className="w-full flex items-center justify-between p-4 px-6 hover:bg-white/5 transition-colors border-b border-white/5 group">
                                     <span className="text-sm font-bold text-white uppercase tracking-tight">Find a Club</span>
                                     <Search size={16} className="text-gray-600 group-hover:text-white transition-colors" />

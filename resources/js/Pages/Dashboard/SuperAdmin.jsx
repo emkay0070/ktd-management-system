@@ -4,6 +4,7 @@ import { AlertTriangle, Check, Church, Layers, Shield, Users, Stethoscope, Chevr
 import { useState } from 'react';
 import DistrictDirectorManager from './Partials/DistrictDirectorManager';
 import ApprovalCenter from './Partials/ApprovalCenter';
+import GlobalUserManager from './Partials/GlobalUserManager';
 
 export default function SuperAdmin(props) {
     const { 
@@ -15,7 +16,8 @@ export default function SuperAdmin(props) {
         districts = [],
         eligible_users = [],
         conferences = [],
-        unassigned_directors = []
+        unassigned_directors = [],
+        all_users = []
     } = props;
     const { auth } = usePage().props;
     const [showMedicalDetails, setShowMedicalDetails] = useState(false);
@@ -238,7 +240,7 @@ export default function SuperAdmin(props) {
             )}
             
             {section === 'registrations' && (
-                <div className="panel p-12 text-center text-muted">Global Registrations module coming soon</div>
+                <GlobalUserManager users={all_users} />
             )}
 
         </AuthenticatedLayout>

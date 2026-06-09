@@ -84,6 +84,9 @@ class VerificationController extends Controller
             ]);
         }
 
+        // Sync to communication channels
+        app(\App\Services\CommunicationService::class)->syncUserToChannels($user);
+
         // Mark user as active since they now have an approved role
         if ($user->status === 'pending_onboarding') {
             $user->status = 'active';

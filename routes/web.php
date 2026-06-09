@@ -24,6 +24,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UnitMemberController;
 use App\Http\Controllers\UnitRoleController;
+use App\Http\Controllers\UserRoleController;
 use App\Http\Controllers\InviteController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -121,6 +122,9 @@ Route::middleware(['auth', 'verified', 'onboarded'])->group(function () {
     Route::put('/club/master-guides/{masterGuide}', [MasterGuideController::class, 'update'])->name('master_guides.update');
     Route::delete('/club/master-guides/{masterGuide}', [MasterGuideController::class, 'destroy'])->name('master_guides.destroy');
 
+    Route::post('/curriculum/batch-signoff', [\App\Http\Controllers\CurriculumController::class, 'batchSignoff'])
+        ->name('curriculum.batch-signoff');
+
     Route::post('/curriculum/{pathfinder}/signoff/{requirement}', [\App\Http\Controllers\CurriculumController::class, 'signoff'])
         ->name('curriculum.signoff');
 
@@ -198,6 +202,23 @@ Route::middleware(['auth', 'verified', 'onboarded'])->group(function () {
     Route::delete('/admin/directors/{user}/remove', [\App\Http\Controllers\DistrictDirectorController::class, 'removeDirector'])->name('admin.district-directors.remove');
     Route::post('/admin/directors/{user}/assign-unassigned', [\App\Http\Controllers\DistrictDirectorController::class, 'assignUnassignedDirector'])->name('admin.district-directors.assign-unassigned');
 
+    // Resource Marketplace routes
+    Route::prefix('resources')->name('resources.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\MinistryResourceController::class, 'index'])->name('index');
+        Route::post('/', [\App\Http\Controllers\MinistryResourceController::class, 'store'])->name('store');
+        Route::get('/{resource}/download', [\App\Http\Controllers\MinistryResourceController::class, 'download'])->name('download');
+    });
+
+    // Communication routes
+    Route::prefix('communication')->name('communication.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\CommunicationController::class, 'index'])->name('index');
+        Route::get('/feed', [\App\Http\Controllers\CommunicationController::class, 'feed'])->name('feed');
+        Route::get('/channels/{channel:slug}', [\App\Http\Controllers\CommunicationController::class, 'show'])->name('show');
+        Route::post('/channels/{channel:slug}/messages', [\App\Http\Controllers\CommunicationController::class, 'store'])->name('messages.store');
+        Route::post('/messages/{message}/reactions', [\App\Http\Controllers\CommunicationController::class, 'toggleReaction'])->name('messages.reactions.toggle');
+        Route::post('/messages/{message}/comments', [\App\Http\Controllers\CommunicationController::class, 'storeComment'])->name('messages.comments.store');
+        Route::post('/direct/{recipient}', [\App\Http\Controllers\CommunicationController::class, 'startDirectMessage'])->name('direct.start');
+    });
 });
 
 // ── Invitations ─────────────────────────────────────────────────────────
@@ -245,6 +266,7 @@ Route::get('/api/churches/search', function (\Illuminate\Http\Request $request) 
 })->name('churches.search');
 
 Route::middleware('auth')->group(function () {
+    Route::post('/users/{user}/assign-role', [UserRoleController::class, 'assign'])->name('users.assign-role');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
