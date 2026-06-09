@@ -142,14 +142,14 @@ export default function BulkMasterGuideForm({ picklists, onCancel, onSuccess }) 
                                 </div>
 
                                 <div>
-                                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">Role *</label>
-                                    <select 
+                                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">Investiture Status *</label>
+                                    <select
                                         className={`h-input w-full ${getError(index, 'role') ? 'border-danger' : ''}`}
                                         value={row.role}
                                         onChange={(e) => updateRow(row.id, 'role', e.target.value)}
                                     >
-                                        <option value="MGT">Master Guide in Training (MGiT)</option>
-                                        <option value="MG">Invested Master Guide</option>
+                                        <option value="MGT">Master Guide in Training (MGT)</option>
+                                        <option value="MG">Master Guide (Invested)</option>
                                     </select>
                                 </div>
 

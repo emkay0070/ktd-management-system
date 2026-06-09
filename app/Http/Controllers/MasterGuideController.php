@@ -24,7 +24,7 @@ class MasterGuideController extends Controller
 
         $request->validate([
             'full_name' => 'required|string|max:255',
-            'role' => 'required|string|in:MG,MGT,PLA,APLA',
+            'role' => 'required|string|in:MG,MGT', // Investiture status: Master Guide or Master Guide in Training
             'assigned_class_id' => 'nullable|integer|exists:classes,id',
             'religion_id' => 'required|integer|exists:religions,id',
             'other_religion' => 'nullable|string|max:255',
@@ -106,7 +106,7 @@ class MasterGuideController extends Controller
 
         $request->validate([
             'full_name' => 'required|string|max:255',
-            'role' => 'required|string|in:MG,MGT,PLA,APLA',
+            'role' => 'required|string|in:MG,MGT', // Investiture status: Master Guide or Master Guide in Training
             'assigned_class_id' => 'nullable|integer|exists:classes,id',
             'religion_id' => 'required|integer|exists:religions,id',
             'other_religion' => 'nullable|string|max:255',

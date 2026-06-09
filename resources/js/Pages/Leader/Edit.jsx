@@ -135,12 +135,10 @@ export default function Edit({ leader, picklists }) {
 
                             <div className="form-grid-2">
                                 <div className="form-group">
-                                    <label>Leadership Level</label>
+                                    <label>Investiture Status</label>
                                     <select className="h-input" value={data.role} onChange={e => setData('role', e.target.value)}>
-                                        <option value="MG">Master Guide (MG)</option>
+                                        <option value="MG">Master Guide (Invested)</option>
                                         <option value="MGT">Master Guide in Training (MGT)</option>
-                                        <option value="PLA">PLA</option>
-                                        <option value="APLA">APLA</option>
                                     </select>
                                 </div>
                                 <div className="form-group">

@@ -356,12 +356,10 @@ export default function MasterGuideManager({ master_guides, mg_training, picklis
                                     
                                     <div className="form-grid-2">
                                         <div className="form-group">
-                                            <label>Leadership Role</label>
+                                            <label>Investiture Status</label>
                                             <select className="h-input" value={mgForm.data.role} onChange={e => mgForm.setData('role', e.target.value)}>
-                                                <option value="MG">Master Guide (MG)</option>
+                                                <option value="MG">Master Guide (Invested)</option>
                                                 <option value="MGT">Master Guide in Training (MGT)</option>
-                                                <option value="PLA">PLA</option>
-                                                <option value="APLA">APLA</option>
                                             </select>
                                         </div>
                                         <div className="form-group">
