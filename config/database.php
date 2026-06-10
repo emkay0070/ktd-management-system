@@ -169,7 +169,7 @@ return [
             'password' => env('REDIS_PASSWORD'),
             'port' => env('REDIS_PORT', '6379'),
             'database' => env('REDIS_DB', '0'),
-            'scheme' => env('REDIS_SCHEME', 'tls'),
+            'scheme' => env('REDIS_SCHEME'),
             'timeout' => 30.0,
             'read_write_timeout' => 60.0,
             'ssl' => [
@@ -190,7 +190,7 @@ return [
             'password' => env('REDIS_PASSWORD'),
             'port' => env('REDIS_PORT', '6379'),
             'database' => env('REDIS_CACHE_DB', '1'),
-            'scheme' => env('REDIS_SCHEME', 'tls'),
+            'scheme' => env('REDIS_SCHEME'),
             'timeout' => 30.0,
             'read_write_timeout' => 60.0,
             'ssl' => [
