@@ -204,7 +204,7 @@ export default function OnboardingIndex({ role, church_status, church_name }) {
                         <InputError message={errors.dob} />
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div className="onboard-form-row">
                         <div>
                             <label className="onboard-label">Gender</label>
                             <select
@@ -309,9 +309,9 @@ export default function OnboardingIndex({ role, church_status, church_name }) {
         <GuestLayout>
             <Head title="Complete Profile — EmPFC" />
 
-            <div style={{ marginBottom: '2rem' }}>
-                <h1 style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--clr-text-primary)', marginBottom: '0.5rem' }}>Almost There!</h1>
-                <p style={{ fontSize: '0.875rem', color: 'var(--clr-text-secondary)' }}>Complete your profile to get started.</p>
+            <div style={{ marginBottom: '1.5rem' }}>
+                <h1 className="onboard-title">Almost There!</h1>
+                <p className="onboard-subtitle">Complete your profile to get started.</p>
             </div>
 
             <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>

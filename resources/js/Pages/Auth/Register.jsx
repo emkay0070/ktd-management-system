@@ -211,29 +211,29 @@ export default function Register({ intent = null }) {
         return (
             <GuestLayout>
                 <Head title="Join EmPFC" />
-                <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-                    <div className="onboard-summary-item__icon" style={{ width: 56, height: 56, borderRadius: 16, margin: '0 auto 1.25rem' }}>
-                        <Sparkles size={26} />
+                <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+                    <div className="onboard-summary-item__icon" style={{ width: 48, height: 48, borderRadius: 16, margin: '0 auto 1rem' }}>
+                        <Sparkles size={22} />
                     </div>
-                    <h1 style={{ fontSize: '1.875rem', fontWeight: 900, color: 'var(--clr-text-primary)', marginBottom: '0.5rem' }}>Join the Platform</h1>
-                    <p style={{ fontSize: '0.875rem', color: 'var(--clr-text-secondary)', maxWidth: 360, margin: '0 auto' }}>How will you be using EmPFC? This helps us tailor your experience.</p>
+                    <h1 className="onboard-title">Join the Platform</h1>
+                    <p className="onboard-subtitle">How will you be using EmPFC? This helps us tailor your experience.</p>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.75rem' }}>
+                <div className="onboard-selection-grid onboard-selection-grid--2-cols">
                     {intentOptions.map((opt) => (
                         <Link
                             key={opt.id}
                             href={route('register', { intent: opt.id })}
                             className="hierarchy-card"
-                            style={{ textAlign: 'center', padding: '1.5rem 1rem' }}
+                            style={{ textAlign: 'center', padding: '1.25rem 0.75rem' }}
                         >
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
-                                <div className="onboard-summary-item__icon" style={{ width: 44, height: 44, borderRadius: 12 }}>
-                                    <opt.icon size={20} />
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+                                <div className="onboard-summary-item__icon" style={{ width: 40, height: 40, borderRadius: 12 }}>
+                                    <opt.icon size={18} />
                                 </div>
                                 <div>
-                                    <div style={{ fontWeight: 700, fontSize: '0.875rem', color: 'var(--clr-text-primary)', marginBottom: 4 }}>{opt.label}</div>
-                                    <div style={{ fontSize: 10, color: 'var(--clr-text-muted)', lineHeight: 1.5 }}>{opt.desc}</div>
+                                    <div style={{ fontWeight: 700, fontSize: '0.8125rem', color: 'var(--clr-text-primary)', marginBottom: 2 }}>{opt.label}</div>
+                                    <div style={{ fontSize: 9, color: 'var(--clr-text-muted)', lineHeight: 1.4 }}>{opt.desc}</div>
                                 </div>
                             </div>
                         </Link>
@@ -383,9 +383,9 @@ export default function Register({ intent = null }) {
                     const sel = getSelectionUI();
                     return (
                         <div className="onboard-fade-in">
-                            <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-                                <h2 style={{ fontSize: '1.75rem', fontWeight: 900, color: 'var(--clr-text-primary)', marginBottom: '0.5rem' }}>Select Your Organization</h2>
-                                <p style={{ fontSize: '0.875rem', color: 'var(--clr-text-secondary)' }}>Navigate the hierarchy to find your specific location within the union's mission fields.</p>
+                            <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+                                <h2 className="onboard-title">Select Your Organization</h2>
+                                <p className="onboard-subtitle">Navigate the hierarchy to find your specific location within the union's mission fields.</p>
                             </div>
 
                             {/* Mobile inline summary */}
@@ -404,14 +404,7 @@ export default function Register({ intent = null }) {
                                 <sel.sectionIcon size={14} /> {sel.sectionLabel}
                             </div>
 
-                            <div style={{ 
-                                display: 'grid', 
-                                gridTemplateColumns: sel.columns === 2 ? 'repeat(2, 1fr)' : '1fr', 
-                                gap: '0.625rem',
-                                maxHeight: 360,
-                                overflowY: 'auto',
-                                paddingRight: 4,
-                            }}>
+                            <div className={`onboard-selection-grid ${sel.columns === 2 ? 'onboard-selection-grid--2-cols' : ''}`}>
                                 {sel.items.map(item => (
                                     <HierarchyCard
                                         key={item.id}
@@ -429,14 +422,14 @@ export default function Register({ intent = null }) {
                 {/* ── STEP 1: Local Church / Club ────────────────────────── */}
                 {step === 1 && (
                     <div className="onboard-fade-in">
-                        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-                            <h2 style={{ fontSize: '1.75rem', fontWeight: 900, color: 'var(--clr-text-primary)', marginBottom: '0.5rem' }}>Select Your Local Church</h2>
-                            <p style={{ fontSize: '0.875rem', color: 'var(--clr-text-secondary)' }}>Pick your home church or school club from the list below.</p>
+                        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+                            <h2 className="onboard-title">Select Your Local Church</h2>
+                            <p className="onboard-subtitle">Pick your home church or school club from the list below.</p>
                         </div>
 
                         {!isCreatingClub ? (
                             <>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.625rem' }}>
+                                <div className="onboard-selection-grid onboard-selection-grid--2-cols">
                                     {hierarchy.churches.map(c => (
                                         <HierarchyCard
                                             key={c.id}
@@ -515,7 +508,7 @@ export default function Register({ intent = null }) {
                             </span>
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                        <div className="onboard-form-row">
                             <div>
                                 <label className="onboard-label">Full Name</label>
                                 <input
@@ -543,7 +536,7 @@ export default function Register({ intent = null }) {
                             </div>
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1rem' }}>
+                        <div className="onboard-form-row" style={{ marginTop: '1rem' }}>
                             <div>
                                 <label className="onboard-label">Create Password</label>
                                 <div style={{ position: 'relative' }}>
