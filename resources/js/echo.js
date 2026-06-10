@@ -13,7 +13,8 @@ const echoConfig = {
 if (import.meta.env.VITE_PUSHER_APP_KEY) {
     window.Echo = new Echo(echoConfig);
 } else {
-    console.warn('Echo could not be initialized: VITE_PUSHER_APP_KEY is missing.');
+    console.error('Echo Error: VITE_PUSHER_APP_KEY is missing from the environment.');
+    console.log('Available Vite Env:', import.meta.env);
 }
 
 export default window.Echo;
