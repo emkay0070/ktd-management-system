@@ -3,18 +3,26 @@ import Pusher from 'pusher-js';
 
 window.Pusher = Pusher;
 
+const getEnv = (key) => {
+    return import.meta.env[key] || (typeof process !== 'undefined' && process.env ? process.env[key] : undefined);
+};
+
+const PUSHER_KEY = getEnv('VITE_PUSHER_APP_KEY');
+const PUSHER_CLUSTER = getEnv('VITE_PUSHER_APP_CLUSTER');
+
 const echoConfig = {
     broadcaster: 'pusher',
-    key: import.meta.env.VITE_PUSHER_APP_KEY,
-    cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
+    key: PUSHER_KEY,
+    cluster: PUSHER_CLUSTER,
     forceTLS: true,
 };
 
-if (import.meta.env.VITE_PUSHER_APP_KEY) {
+if (PUSHER_KEY) {
     window.Echo = new Echo(echoConfig);
 } else {
     console.error('Echo Error: VITE_PUSHER_APP_KEY is missing from the environment.');
-    console.log('Available Vite Env:', import.meta.env);
+    console.log('Vite meta.env:', import.meta.env);
+    if (typeof process !== 'undefined') console.log('Process env:', process.env);
 }
 
 export default window.Echo;

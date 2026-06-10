@@ -173,7 +173,7 @@ export default function AuthenticatedLayout({ header, breadcrumb, children }) {
 
                     <NavItem
                         href={route('resources.index')}
-                        icon={Book}
+                        icon={BookOpen}
                         label="Resources"
                         active={route().current('resources.*')}
                         isCollapsed={isCollapsed}
