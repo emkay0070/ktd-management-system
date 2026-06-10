@@ -9,6 +9,10 @@
         <!-- Fonts: Inter loaded from SCSS via system-ui fallback (offline-safe) -->
 
         <!-- Scripts -->
+        <script>
+            window.VITE_PUSHER_APP_KEY = "{{ env('VITE_PUSHER_APP_KEY') }}";
+            window.VITE_PUSHER_APP_CLUSTER = "{{ env('VITE_PUSHER_APP_CLUSTER', 'mt1') }}";
+        </script>
         @routes
         @if (!app()->environment('testing'))
             @viteReactRefresh

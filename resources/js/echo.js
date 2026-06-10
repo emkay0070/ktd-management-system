@@ -4,7 +4,7 @@ import Pusher from 'pusher-js';
 window.Pusher = Pusher;
 
 const getEnv = (key) => {
-    return import.meta.env[key] || (typeof process !== 'undefined' && process.env ? process.env[key] : undefined);
+    return window[key] || import.meta.env[key] || (typeof process !== 'undefined' && process.env ? process.env[key] : undefined);
 };
 
 const PUSHER_KEY = getEnv('VITE_PUSHER_APP_KEY');
