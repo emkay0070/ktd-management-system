@@ -153,9 +153,11 @@ return [
             'cluster' => env('REDIS_CLUSTER', 'redis'),
             'prefix' => env('REDIS_PREFIX', Str::slug((string) env('APP_NAME', 'laravel')).'-database-'),
             'persistent' => env('REDIS_PERSISTENT', false),
-            'context' => [
+            'parameters' => [
                 'ssl' => [
                     'verify_peer' => env('REDIS_VERIFY_PEER', false),
+                    'verify_peer_name' => env('REDIS_VERIFY_PEER', false),
+                    'crypto_method' => STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT | STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT,
                 ],
             ],
         ],
@@ -168,8 +170,12 @@ return [
             'port' => env('REDIS_PORT', '6379'),
             'database' => env('REDIS_DB', '0'),
             'scheme' => env('REDIS_SCHEME', 'tls'),
+            'timeout' => 30.0,
+            'read_write_timeout' => 60.0,
             'ssl' => [
                 'verify_peer' => env('REDIS_VERIFY_PEER', false),
+                'verify_peer_name' => env('REDIS_VERIFY_PEER', false),
+                'crypto_method' => STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT | STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT,
             ],
             'max_retries' => env('REDIS_MAX_RETRIES', 3),
             'backoff_algorithm' => env('REDIS_BACKOFF_ALGORITHM', 'decorrelated_jitter'),
@@ -185,8 +191,12 @@ return [
             'port' => env('REDIS_PORT', '6379'),
             'database' => env('REDIS_CACHE_DB', '1'),
             'scheme' => env('REDIS_SCHEME', 'tls'),
+            'timeout' => 30.0,
+            'read_write_timeout' => 60.0,
             'ssl' => [
                 'verify_peer' => env('REDIS_VERIFY_PEER', false),
+                'verify_peer_name' => env('REDIS_VERIFY_PEER', false),
+                'crypto_method' => STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT | STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT,
             ],
             'max_retries' => env('REDIS_MAX_RETRIES', 3),
             'backoff_algorithm' => env('REDIS_BACKOFF_ALGORITHM', 'decorrelated_jitter'),
