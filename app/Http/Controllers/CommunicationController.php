@@ -229,6 +229,115 @@ class CommunicationController extends Controller
         return response()->json($comment->load('user'));
     }
 
+    public function storeChannel(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string|max:1000',
+            'participants' => 'nullable|array',
+            'participants.*' => 'exists:users,id',
+        ]);
+
+        $channel = DB::transaction(function () use ($validated, $request) {
+            $user = $request->user();
+
+            $channel = CommunicationChannel::create([
+                'name' => $validated['name'],
+                'description' => $validated['description'] ?? null,
+                'type' => 'group',
+                'created_by' => $user->id,
+            ]);
+
+            // Add creator as admin
+            CommunicationParticipant::create([
+                'channel_id' => $channel->id,
+                'user_id' => $user->id,
+                'role' => 'admin',
+            ]);
+
+            // Add other participants
+            if (!empty($validated['participants'])) {
+                foreach (array_unique($validated['participants']) as $userId) {
+                    if ($userId != $user->id) {
+                        CommunicationParticipant::create([
+                            'channel_id' => $channel->id,
+                            'user_id' => $userId,
+                            'role' => 'member',
+                        ]);
+                    }
+                }
+            }
+
+            return $channel;
+        });
+
+        return redirect()->route('communication.index', ['channel' => $channel->slug]);
+    }
+
+    public function addParticipant(Request $request, CommunicationChannel $channel)
+    {
+        $user = $request->user();
+
+        // Must be admin of this channel to add participants
+        $isAdmin = CommunicationParticipant::where('channel_id', $channel->id)
+            ->where('user_id', $user->id)
+            ->where('role', 'admin')
+            ->exists();
+
+        if (!$isAdmin && $channel->type !== 'public') {
+            abort(403, 'Only admins can add participants.');
+        }
+
+        $validated = $request->validate([
+            'user_ids' => 'required|array',
+            'user_ids.*' => 'exists:users,id',
+        ]);
+
+        foreach (array_unique($validated['user_ids']) as $userId) {
+            CommunicationParticipant::firstOrCreate([
+                'channel_id' => $channel->id,
+                'user_id' => $userId,
+            ], [
+                'role' => 'member',
+            ]);
+        }
+
+        return back();
+    }
+
+    public function removeParticipant(CommunicationChannel $channel, User $user, Request $request)
+    {
+        $currentUser = $request->user();
+
+        // Can remove if self (leaving) OR if current user is admin of the channel
+        $isAdmin = CommunicationParticipant::where('channel_id', $channel->id)
+            ->where('user_id', $currentUser->id)
+            ->where('role', 'admin')
+            ->exists();
+
+        if ($currentUser->id !== $user->id && !$isAdmin) {
+            abort(403, 'Only admins can remove participants.');
+        }
+
+        CommunicationParticipant::where('channel_id', $channel->id)
+            ->where('user_id', $user->id)
+            ->delete();
+
+        return back();
+    }
+
+    public function searchUsers(Request $request)
+    {
+        $query = $request->get('q', '');
+        
+        $users = User::where('name', 'ilike', "%{$query}%")
+            ->orWhere('email', 'ilike', "%{$query}%")
+            ->limit(10)
+            ->get(['id', 'name', 'email']);
+
+        return response()->json($users);
+    }
+
     protected function mapMimeToType($mime)
     {
         if (Str::startsWith($mime, 'image/')) return 'image';

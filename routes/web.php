@@ -213,11 +213,15 @@ Route::middleware(['auth', 'verified', 'onboarded'])->group(function () {
     Route::prefix('communication')->name('communication.')->group(function () {
         Route::get('/', [\App\Http\Controllers\CommunicationController::class, 'index'])->name('index');
         Route::get('/feed', [\App\Http\Controllers\CommunicationController::class, 'feed'])->name('feed');
+        Route::post('/channels', [\App\Http\Controllers\CommunicationController::class, 'storeChannel'])->name('channels.store');
         Route::get('/channels/{channel:slug}', [\App\Http\Controllers\CommunicationController::class, 'show'])->name('show');
         Route::post('/channels/{channel:slug}/messages', [\App\Http\Controllers\CommunicationController::class, 'store'])->name('messages.store');
+        Route::post('/channels/{channel:slug}/participants', [\App\Http\Controllers\CommunicationController::class, 'addParticipant'])->name('channels.participants.store');
+        Route::delete('/channels/{channel:slug}/participants/{user}', [\App\Http\Controllers\CommunicationController::class, 'removeParticipant'])->name('channels.participants.destroy');
         Route::post('/messages/{message}/reactions', [\App\Http\Controllers\CommunicationController::class, 'toggleReaction'])->name('messages.reactions.toggle');
         Route::post('/messages/{message}/comments', [\App\Http\Controllers\CommunicationController::class, 'storeComment'])->name('messages.comments.store');
         Route::post('/direct/{recipient}', [\App\Http\Controllers\CommunicationController::class, 'startDirectMessage'])->name('direct.start');
+        Route::get('/users/search', [\App\Http\Controllers\CommunicationController::class, 'searchUsers'])->name('users.search');
     });
 });
 

@@ -4,8 +4,10 @@ import { Head, useForm, router } from '@inertiajs/react';
 import { 
     Send, Paperclip, Smile, Image, Mic, FileText, 
     MoreVertical, Search, Hash, MessageSquare, 
-    Users, Info, ChevronLeft, Phone, Video
+    Users, Info, ChevronLeft, Phone, Video, Plus
 } from 'lucide-react';
+import CreateChannelModal from './Partials/CreateChannelModal';
+import ManageChannelModal from './Partials/ManageChannelModal';
 
 export default function Index({ auth, channels = [], initialChannelSlug = null }) {
     const [selectedChannel, setSelectedChannel] = useState(null);
@@ -13,6 +15,8 @@ export default function Index({ auth, channels = [], initialChannelSlug = null }
     const [onlineUsers, setOnlineUsers] = useState([]);
     const [typingUsers, setTypingUsers] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [showManageModal, setShowManageModal] = useState(false);
     const [isRecording, setIsRecording] = useState(false);
     const [recordingTime, setRecordingTime] = useState(0);
     const mediaRecorderRef = useRef(null);
@@ -183,8 +187,8 @@ export default function Index({ auth, channels = [], initialChannelSlug = null }
             <div className="flex h-[calc(100vh-140px)] bg-[#0f0f15] rounded-3xl overflow-hidden border border-white/5 shadow-2xl">
                 {/* Sidebar */}
                 <div className="w-80 border-r border-white/5 flex flex-col bg-[#16161d]">
-                    <div className="p-6 border-b border-white/5">
-                        <div className="relative">
+                    <div className="p-6 border-b border-white/5 flex items-center justify-between gap-4">
+                        <div className="relative flex-1">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
                             <input 
                                 type="text" 
@@ -192,6 +196,13 @@ export default function Index({ auth, channels = [], initialChannelSlug = null }
                                 className="w-full bg-white/5 border-none rounded-xl pl-10 text-sm focus:ring-burgundy-500 text-white placeholder:text-gray-600"
                             />
                         </div>
+                        <button 
+                            onClick={() => setShowCreateModal(true)}
+                            className="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors shrink-0"
+                            title="Create Group Channel"
+                        >
+                            <Plus size={20} />
+                        </button>
                     </div>
                     
                     <div className="flex-1 overflow-y-auto custom-scrollbar">
@@ -262,8 +273,8 @@ export default function Index({ auth, channels = [], initialChannelSlug = null }
                                 <div className="flex items-center gap-4 text-gray-400">
                                     <button className="p-2 hover:bg-white/5 rounded-xl transition-colors"><Phone size={20} /></button>
                                     <button className="p-2 hover:bg-white/5 rounded-xl transition-colors"><Video size={20} /></button>
-                                    <button className="p-2 hover:bg-white/5 rounded-xl transition-colors"><Info size={20} /></button>
-                                    <button className="p-2 hover:bg-white/5 rounded-xl transition-colors"><MoreVertical size={20} /></button>
+                                    <button onClick={() => setShowManageModal(true)} className="p-2 hover:bg-white/5 rounded-xl transition-colors hover:text-burgundy-400"><Info size={20} /></button>
+                                    <button onClick={() => setShowManageModal(true)} className="p-2 hover:bg-white/5 rounded-xl transition-colors"><MoreVertical size={20} /></button>
                                 </div>
                             </div>
 
@@ -497,6 +508,19 @@ export default function Index({ auth, channels = [], initialChannelSlug = null }
                     )}
                 </div>
             </div>
+
+            <CreateChannelModal 
+                show={showCreateModal} 
+                onClose={() => setShowCreateModal(false)} 
+                auth={auth} 
+            />
+
+            <ManageChannelModal 
+                show={showManageModal} 
+                onClose={() => setShowManageModal(false)} 
+                channel={selectedChannel} 
+                auth={auth} 
+            />
         </AuthenticatedLayout>
     );
 }
