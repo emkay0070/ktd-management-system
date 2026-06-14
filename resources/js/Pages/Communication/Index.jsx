@@ -153,17 +153,37 @@ export default function Index({ auth, channels = [], initialChannelSlug = null }
         return `${mins}:${secs.toString().padStart(2, '0')}`;
     };
 
-    const handleSendMessage = (e) => {
+    const handleSendMessage = async (e) => {
         e.preventDefault();
         if (!data.content && data.attachments.length === 0) return;
 
-        post(route('communication.messages.store', selectedChannel.slug), {
-            preserveScroll: true,
-            onSuccess: (page) => {
-                reset();
-                // Message will be added via Echo or manually if needed
-            },
-        });
+        try {
+            const formData = new FormData();
+            if (data.content) formData.append('content', data.content);
+            formData.append('type', data.type);
+            data.attachments.forEach((file) => {
+                formData.append('attachments[]', file);
+            });
+
+            const response = await axios.post(
+                route('communication.messages.store', selectedChannel.slug),
+                formData,
+                {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                }
+            );
+
+            // Add the new message to the messages array immediately
+            if (response.data) {
+                setMessages(prev => [...prev, response.data]);
+            }
+
+            reset();
+        } catch (error) {
+            console.error('Failed to send message:', error);
+        }
     };
 
     const handleFileSelect = (e) => {
