@@ -37,7 +37,7 @@ class ReactionUpdated implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('communication.channel.' . $this->channelId),
+            new PresenceChannel('communication.channel.' . $this->channelId),
         ];
     }
 
