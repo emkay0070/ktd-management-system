@@ -20,6 +20,9 @@ class CommunicationController extends Controller
     {
         $user = $request->user();
         
+        // Sync user to all relevant channels
+        app(\App\Services\CommunicationService::class)->syncUserToChannels($user);
+        
         $channels = CommunicationChannel::whereHas('participants', function ($query) use ($user) {
             $query->where('user_id', $user->id);
         })
