@@ -167,12 +167,7 @@ export default function Index({ auth, channels = [], initialChannelSlug = null }
 
             const response = await axios.post(
                 route('communication.messages.store', selectedChannel.slug),
-                formData,
-                {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                    },
-                }
+                formData
             );
 
             // Add the new message to the messages array immediately
