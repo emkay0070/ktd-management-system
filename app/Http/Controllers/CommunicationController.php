@@ -68,56 +68,67 @@ class CommunicationController extends Controller
 
     public function store(Request $request, CommunicationChannel $channel)
     {
-        $user = $request->user();
-        
-        // Ensure user is participant
-        abort_unless(CommunicationParticipant::where('channel_id', $channel->id)
-            ->where('user_id', $user->id)
-            ->exists(), 403);
+        try {
+            $user = $request->user();
+            
+            // Ensure user is participant
+            abort_unless(CommunicationParticipant::where('channel_id', $channel->id)
+                ->where('user_id', $user->id)
+                ->exists(), 403);
 
-        $validated = $request->validate([
-            'content' => 'required_without:attachments|nullable|string',
-            'type' => 'required|string|in:text,image,audio,video,document,system',
-            'attachments' => 'nullable|array',
-            'attachments.*' => 'file|max:10240', // 10MB limit
-        ]);
-
-        return DB::transaction(function () use ($channel, $user, $validated, $request) {
-            $message = CommunicationMessage::create([
-                'channel_id' => $channel->id,
-                'sender_id' => $user->id,
-                'content' => $validated['content'] ?? null,
-                'type' => $validated['type'],
+            $validated = $request->validate([
+                'content' => 'required_without:attachments|nullable|string',
+                'type' => 'required|string|in:text,image,audio,video,document,system',
+                'attachments' => 'nullable|array',
+                'attachments.*' => 'file|max:10240', // 10MB limit
             ]);
 
-            if ($request->hasFile('attachments')) {
-                foreach ($request->file('attachments') as $file) {
-                    $path = $file->store('communication/attachments/' . $channel->id, 'public');
+            return DB::transaction(function () use ($channel, $user, $validated, $request) {
+                $message = CommunicationMessage::create([
+                    'channel_id' => $channel->id,
+                    'sender_id' => $user->id,
+                    'content' => $validated['content'] ?? null,
+                    'type' => $validated['type'],
+                ]);
+
+                if ($request->hasFile('attachments')) {
+                    foreach ($request->file('attachments') as $file) {
+                        // Try to store the file, use S3 if configured, otherwise public
+                        $disk = env('AWS_ACCESS_KEY_ID') ? 's3' : 'public';
+                        $path = $file->store('communication/attachments/' . $channel->id, $disk);
+                        
+                        CommunicationAttachment::create([
+                            'message_id' => $message->id,
+                            'file_path' => $path,
+                            'file_name' => $file->getClientOriginalName(),
+                            'file_type' => $file->getMimeType(),
+                            'file_size' => $file->getSize(),
+                        ]);
+                    }
                     
-                    CommunicationAttachment::create([
-                        'message_id' => $message->id,
-                        'file_path' => $path,
-                        'file_name' => $file->getClientOriginalName(),
-                        'file_type' => $file->getMimeType(),
-                        'file_size' => $file->getSize(),
-                    ]);
+                    // If only attachments, update type to first attachment type if not specified
+                    if (!$validated['content'] && $validated['type'] === 'text') {
+                        $firstMime = $request->file('attachments')[0]->getMimeType();
+                        $message->update(['type' => $this->mapMimeToType($firstMime)]);
+                    }
                 }
-                
-                // If only attachments, update type to first attachment type if not specified
-                if (!$validated['content'] && $validated['type'] === 'text') {
-                    $firstMime = $request->file('attachments')[0]->getMimeType();
-                    $message->update(['type' => $this->mapMimeToType($firstMime)]);
-                }
-            }
 
-            // Update channel timestamp
-            $channel->touch();
+                // Update channel timestamp
+                $channel->touch();
 
-            // Broadcast
-            broadcast(new MessageSent($message))->toOthers();
+                // Broadcast
+                broadcast(new MessageSent($message))->toOthers();
 
-            return $message->load(['sender', 'attachments', 'reactions']);
-        });
+                return $message->load(['sender', 'attachments', 'reactions']);
+            });
+        } catch (\Exception $e) {
+            \Log::error('Error sending message: ' . $e->getMessage(), [
+                'exception' => $e,
+                'request' => $request->all(),
+                'channel' => $channel,
+            ]);
+            abort(500, 'Error sending message: ' . $e->getMessage());
+        }
     }
 
     public function startDirectMessage(User $recipient, Request $request)

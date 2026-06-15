@@ -30,6 +30,7 @@ class CommunicationAttachment extends Model
 
     public function getUrlAttribute(): string
     {
-        return Storage::url($this->file_path);
+        $disk = env('AWS_ACCESS_KEY_ID') ? 's3' : 'public';
+        return Storage::disk($disk)->url($this->file_path);
     }
 }
