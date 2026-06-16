@@ -136,6 +136,11 @@ export default function Index({ auth, channels = [], initialChannelSlug = null }
             }, 1000);
         } catch (error) {
             console.error('Failed to start recording', error);
+            if (error.name === 'NotAllowedError') {
+                alert('Microphone permission denied. Please allow microphone access in your browser settings.');
+            } else {
+                alert(`Failed to start recording: ${error.message}`);
+            }
         }
     };
 
@@ -205,6 +210,18 @@ export default function Index({ auth, channels = [], initialChannelSlug = null }
             return otherUser ? otherUser.user.name : 'Direct Message';
         }
         return channel.name || `${channel.type.toUpperCase()} Channel`;
+    };
+
+    const getChannelTypeLabel = (type) => {
+        const labels = {
+            'direct': 'Private Chat',
+            'group': 'Group Chat',
+            'club': 'Club',
+            'district': 'District',
+            'union': 'Union',
+            'public': 'Public'
+        };
+        return labels[type] || type.charAt(0).toUpperCase() + type.slice(1);
     };
 
     return (
@@ -283,7 +300,7 @@ export default function Index({ auth, channels = [], initialChannelSlug = null }
                                         <h3 className="title">{getChannelName(selectedChannel)}</h3>
                                         <div className="meta">
                                             <p className="type">
-                                                {selectedChannel.type} • {selectedChannel.participants?.length || 0} Members
+                                                {getChannelTypeLabel(selectedChannel.type)} • {selectedChannel.participants?.length || 0} Members
                                             </p>
                                             <span className="dot"></span>
                                             <p className="online">
