@@ -128,14 +128,13 @@ class CommunicationController extends Controller
                 'channel' => $channel,
                 'trace' => $e->getTraceAsString(),
             ]);
-            // For debugging, return full trace in dev
-            if (app()->environment('local')) {
-                return response()->json([
-                    'error' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString(),
-                ], 500);
-            }
-            abort(500, 'Error sending message: ' . $e->getMessage());
+            // Return full trace for debugging
+            return response()->json([
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ], 500);
         }
     }
 
