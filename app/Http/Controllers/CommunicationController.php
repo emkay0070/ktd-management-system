@@ -112,7 +112,7 @@ class CommunicationController extends Controller
                     }
                     
                     // If only attachments, update type to first attachment type if not specified
-                    if (!$validated['content'] && $validated['type'] === 'text') {
+                    if (empty($validated['content']) && $validated['type'] === 'text') {
                         $firstMime = $request->file('attachments')[0]->getMimeType();
                         $message->update(['type' => $this->mapMimeToType($firstMime)]);
                     }
