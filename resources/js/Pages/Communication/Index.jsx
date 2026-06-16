@@ -228,9 +228,9 @@ export default function Index({ auth, channels = [], initialChannelSlug = null }
 
             reset();
         } catch (error) {
-            console.error('Failed to send message:', error);
+            console.error('Failed to send message', error);
             if (error.response) {
-                console.error('Error response data:', error.response.data);
+                console.error('Error response data', error.response.data);
             }
         }
     };
@@ -284,63 +284,92 @@ export default function Index({ auth, channels = [], initialChannelSlug = null }
         >
             <Head title="Communication Center" />
 
-            <div className="communication-container h-[calc(100vh-140px)] flex rounded-3xl overflow-hidden shadow-2xl mx-4" data-role-theme="district">
+            <div className="communication-container">
                 {/* Sidebar */}
-                <div className="communication-sidebar w-80 bg-[#1a1a2e] border-r border-white/5 flex flex-col">
-                    <div className="communication-sidebar-header p-5 border-b border-white/5 bg-gradient-to-br from-[#1a1a2e] to-[#16213e]">
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="font-bold text-xl text-white">Messages</h3>
-                            <div className="flex gap-2">
+                <div className="communication-sidebar">
+                    <div className="communication-sidebar-header">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'space-between', width: '100%' }}>
+                            <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--clr-text-primary)', margin: 0 }}>Messages</h3>
+                            <div style={{ display: 'flex', gap: '8px' }}>
                                 <button
                                     onClick={() => setShowUserSearch(!showUserSearch)}
-                                    className={`p-2.5 rounded-xl transition-all ${showUserSearch ? 'bg-burgundy-600 text-white' : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'}`}
+                                    className="btn-icon"
                                     title="Start New Chat"
                                 >
                                     <User size={18} />
                                 </button>
                                 <button
                                     onClick={() => setShowCreateModal(true)}
-                                    className="p-2.5 bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white rounded-xl transition-all"
+                                    className="btn-icon"
                                     title="Create Group Channel"
                                 >
                                     <Plus size={18} />
                                 </button>
                             </div>
                         </div>
-                        <div className="communication-search relative">
-                            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
-                            <input
-                                type="text"
-                                placeholder="Search conversations..."
-                                className="w-full bg-black/30 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-gray-500 focus:border-burgundy-500 focus:ring-1 focus:ring-burgundy-500 outline-none"
-                            />
+                        <div className="communication-search">
+                            <Search className="icon" size={16} />
+                            <input type="text" placeholder="Search conversations..." />
                         </div>
                     </div>
 
                     {showUserSearch && (
-                        <div className="p-4 border-b border-white/5 bg-[#16213e]">
+                        <div style={{ padding: '16px', borderBottom: '1px solid var(--clr-border)', background: 'var(--clr-surface-900)' }}>
                             <input
                                 type="text"
                                 value={searchQuery}
                                 onChange={handleUserSearch}
                                 placeholder="Search users to message..."
-                                className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-burgundy-500 focus:ring-1 focus:ring-burgundy-500 outline-none"
+                                style={{
+                                    width: '100%',
+                                    background: 'var(--theme-bg-alpha)',
+                                    border: '1px solid var(--clr-border)',
+                                    borderRadius: 'var(--radius-lg)',
+                                    padding: '12px 16px',
+                                    color: 'var(--clr-text-primary)',
+                                    fontSize: '14px',
+                                    outline: 'none'
+                                }}
                             />
-                            {searching && <div className="text-center py-3 text-gray-500 text-xs">Searching...</div>}
+                            {searching && <div style={{ textAlign: 'center', padding: '12px', color: 'var(--clr-text-muted)', fontSize: '12px' }}>Searching...</div>}
                             {searchResults.length > 0 && (
-                                <div className="mt-3 space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
+                                <div style={{ marginTop: '12px', maxHeight: '200px', overflowY: 'auto' }}>
                                     {searchResults.map(user => (
                                         <button
                                             key={user.id}
                                             onClick={() => startDirectMessage(user)}
-                                            className="w-full flex items-center gap-3 p-3.5 rounded-xl hover:bg-white/5 transition-all text-left"
+                                            style={{
+                                                width: '100%',
+                                                textAlign: 'left',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '12px',
+                                                padding: '12px',
+                                                borderRadius: 'var(--radius-lg)',
+                                                cursor: 'pointer',
+                                                background: 'transparent',
+                                                border: 'none'
+                                            }}
+                                            onMouseOver={(e) => e.currentTarget.style.background = 'var(--theme-bg-alpha)'}
+                                            onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
                                         >
-                                            <div className="w-11 h-11 rounded-full bg-gradient-to-br from-burgundy-500 to-burgundy-700 flex items-center justify-center text-white font-bold text-sm shadow-lg">
+                                            <div style={{
+                                                width: '44px',
+                                                height: '44px',
+                                                borderRadius: '50%',
+                                                background: 'linear-gradient(to bottom right, var(--theme-gradient-1), var(--theme-gradient-2))',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                color: 'white',
+                                                fontWeight: '700',
+                                                fontSize: '14px'
+                                            }}>
                                                 {user.name.substring(0, 2).toUpperCase()}
                                             </div>
-                                            <div className="flex-1 min-w-0">
-                                                <div className="font-medium text-white text-sm">{user.name}</div>
-                                                <div className="text-xs text-gray-400 truncate">{user.email}</div>
+                                            <div>
+                                                <div style={{ fontWeight: '600', color: 'var(--clr-text-primary)', fontSize: '14px' }}>{user.name}</div>
+                                                <div style={{ fontSize: '12px', color: 'var(--clr-text-muted)' }}>{user.email}</div>
                                             </div>
                                         </button>
                                     ))}
@@ -349,35 +378,31 @@ export default function Index({ auth, channels = [], initialChannelSlug = null }
                         </div>
                     )}
 
-                    <div className="communication-channel-list flex-1 overflow-y-auto p-3 custom-scrollbar">
+                    <div className="communication-channel-list">
                         {channels.map(channel => (
                             <button
                                 key={channel.id}
                                 onClick={() => selectChannel(channel)}
-                                className={`channel-item w-full flex items-center gap-3 p-3.5 rounded-2xl transition-all mb-1 ${selectedChannel?.id === channel.id ? 'bg-gradient-to-r from-burgundy-600/30 to-burgundy-700/20 border border-burgundy-500/30' : 'hover:bg-white/5'}`}
+                                className={`channel-item ${selectedChannel?.id === channel.id ? 'active' : ''}`}
                             >
-                                <div className="relative shrink-0">
-                                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-burgundy-600 to-burgundy-800 flex items-center justify-center text-white font-bold shadow-lg">
+                                <div className="channel-icon">
+                                    <div className="icon-bg">
                                         {channel.type === 'direct' ? <MessageSquare size={18} /> : <Hash size={18} />}
                                     </div>
                                     {channel.unread_count > 0 && (
-                                        <div className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-br from-burgundy-500 to-burgundy-700 rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-lg border-2 border-[#1a1a2e]">
-                                            {channel.unread_count}
-                                        </div>
+                                        <div className="unread-badge">{channel.unread_count}</div>
                                     )}
                                 </div>
-                                <div className="flex-1 text-left min-w-0">
-                                    <div className="flex items-center justify-between mb-1">
-                                        <span className="font-semibold text-white text-sm truncate">{getChannelName(channel)}</span>
+                                <div className="channel-info">
+                                    <div className="header">
+                                        <span className="name">{getChannelName(channel)}</span>
                                         {channel.lastMessage && (
-                                            <span className="text-xs text-gray-400 shrink-0">
+                                            <span className="time">
                                                 {new Date(channel.lastMessage.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             </span>
                                         )}
                                     </div>
-                                    <p className="text-sm text-gray-400 truncate">
-                                        {getLastMessagePreview(channel.lastMessage)}
-                                    </p>
+                                    <p className="preview">{getLastMessagePreview(channel.lastMessage)}</p>
                                 </div>
                             </button>
                         ))}
@@ -385,49 +410,43 @@ export default function Index({ auth, channels = [], initialChannelSlug = null }
                 </div>
 
                 {/* Chat Area */}
-                <div className="communication-chat-area flex-1 flex flex-col bg-gradient-to-b from-[#16213e] to-[#1a1a2e]">
+                <div className="communication-chat-area">
                     {selectedChannel ? (
                         <>
                             {/* Chat Header */}
-                            <div className="chat-header p-5 border-b border-white/5 bg-[#16213e]/80 backdrop-blur-sm flex items-center justify-between">
-                                <div className="flex items-center gap-3.5">
-                                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-burgundy-600 to-burgundy-800 flex items-center justify-center text-white font-bold shadow-lg">
+                            <div className="chat-header">
+                                <div className="chat-title-wrapper">
+                                    <div className="icon-bg">
                                         {selectedChannel.type === 'direct' ? <MessageSquare size={20} /> : <Hash size={20} />}
                                     </div>
                                     <div>
-                                        <h3 className="font-bold text-white text-lg">{getChannelName(selectedChannel)}</h3>
-                                        <div className="flex items-center gap-2 text-xs text-gray-400 mt-0.5">
-                                            <span>{getChannelTypeLabel(selectedChannel.type)}</span>
-                                            <span className="w-1 h-1 rounded-full bg-gray-600"></span>
-                                            <span className="flex items-center gap-1.5">
-                                                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-lg shadow-green-500/30"></span>
-                                                {onlineUsers.length} online
-                                            </span>
+                                        <h3 className="title">{getChannelName(selectedChannel)}</h3>
+                                        <div className="meta">
+                                            <p className="type">
+                                                {getChannelTypeLabel(selectedChannel.type)} • {selectedChannel.participants?.length || 0} Members
+                                            </p>
+                                            <span className="dot"></span>
+                                            <p className="online">
+                                                <span className="pulse"></span>
+                                                {onlineUsers.length} Online
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
-                                <div className="flex gap-1.5">
-                                    <button onClick={() => alert('Voice calls coming soon!')} className="p-2.5 hover:bg-white/5 rounded-xl text-gray-400 hover:text-white transition-all">
-                                        <Phone size={18} />
-                                    </button>
-                                    <button onClick={() => alert('Video calls coming soon!')} className="p-2.5 hover:bg-white/5 rounded-xl text-gray-400 hover:text-white transition-all">
-                                        <Video size={18} />
-                                    </button>
-                                    <button onClick={() => setShowManageModal(true)} className="p-2.5 hover:bg-white/5 rounded-xl text-gray-400 hover:text-white transition-all">
-                                        <Info size={18} />
-                                    </button>
-                                    <button onClick={() => setShowManageModal(true)} className="p-2.5 hover:bg-white/5 rounded-xl text-gray-400 hover:text-white transition-all">
-                                        <MoreVertical size={18} />
-                                    </button>
+                                <div className="chat-actions">
+                                    <button onClick={() => alert('Voice calls coming soon!')}><Phone size={18} /></button>
+                                    <button onClick={() => alert('Video calls coming soon!')}><Video size={18} /></button>
+                                    <button onClick={() => setShowManageModal(true)}><Info size={18} /></button>
+                                    <button onClick={() => setShowManageModal(true)}><MoreVertical size={18} /></button>
                                 </div>
                             </div>
 
                             {/* Messages */}
-                            <div className="chat-messages flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
+                            <div className="chat-messages">
                                 {loading ? (
-                                    <div className="flex items-center justify-center h-full">
-                                        <div className="text-gray-400 flex items-center gap-2">
-                                            <div className="w-5 h-5 border-2 border-burgundy-500 border-t-transparent rounded-full animate-spin"></div>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--clr-text-muted)' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <div style={{ width: '20px', height: '20px', border: '2px solid var(--theme-primary)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
                                             Loading messages...
                                         </div>
                                     </div>
@@ -436,54 +455,62 @@ export default function Index({ auth, channels = [], initialChannelSlug = null }
                                         {messages.map((message, idx) => {
                                             const isMe = message.sender_id === auth.user.id;
                                             return (
-                                                <div key={message.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-                                                    <div className="flex gap-3 max-w-[65%]">
+                                                <div key={message.id} className={`message-wrapper ${isMe ? 'me' : 'them'}`}>
+                                                    <div className="message-content">
                                                         {!isMe && (
-                                                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-burgundy-600 to-burgundy-800 flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-lg">
-                                                                {message.sender?.name?.substring(0, 2).toUpperCase()}
+                                                            <div className="avatar-wrapper">
+                                                                <div className="avatar">
+                                                                    {message.sender?.name?.substring(0, 2).toUpperCase()}
+                                                                </div>
+                                                                {onlineUsers.find(u => u.id === message.sender_id) && (
+                                                                    <div className="online-dot"></div>
+                                                                )}
                                                             </div>
                                                         )}
-                                                        <div className={`space-y-1.5 ${isMe ? 'items-end' : 'items-start'} flex flex-col`}>
+                                                        <div className="message-body">
                                                             {!isMe && (
-                                                                <div className="text-xs text-gray-400 font-medium ml-1">
+                                                                <div style={{ fontSize: '10px', color: 'var(--clr-text-muted)', fontWeight: '700', marginBottom: '4px', marginLeft: '4px' }}>
                                                                     {message.sender?.name}
                                                                 </div>
                                                             )}
-                                                            <div className={`p-4 rounded-2xl shadow-lg ${isMe ? 'bg-gradient-to-br from-burgundy-600 to-burgundy-700 text-white rounded-tr-md' : 'bg-[#2a2a45] text-white rounded-tl-md'}`}>
+                                                            <div className="bubble">
                                                                 {message.content && (
-                                                                    <div className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</div>
+                                                                    <div style={{ fontSize: '14px', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>
+                                                                        {message.content}
+                                                                    </div>
                                                                 )}
+
                                                                 {message.attachments?.length > 0 && (
-                                                                    <div className={`mt-3 space-y-2.5 ${message.content ? 'pt-3 border-t border-white/10' : ''}`}>
+                                                                    <div className="attachments">
                                                                         {message.attachments.map(file => (
                                                                             <div key={file.id}>
                                                                                 {file.file_type.startsWith('image/') ? (
                                                                                     <img
                                                                                         src={file.url}
                                                                                         alt={file.file_name}
-                                                                                        className="max-w-full rounded-xl max-h-72 object-cover shadow-md cursor-pointer hover:scale-[1.01] transition-transform"
+                                                                                        style={{
+                                                                                            maxWidth: '100%',
+                                                                                            maxHeight: '300px',
+                                                                                            borderRadius: '12px',
+                                                                                            marginTop: '12px'
+                                                                                        }}
                                                                                     />
                                                                                 ) : file.file_type.startsWith('audio/') ? (
-                                                                                    <div className="flex items-center gap-3 p-3 bg-black/20 rounded-xl">
-                                                                                        <div className="p-2.5 bg-white/10 rounded-full">
-                                                                                            <Mic size={18} />
+                                                                                    <div className="audio-player">
+                                                                                        <div className="icon-wrapper">
+                                                                                            <Mic size={16} />
                                                                                         </div>
-                                                                                        <audio controls src={file.url} className="h-11 flex-1" />
+                                                                                        <audio controls src={file.url} style={{ width: '100%' }} />
                                                                                     </div>
                                                                                 ) : (
                                                                                     <a
                                                                                         href={file.url}
                                                                                         target="_blank"
                                                                                         rel="noopener noreferrer"
-                                                                                        className="flex items-center gap-3 p-3.5 bg-black/20 rounded-xl hover:bg-black/30 transition-all"
+                                                                                        className="file-link"
                                                                                     >
-                                                                                        <FileText size={22} className="text-burgundy-400" />
-                                                                                        <div className="flex-1 min-w-0">
-                                                                                            <div className="text-sm font-medium truncate">{file.file_name}</div>
-                                                                                            <div className="text-xs text-gray-400">
-                                                                                                {(file.file_size / 1024 / 1024).toFixed(2)} MB
-                                                                                            </div>
-                                                                                        </div>
+                                                                                        <FileText size={20} />
+                                                                                        <span className="filename">{file.file_name}</span>
                                                                                     </a>
                                                                                 )}
                                                                             </div>
@@ -491,47 +518,65 @@ export default function Index({ auth, channels = [], initialChannelSlug = null }
                                                                     </div>
                                                                 )}
                                                             </div>
-                                                            <div className="flex items-center gap-2">
-                                                                {message.reactions?.length > 0 && (
-                                                                    <div className="flex gap-1.5">
-                                                                        {message.reactions.reduce((acc, curr) => {
-                                                                            const existing = acc.find(r => r.emoji === curr.emoji);
-                                                                            if (existing) {
-                                                                                existing.count++;
-                                                                            } else {
-                                                                                acc.push({ emoji: curr.emoji, count: 1, isMe: curr.user_id === auth.user.id });
-                                                                            }
-                                                                            return acc;
-                                                                        }, []).map(reaction => (
+
+                                                            <div className="reactions">
+                                                                {message.reactions?.reduce((acc, curr) => {
+                                                                    const existing = acc.find(r => r.emoji === curr.emoji);
+                                                                    if (existing) {
+                                                                        existing.count++;
+                                                                        if (curr.user_id === auth.user.id) existing.isMe = true;
+                                                                    } else {
+                                                                        acc.push({ emoji: curr.emoji, count: 1, isMe: curr.user_id === auth.user.id });
+                                                                    }
+                                                                    return acc;
+                                                                }, []).map(reaction => (
+                                                                    <button
+                                                                        key={reaction.emoji}
+                                                                        onClick={() => toggleReaction(message.id, reaction.emoji)}
+                                                                        className={`reaction-btn ${reaction.isMe ? 'active' : ''}`}
+                                                                    >
+                                                                        <span>{reaction.emoji}</span>
+                                                                        <span className="count">{reaction.count}</span>
+                                                                    </button>
+                                                                ))}
+
+                                                                <div className="add-reaction">
+                                                                    <button className="add-btn">
+                                                                        <Smile size={12} />
+                                                                    </button>
+                                                                    <div className="emoji-picker">
+                                                                        {['👍', '❤️', '🙏', '🎉', '🔥'].map(emoji => (
                                                                             <button
-                                                                                key={reaction.emoji}
-                                                                                onClick={() => toggleReaction(message.id, reaction.emoji)}
-                                                                                className={`px-2.5 py-1 rounded-full text-xs font-medium shadow-sm ${reaction.isMe ? 'bg-burgundy-500/30 text-burgundy-400 border border-burgundy-500/20' : 'bg-white/5 text-gray-300 border border-white/10'}`}
+                                                                                key={emoji}
+                                                                                onClick={() => toggleReaction(message.id, emoji)}
                                                                             >
-                                                                                {reaction.emoji} {reaction.count}
+                                                                                {emoji}
                                                                             </button>
                                                                         ))}
                                                                     </div>
-                                                                )}
-                                                                <span className="text-[10px] text-gray-500">
-                                                                    {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                                </span>
+                                                                </div>
                                                             </div>
+
+                                                            <span className="time">
+                                                                {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                            </span>
                                                         </div>
                                                     </div>
                                                 </div>
                                             );
                                         })}
                                         {typingUsers.length > 0 && (
-                                            <div className="text-sm text-gray-400 italic flex items-center gap-2 ml-12">
-                                                <div className="flex gap-1">
-                                                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-                                                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-                                                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"></span>
-                                                </div>
+                                            <div style={{
+                                                fontSize: '10px',
+                                                color: 'var(--clr-text-muted)',
+                                                textTransform: 'uppercase',
+                                                letterSpacing: '0.1em',
+                                                animation: 'pulse 2s infinite',
+                                                marginLeft: '56px'
+                                            }}>
                                                 {typingUsers.length === 1
                                                     ? `${typingUsers[0].name} is typing...`
-                                                    : `${typingUsers.length} people are typing...`
+                                                    : 'Multiple people are typing...'
                                                 }
                                             </div>
                                         )}
@@ -541,19 +586,20 @@ export default function Index({ auth, channels = [], initialChannelSlug = null }
                             </div>
 
                             {/* Input Area */}
-                            <div className="chat-input-area p-4 border-t border-white/5 bg-[#16213e]">
-                                <form onSubmit={handleSendMessage} className="space-y-3">
+                            <div className="chat-input-area">
+                                <form onSubmit={handleSendMessage}>
                                     {data.attachments.length > 0 && (
-                                        <div className="flex flex-wrap gap-2">
-                                            {data.attachments.map((file, idx) => (
-                                                <div key={idx} className="flex items-center gap-2 bg-black/30 border border-white/10 rounded-xl px-3 py-2">
-                                                    <FileText size={14} className="text-gray-400" />
-                                                    <span className="text-sm text-gray-300 truncate max-w-[200px]">{file.name}</span>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => removeAttachment(idx)}
-                                                        className="p-1 hover:bg-red-500/20 rounded text-gray-400 hover:text-red-400 transition-colors"
-                                                    >
+                                        <div className="attachment-preview">
+                                            {data.attachments.map((file, i) => (
+                                                <div key={i} className="file-chip">
+                                                    <FileText size={12} />
+                                                    <span>{file.name}</span>
+                                                    <button type="button" onClick={() => removeAttachment(i)} style={{
+                                                        border: 'none',
+                                                        background: 'transparent',
+                                                        color: 'inherit',
+                                                        cursor: 'pointer'
+                                                    }}>
                                                         <X size={14} />
                                                     </button>
                                                 </div>
@@ -562,80 +608,105 @@ export default function Index({ auth, channels = [], initialChannelSlug = null }
                                     )}
 
                                     {isRecording ? (
-                                        <div className="flex items-center gap-3 bg-gradient-to-r from-red-500/20 to-red-600/10 border border-red-500/30 rounded-2xl p-4">
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse shadow-lg shadow-red-500/30"></div>
-                                                <span className="text-red-400 font-medium">Recording</span>
-                                                <span className="text-red-300 font-mono text-lg">{formatTime(recordingTime)}</span>
+                                        <div style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '16px',
+                                            background: 'linear-gradient(to right, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.1))',
+                                            border: '1px solid rgba(239, 68, 68, 0.3)',
+                                            borderRadius: '16px',
+                                            padding: '16px'
+                                        }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <div style={{
+                                                    width: '10px',
+                                                    height: '10px',
+                                                    background: 'rgb(239, 68, 68)',
+                                                    borderRadius: '50%',
+                                                    animation: 'pulse 2s infinite'
+                                                }}></div>
+                                                <span style={{ color: 'rgb(239, 68, 68)', fontWeight: '700' }}>Recording</span>
+                                                <span style={{ color: 'rgb(248, 113, 113)', fontFamily: 'monospace', fontSize: '18px' }}>{formatTime(recordingTime)}</span>
                                             </div>
-                                            <div className="flex-1"></div>
-                                            <button
-                                                type="button"
-                                                onClick={cancelRecording}
-                                                className="px-4 py-2 bg-gray-700/50 hover:bg-gray-700 text-gray-300 rounded-xl text-sm font-medium transition-colors"
-                                            >
+                                            <div style={{ flex: '1' }}></div>
+                                            <button type="button" onClick={cancelRecording} style={{
+                                                padding: '8px 16px',
+                                                background: 'rgba(75, 85, 99, 0.5)',
+                                                color: 'rgb(209, 213, 219)',
+                                                border: 'none',
+                                                borderRadius: '12px',
+                                                cursor: 'pointer',
+                                                fontSize: '12px',
+                                                fontWeight: '600'
+                                            }}>
                                                 Cancel
                                             </button>
-                                            <button
-                                                type="button"
-                                                onClick={stopRecording}
-                                                className="px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white rounded-xl text-sm font-medium transition-all shadow-lg shadow-red-500/25 flex items-center gap-2"
-                                            >
+                                            <button type="button" onClick={stopRecording} style={{
+                                                padding: '8px 16px',
+                                                background: 'linear-gradient(to right, rgb(220, 38, 38), rgb(185, 28, 28))',
+                                                color: 'white',
+                                                border: 'none',
+                                                borderRadius: '12px',
+                                                cursor: 'pointer',
+                                                fontSize: '12px',
+                                                fontWeight: '600',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '6px'
+                                            }}>
                                                 <StopCircle size={16} />
                                                 Stop
                                             </button>
                                         </div>
                                     ) : (
-                                        <div className="flex items-end gap-3">
-                                            <div className="flex-1 bg-[#2a2a45] rounded-2xl p-2.5 flex items-end gap-1.5 border border-white/5">
-                                                <div className="flex gap-1">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => fileInputRef.current?.click()}
-                                                        className="p-2.5 hover:bg-white/5 rounded-xl text-gray-400 hover:text-white transition-colors"
-                                                        title="Attach File"
-                                                    >
-                                                        <Paperclip size={18} />
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            const input = document.createElement('input');
-                                                            input.type = 'file';
-                                                            input.accept = 'image/*';
-                                                            input.multiple = true;
-                                                            input.onchange = (e) => {
-                                                                const files = Array.from(e.target.files);
-                                                                setData('attachments', [...data.attachments, ...files]);
-                                                            };
-                                                            input.click();
-                                                        }}
-                                                        className="p-2.5 hover:bg-white/5 rounded-xl text-gray-400 hover:text-white transition-colors"
-                                                        title="Add Image"
-                                                    >
-                                                        <Image size={18} />
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => alert('Emoji picker coming soon!')}
-                                                        className="p-2.5 hover:bg-white/5 rounded-xl text-gray-400 hover:text-white transition-colors"
-                                                        title="Add Emoji"
-                                                    >
-                                                        <Smile size={18} />
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={startRecording}
-                                                        className="p-2.5 hover:bg-white/5 rounded-xl text-gray-400 hover:text-white transition-colors"
-                                                        title="Voice Message"
-                                                    >
-                                                        <Mic size={18} />
-                                                    </button>
+                                        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '16px' }}>
+                                            <div className="input-wrapper">
+                                                <div className="input-actions">
+                                                    <div className="action-group">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => fileInputRef.current?.click()}
+                                                            title="Attach File"
+                                                        >
+                                                            <Paperclip size={20} />
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                const input = document.createElement('input');
+                                                                input.type = 'file';
+                                                                input.accept = 'image/*';
+                                                                input.multiple = true;
+                                                                input.onchange = (e) => {
+                                                                    const files = Array.from(e.target.files);
+                                                                    setData('attachments', [...data.attachments, ...files]);
+                                                                };
+                                                                input.click();
+                                                            }}
+                                                            title="Add Image"
+                                                        >
+                                                            <Image size={20} />
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => alert('Emoji picker coming soon!')}
+                                                            title="Add Emoji"
+                                                        >
+                                                            <Smile size={20} />
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={startRecording}
+                                                            title="Voice Message"
+                                                        >
+                                                            <Mic size={20} />
+                                                        </button>
+                                                    </div>
                                                 </div>
                                                 <textarea
                                                     rows="1"
                                                     value={data.content}
-                                                    onChange={e => {
+                                                    onChange={(e) => {
                                                         setData('content', e.target.value);
                                                         if (window.Echo) {
                                                             window.Echo.join(`communication.channel.${selectedChannel.id}`)
@@ -646,8 +717,6 @@ export default function Index({ auth, channels = [], initialChannelSlug = null }
                                                         }
                                                     }}
                                                     placeholder="Type your message..."
-                                                    className="flex-1 bg-transparent text-white placeholder-gray-500 resize-none outline-none text-sm py-2 px-2"
-                                                    style={{ minHeight: '24px', maxHeight: '120px' }}
                                                     onKeyDown={(e) => {
                                                         if (e.key === 'Enter' && !e.shiftKey) {
                                                             e.preventDefault();
@@ -656,49 +725,61 @@ export default function Index({ auth, channels = [], initialChannelSlug = null }
                                                     }}
                                                 />
                                             </div>
-                                            <button
-                                                type="submit"
-                                                disabled={processing || (!data.content && data.attachments.length === 0)}
-                                                className="p-3.5 bg-gradient-to-r from-burgundy-600 to-burgundy-700 hover:from-burgundy-500 hover:to-burgundy-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-2xl text-white transition-all shadow-lg shadow-burgundy-500/25"
-                                            >
+                                            <button type="submit" disabled={processing || (!data.content && data.attachments.length === 0)} className="send-btn">
                                                 <Send size={20} />
                                             </button>
                                         </div>
                                     )}
-                                    <input
-                                        type="file"
-                                        multiple
-                                        ref={fileInputRef}
-                                        style={{ display: 'none' }}
-                                        onChange={handleFileSelect}
-                                    />
+                                    <input type="file" multiple ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileSelect} />
                                 </form>
                             </div>
                         </>
                     ) : (
-                        <div className="chat-empty-state flex-1 flex items-center justify-center p-10">
-                            <div className="text-center max-w-md">
-                                <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-gradient-to-br from-burgundy-600/20 to-burgundy-800/20 flex items-center justify-center shadow-inner">
-                                    <MessageSquare size={56} className="text-burgundy-400" />
-                                </div>
-                                <h3 className="text-2xl font-bold text-white mb-3">Select a Conversation</h3>
-                                <p className="text-gray-400 mb-8 text-base">Choose a channel from the sidebar or start a new chat</p>
-                                <div className="flex gap-4 justify-center flex-wrap">
-                                    <button
-                                        onClick={() => setShowUserSearch(true)}
-                                        className="px-6 py-3 bg-gradient-to-r from-burgundy-600 to-burgundy-700 hover:from-burgundy-500 hover:to-burgundy-600 text-white rounded-2xl font-medium transition-all shadow-lg shadow-burgundy-500/25 flex items-center gap-2"
-                                    >
-                                        <User size={18} />
-                                        Start Private Chat
-                                    </button>
-                                    <button
-                                        onClick={() => setShowCreateModal(true)}
-                                        className="px-6 py-3 bg-white/5 hover:bg-white/10 text-white rounded-2xl font-medium transition-all border border-white/10 flex items-center gap-2"
-                                    >
-                                        <Users size={18} />
-                                        Create Group
-                                    </button>
-                                </div>
+                        <div className="chat-empty-state">
+                            <div className="icon-wrapper">
+                                <MessageSquare size={48} />
+                            </div>
+                            <h3>Select a Conversation</h3>
+                            <p>
+                                Choose a channel from the sidebar or start a new direct message with a fellow leader or parent.
+                            </p>
+                            <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+                                <button
+                                    onClick={() => setShowUserSearch(true)}
+                                    style={{
+                                        padding: '12px 24px',
+                                        background: 'linear-gradient(to right, var(--theme-gradient-1), var(--theme-gradient-2))',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '12px',
+                                        cursor: 'pointer',
+                                        fontWeight: '600',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px'
+                                    }}
+                                >
+                                    <User size={18} />
+                                    Start Private Chat
+                                </button>
+                                <button
+                                    onClick={() => setShowCreateModal(true)}
+                                    style={{
+                                        padding: '12px 24px',
+                                        background: 'var(--theme-bg-alpha)',
+                                        color: 'var(--clr-text-primary)',
+                                        border: '1px solid var(--clr-border)',
+                                        borderRadius: '12px',
+                                        cursor: 'pointer',
+                                        fontWeight: '600',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px'
+                                    }}
+                                >
+                                    <Users size={18} />
+                                    Create Group
+                                </button>
                             </div>
                         </div>
                     )}
