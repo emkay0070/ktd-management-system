@@ -23,7 +23,7 @@ class CommunicationController extends Controller
         $channels = CommunicationChannel::whereHas('participants', function ($query) use ($user) {
             $query->where('user_id', $user->id);
         })
-        ->with(['lastMessage.sender', 'participants.user'])
+        ->with(['lastMessage.sender', 'lastMessage.attachments', 'participants.user'])
         ->withCount(['messages as unread_count' => function ($query) use ($user) {
             $query->where(function ($q) use ($user) {
                 $q->whereRaw('communication_messages.created_at > (

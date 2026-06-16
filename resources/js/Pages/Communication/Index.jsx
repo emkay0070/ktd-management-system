@@ -212,6 +212,19 @@ export default function Index({ auth, channels = [], initialChannelSlug = null }
         return channel.name || `${channel.type.toUpperCase()} Channel`;
     };
 
+    const getLastMessagePreview = (message) => {
+        if (!message) return 'No messages yet';
+        if (message.content) return message.content;
+        if (message.attachments?.length > 0) {
+            const firstAttachment = message.attachments[0];
+            if (firstAttachment.file_type.startsWith('audio/')) return '🎤 Voice note';
+            if (firstAttachment.file_type.startsWith('image/')) return '🖼️ Image';
+            if (firstAttachment.file_type.startsWith('video/')) return '🎥 Video';
+            return '📎 Attachment';
+        }
+        return 'No messages yet';
+    };
+
     const getChannelTypeLabel = (type) => {
         const labels = {
             'direct': 'Private Chat',
@@ -278,7 +291,7 @@ export default function Index({ auth, channels = [], initialChannelSlug = null }
                                         )}
                                     </div>
                                     <p className="preview">
-                                        {channel.lastMessage ? channel.lastMessage.content : 'No messages yet'}
+                                        {getLastMessagePreview(channel.lastMessage)}
                                     </p>
                                 </div>
                             </button>
@@ -311,8 +324,8 @@ export default function Index({ auth, channels = [], initialChannelSlug = null }
                                     </div>
                                 </div>
                                 <div className="chat-actions">
-                                    <button><Phone size={20} /></button>
-                                    <button><Video size={20} /></button>
+                                    <button onClick={() => alert('Voice calls coming soon!')}><Phone size={20} /></button>
+                                    <button onClick={() => alert('Video calls coming soon!')}><Video size={20} /></button>
                                     <button onClick={() => setShowManageModal(true)}><Info size={20} /></button>
                                     <button onClick={() => setShowManageModal(true)}><MoreVertical size={20} /></button>
                                 </div>
@@ -348,18 +361,37 @@ export default function Index({ auth, channels = [], initialChannelSlug = null }
                                                                 {message.attachments?.length > 0 && (
                                                                     <div className="attachments">
                                                                         {message.attachments.map(file => (
-                                                                            file.file_type.startsWith('audio/') ? (
+                                                                            file.file_type.startsWith('image/') ? (
+                                                                                <a 
+                                                                                    key={file.id} 
+                                                                                    href={file.url} 
+                                                                                    target="_blank" 
+                                                                                    rel="noopener noreferrer"
+                                                                                >
+                                                                                    <img 
+                                                                                        src={file.url} 
+                                                                                        alt={file.file_name} 
+                                                                                        style={{ 
+                                                                                            maxWidth: '100%', 
+                                                                                            maxHeight: '300px', 
+                                                                                            borderRadius: '8px', 
+                                                                                            marginTop: '8px' 
+                                                                                        }} 
+                                                                                    />
+                                                                                </a>
+                                                                            ) : file.file_type.startsWith('audio/') ? (
                                                                                 <div key={file.id} className="audio-player">
-                                                                                    <button className="icon-wrapper">
+                                                                                    <div className="icon-wrapper">
                                                                                         <Mic size={14} />
-                                                                                    </button>
-                                                                                    <audio controls src={file.url} />
+                                                                                    </div>
+                                                                                    <audio controls src={file.url} style={{ width: '100%' }} />
                                                                                 </div>
                                                                             ) : (
                                                                                 <a 
                                                                                     key={file.id} 
                                                                                     href={file.url} 
                                                                                     target="_blank" 
+                                                                                    rel="noopener noreferrer"
                                                                                     className="file-link"
                                                                                 >
                                                                                     <FileText size={16} />
@@ -483,8 +515,30 @@ export default function Index({ auth, channels = [], initialChannelSlug = null }
                                                 >
                                                     <Paperclip size={20} />
                                                 </button>
-                                                <button type="button" title="Add Image"><Image size={20} /></button>
-                                                <button type="button" title="Add Emoji"><Smile size={20} /></button>
+                                                <button 
+                                                    type="button" 
+                                                    onClick={() => {
+                                                        const input = document.createElement('input');
+                                                        input.type = 'file';
+                                                        input.accept = 'image/*';
+                                                        input.multiple = true;
+                                                        input.onchange = (e) => {
+                                                            const files = Array.from(e.target.files);
+                                                            setData('attachments', [...data.attachments, ...files]);
+                                                        };
+                                                        input.click();
+                                                    }}
+                                                    title="Add Image"
+                                                >
+                                                    <Image size={20} />
+                                                </button>
+                                                <button 
+                                                    type="button" 
+                                                    onClick={() => alert('Emoji picker coming soon!')}
+                                                    title="Add Emoji"
+                                                >
+                                                    <Smile size={20} />
+                                                </button>
                                                 <button 
                                                     type="button" 
                                                     onMouseDown={startRecording}
