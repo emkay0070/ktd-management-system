@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link } from '@inertiajs/react';
-import axios from 'axios';
 import { 
     Heart, MessageSquare, Share2, MoreHorizontal, 
     Zap, Calendar, MapPin, Shield, Star, Award

@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('communication_channels', function (Blueprint $table) {
-            $table->enum('type', ['direct', 'class', 'unit', 'club', 'district', 'union', 'public', 'group'])->default('club')->change();
-        });
+        DB::statement("ALTER TABLE communication_channels DROP CONSTRAINT IF EXISTS communication_channels_type_check");
+        DB::statement("ALTER TABLE communication_channels ADD CONSTRAINT communication_channels_type_check CHECK (type IN ('direct', 'class', 'unit', 'club', 'district', 'union', 'public', 'group'))");
+        DB::statement("ALTER TABLE communication_channels ALTER COLUMN type SET DEFAULT 'club'");
     }
 
     /**
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('communication_channels', function (Blueprint $table) {
-            $table->enum('type', ['direct', 'class', 'unit', 'club', 'district', 'union', 'public'])->default('club')->change();
-        });
+        DB::statement("ALTER TABLE communication_channels DROP CONSTRAINT IF EXISTS communication_channels_type_check");
+        DB::statement("ALTER TABLE communication_channels ADD CONSTRAINT communication_channels_type_check CHECK (type IN ('direct', 'class', 'unit', 'club', 'district', 'union', 'public'))");
+        DB::statement("ALTER TABLE communication_channels ALTER COLUMN type SET DEFAULT 'club'");
     }
 };

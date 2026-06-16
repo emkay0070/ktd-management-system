@@ -52,14 +52,9 @@ export default function CreateChannelModal({ show, onClose, auth }) {
     const submit = (e) => {
         e.preventDefault();
         
-        const payload = {
-            name: data.name,
-            description: data.description,
-            participants: data.participants.map(p => p.id),
-        };
+        setData('participants', data.participants.map(p => p.id));
 
         post(route('communication.channels.store'), {
-            data: payload,
             onSuccess: () => {
                 reset();
                 onClose();

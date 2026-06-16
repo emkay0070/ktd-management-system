@@ -20,19 +20,24 @@ class CommunicationController extends Controller
     {
         $user = $request->user();
         
-        // Sync user to all relevant channels
-        app(\App\Services\CommunicationService::class)->syncUserToChannels($user);
-        
         $channels = CommunicationChannel::whereHas('participants', function ($query) use ($user) {
             $query->where('user_id', $user->id);
         })
         ->with(['lastMessage.sender', 'participants.user'])
         ->withCount(['messages as unread_count' => function ($query) use ($user) {
-            $query->where('created_at', '>', function ($subQuery) use ($user) {
-                $subQuery->select('last_read_at')
-                    ->from('communication_participants')
-                    ->whereColumn('channel_id', 'communication_messages.channel_id')
-                    ->where('user_id', $user->id);
+            $query->where(function ($q) use ($user) {
+                $q->whereRaw('communication_messages.created_at > (
+                    select last_read_at 
+                    from communication_participants 
+                    where channel_id = communication_messages.channel_id 
+                    and user_id = ?
+                )', [$user->id])
+                ->orWhereRaw('(
+                    select last_read_at 
+                    from communication_participants 
+                    where channel_id = communication_messages.channel_id 
+                    and user_id = ?
+                ) is null', [$user->id]);
             });
         }])
         ->latest('updated_at')
