@@ -512,7 +512,7 @@ export default function Index({ auth, channels = [], initialChannelSlug = null }
                                                                                     >
                                                                                         <FileText size={20} />
                                                                                         <span className="filename">{file.file_name}</span>
-                                                                                    </a>)
+                                                                                    </a>
                                                                                 )}
                                                                             </div>
                                                                         ))}
