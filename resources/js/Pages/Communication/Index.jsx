@@ -4,7 +4,8 @@ import { Head, useForm, router } from '@inertiajs/react';
 import {
     Send, Paperclip, Smile, Image, Mic, FileText,
     MoreVertical, Search, Hash, MessageSquare,
-    Users, Info, ChevronLeft, Phone, Video, Plus, X, User
+    Users, Info, ChevronLeft, Phone, Video, Plus, X, User,
+    StopCircle
 } from 'lucide-react';
 import CreateChannelModal from './Partials/CreateChannelModal';
 import ManageChannelModal from './Partials/ManageChannelModal';
@@ -188,6 +189,16 @@ export default function Index({ auth, channels = [], initialChannelSlug = null }
         }
     };
 
+    const cancelRecording = () => {
+        if (mediaRecorderRef.current && isRecording) {
+            mediaRecorderRef.current.onstop = () => {};
+            mediaRecorderRef.current.stop();
+            setIsRecording(false);
+            clearInterval(timerRef.current);
+            chunksRef.current = [];
+        }
+    };
+
     const formatTime = (seconds) => {
         const mins = Math.floor(seconds / 60);
         const secs = seconds % 60;
@@ -273,63 +284,63 @@ export default function Index({ auth, channels = [], initialChannelSlug = null }
         >
             <Head title="Communication Center" />
 
-            <div className="communication-container h-[calc(100vh-120px)] flex" data-role-theme="district">
+            <div className="communication-container h-[calc(100vh-140px)] flex rounded-3xl overflow-hidden shadow-2xl mx-4" data-role-theme="district">
                 {/* Sidebar */}
-                <div className="communication-sidebar w-80 bg-[#0f0f15] border-r border-white/5 flex flex-col">
-                    <div className="communication-sidebar-header p-4 border-b border-white/5">
-                        <div className="flex items-center justify-between mb-3">
-                            <h3 className="font-bold text-white">Messages</h3>
+                <div className="communication-sidebar w-80 bg-[#1a1a2e] border-r border-white/5 flex flex-col">
+                    <div className="communication-sidebar-header p-5 border-b border-white/5 bg-gradient-to-br from-[#1a1a2e] to-[#16213e]">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="font-bold text-xl text-white">Messages</h3>
                             <div className="flex gap-2">
                                 <button
                                     onClick={() => setShowUserSearch(!showUserSearch)}
-                                    className="btn-icon hover:bg-burgundy-500/20"
+                                    className={`p-2.5 rounded-xl transition-all ${showUserSearch ? 'bg-burgundy-600 text-white' : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'}`}
                                     title="Start New Chat"
                                 >
-                                    <User size={20} />
+                                    <User size={18} />
                                 </button>
                                 <button
                                     onClick={() => setShowCreateModal(true)}
-                                    className="btn-icon hover:bg-burgundy-500/20"
+                                    className="p-2.5 bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white rounded-xl transition-all"
                                     title="Create Group Channel"
                                 >
-                                    <Plus size={20} />
+                                    <Plus size={18} />
                                 </button>
                             </div>
                         </div>
                         <div className="communication-search relative">
-                            <Search className="icon absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
+                            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
                             <input
                                 type="text"
                                 placeholder="Search conversations..."
-                                className="w-full bg-black/20 border border-white/5 rounded-xl pl-10 p-2 text-sm text-white focus:border-burgundy-500"
+                                className="w-full bg-black/30 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-gray-500 focus:border-burgundy-500 focus:ring-1 focus:ring-burgundy-500 outline-none"
                             />
                         </div>
                     </div>
 
                     {showUserSearch && (
-                        <div className="p-4 border-b border-white/5">
+                        <div className="p-4 border-b border-white/5 bg-[#16213e]">
                             <input
                                 type="text"
                                 value={searchQuery}
                                 onChange={handleUserSearch}
                                 placeholder="Search users to message..."
-                                className="w-full bg-black/20 border border-white/5 rounded-xl p-3 text-white text-sm focus:border-burgundy-500"
+                                className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-burgundy-500 focus:ring-1 focus:ring-burgundy-500 outline-none"
                             />
-                            {searching && <div className="text-center py-2 text-gray-500 text-xs">Searching...</div>}
+                            {searching && <div className="text-center py-3 text-gray-500 text-xs">Searching...</div>}
                             {searchResults.length > 0 && (
-                                <div className="mt-3 space-y-2 max-h-40 overflow-y-auto">
+                                <div className="mt-3 space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
                                     {searchResults.map(user => (
                                         <button
                                             key={user.id}
                                             onClick={() => startDirectMessage(user)}
-                                            className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors"
+                                            className="w-full flex items-center gap-3 p-3.5 rounded-xl hover:bg-white/5 transition-all text-left"
                                         >
-                                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-burgundy-600 to-burgundy-900 flex items-center justify-center text-white font-bold text-sm">
+                                            <div className="w-11 h-11 rounded-full bg-gradient-to-br from-burgundy-500 to-burgundy-700 flex items-center justify-center text-white font-bold text-sm shadow-lg">
                                                 {user.name.substring(0, 2).toUpperCase()}
                                             </div>
-                                            <div className="text-left">
-                                                <div className="text-sm font-medium text-white">{user.name}</div>
-                                                <div className="text-xs text-gray-500">{user.email}</div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="font-medium text-white text-sm">{user.name}</div>
+                                                <div className="text-xs text-gray-400 truncate">{user.email}</div>
                                             </div>
                                         </button>
                                     ))}
@@ -338,28 +349,28 @@ export default function Index({ auth, channels = [], initialChannelSlug = null }
                         </div>
                     )}
 
-                    <div className="communication-channel-list flex-1 overflow-y-auto p-2">
+                    <div className="communication-channel-list flex-1 overflow-y-auto p-3 custom-scrollbar">
                         {channels.map(channel => (
                             <button
                                 key={channel.id}
                                 onClick={() => selectChannel(channel)}
-                                className={`channel-item w-full flex items-center gap-3 p-3 rounded-xl transition-colors ${selectedChannel?.id === channel.id ? 'bg-burgundy-500/20 border border-burgundy-500/30' : 'hover:bg-white/5'}`}
+                                className={`channel-item w-full flex items-center gap-3 p-3.5 rounded-2xl transition-all mb-1 ${selectedChannel?.id === channel.id ? 'bg-gradient-to-r from-burgundy-600/30 to-burgundy-700/20 border border-burgundy-500/30' : 'hover:bg-white/5'}`}
                             >
-                                <div className="relative">
-                                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-burgundy-600 to-burgundy-900 flex items-center justify-center text-white font-bold">
+                                <div className="relative shrink-0">
+                                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-burgundy-600 to-burgundy-800 flex items-center justify-center text-white font-bold shadow-lg">
                                         {channel.type === 'direct' ? <MessageSquare size={18} /> : <Hash size={18} />}
                                     </div>
                                     {channel.unread_count > 0 && (
-                                        <div className="absolute -top-1 -right-1 w-5 h-5 bg-burgundy-500 rounded-full flex items-center justify-center text-[10px] font-bold text-white">
+                                        <div className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-br from-burgundy-500 to-burgundy-700 rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-lg border-2 border-[#1a1a2e]">
                                             {channel.unread_count}
                                         </div>
                                     )}
                                 </div>
                                 <div className="flex-1 text-left min-w-0">
-                                    <div className="flex items-center justify-between">
-                                        <span className="font-medium text-white truncate">{getChannelName(channel)}</span>
+                                    <div className="flex items-center justify-between mb-1">
+                                        <span className="font-semibold text-white text-sm truncate">{getChannelName(channel)}</span>
                                         {channel.lastMessage && (
-                                            <span className="text-xs text-gray-500">
+                                            <span className="text-xs text-gray-400 shrink-0">
                                                 {new Date(channel.lastMessage.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             </span>
                                         )}
@@ -374,48 +385,51 @@ export default function Index({ auth, channels = [], initialChannelSlug = null }
                 </div>
 
                 {/* Chat Area */}
-                <div className="communication-chat-area flex-1 flex flex-col bg-[#16161d]">
+                <div className="communication-chat-area flex-1 flex flex-col bg-gradient-to-b from-[#16213e] to-[#1a1a2e]">
                     {selectedChannel ? (
                         <>
                             {/* Chat Header */}
-                            <div className="chat-header p-4 border-b border-white/5 flex items-center justify-between bg-[#16161d]">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-burgundy-600 to-burgundy-900 flex items-center justify-center text-white font-bold">
-                                        {selectedChannel.type === 'direct' ? <MessageSquare size={18} /> : <Hash size={18} />}
+                            <div className="chat-header p-5 border-b border-white/5 bg-[#16213e]/80 backdrop-blur-sm flex items-center justify-between">
+                                <div className="flex items-center gap-3.5">
+                                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-burgundy-600 to-burgundy-800 flex items-center justify-center text-white font-bold shadow-lg">
+                                        {selectedChannel.type === 'direct' ? <MessageSquare size={20} /> : <Hash size={20} />}
                                     </div>
                                     <div>
-                                        <h3 className="font-bold text-white">{getChannelName(selectedChannel)}</h3>
-                                        <div className="flex items-center gap-2 text-xs text-gray-400">
+                                        <h3 className="font-bold text-white text-lg">{getChannelName(selectedChannel)}</h3>
+                                        <div className="flex items-center gap-2 text-xs text-gray-400 mt-0.5">
                                             <span>{getChannelTypeLabel(selectedChannel.type)}</span>
                                             <span className="w-1 h-1 rounded-full bg-gray-600"></span>
-                                            <span className="flex items-center gap-1">
-                                                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                                            <span className="flex items-center gap-1.5">
+                                                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-lg shadow-green-500/30"></span>
                                                 {onlineUsers.length} online
                                             </span>
                                         </div>
                                     </div>
                                 </div>
-                                <div className="flex gap-2">
-                                    <button onClick={() => alert('Voice calls coming soon!')} className="btn-icon hover:bg-white/5">
-                                        <Phone size={20} />
+                                <div className="flex gap-1.5">
+                                    <button onClick={() => alert('Voice calls coming soon!')} className="p-2.5 hover:bg-white/5 rounded-xl text-gray-400 hover:text-white transition-all">
+                                        <Phone size={18} />
                                     </button>
-                                    <button onClick={() => alert('Video calls coming soon!')} className="btn-icon hover:bg-white/5">
-                                        <Video size={20} />
+                                    <button onClick={() => alert('Video calls coming soon!')} className="p-2.5 hover:bg-white/5 rounded-xl text-gray-400 hover:text-white transition-all">
+                                        <Video size={18} />
                                     </button>
-                                    <button onClick={() => setShowManageModal(true)} className="btn-icon hover:bg-white/5">
-                                        <Info size={20} />
+                                    <button onClick={() => setShowManageModal(true)} className="p-2.5 hover:bg-white/5 rounded-xl text-gray-400 hover:text-white transition-all">
+                                        <Info size={18} />
                                     </button>
-                                    <button onClick={() => setShowManageModal(true)} className="btn-icon hover:bg-white/5">
-                                        <MoreVertical size={20} />
+                                    <button onClick={() => setShowManageModal(true)} className="p-2.5 hover:bg-white/5 rounded-xl text-gray-400 hover:text-white transition-all">
+                                        <MoreVertical size={18} />
                                     </button>
                                 </div>
                             </div>
 
                             {/* Messages */}
-                            <div className="chat-messages flex-1 overflow-y-auto p-6 space-y-4">
+                            <div className="chat-messages flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
                                 {loading ? (
                                     <div className="flex items-center justify-center h-full">
-                                        <div className="text-gray-500">Loading messages...</div>
+                                        <div className="text-gray-400 flex items-center gap-2">
+                                            <div className="w-5 h-5 border-2 border-burgundy-500 border-t-transparent rounded-full animate-spin"></div>
+                                            Loading messages...
+                                        </div>
                                     </div>
                                 ) : (
                                     <>
@@ -423,47 +437,47 @@ export default function Index({ auth, channels = [], initialChannelSlug = null }
                                             const isMe = message.sender_id === auth.user.id;
                                             return (
                                                 <div key={message.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-                                                    <div className="flex gap-3 max-w-[70%]">
+                                                    <div className="flex gap-3 max-w-[65%]">
                                                         {!isMe && (
-                                                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-burgundy-600 to-burgundy-900 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                                                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-burgundy-600 to-burgundy-800 flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-lg">
                                                                 {message.sender?.name?.substring(0, 2).toUpperCase()}
                                                             </div>
                                                         )}
-                                                        <div className={`space-y-1 ${isMe ? 'items-end' : 'items-start'} flex flex-col`}>
+                                                        <div className={`space-y-1.5 ${isMe ? 'items-end' : 'items-start'} flex flex-col`}>
                                                             {!isMe && (
                                                                 <div className="text-xs text-gray-400 font-medium ml-1">
                                                                     {message.sender?.name}
                                                                 </div>
                                                             )}
-                                                            <div className={`p-3 rounded-2xl ${isMe ? 'bg-burgundy-600 text-white rounded-tr-sm' : 'bg-[#252532] text-white rounded-tl-sm'}`}>
+                                                            <div className={`p-4 rounded-2xl shadow-lg ${isMe ? 'bg-gradient-to-br from-burgundy-600 to-burgundy-700 text-white rounded-tr-md' : 'bg-[#2a2a45] text-white rounded-tl-md'}`}>
                                                                 {message.content && (
-                                                                    <div className="text-sm whitespace-pre-wrap">{message.content}</div>
+                                                                    <div className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</div>
                                                                 )}
                                                                 {message.attachments?.length > 0 && (
-                                                                    <div className="mt-2 space-y-2">
+                                                                    <div className={`mt-3 space-y-2.5 ${message.content ? 'pt-3 border-t border-white/10' : ''}`}>
                                                                         {message.attachments.map(file => (
                                                                             <div key={file.id}>
                                                                                 {file.file_type.startsWith('image/') ? (
                                                                                     <img
                                                                                         src={file.url}
                                                                                         alt={file.file_name}
-                                                                                        className="max-w-full rounded-xl max-h-64 object-cover"
+                                                                                        className="max-w-full rounded-xl max-h-72 object-cover shadow-md cursor-pointer hover:scale-[1.01] transition-transform"
                                                                                     />
                                                                                 ) : file.file_type.startsWith('audio/') ? (
                                                                                     <div className="flex items-center gap-3 p-3 bg-black/20 rounded-xl">
-                                                                                        <div className="p-2 bg-white/10 rounded-full">
-                                                                                            <Mic size={16} />
+                                                                                        <div className="p-2.5 bg-white/10 rounded-full">
+                                                                                            <Mic size={18} />
                                                                                         </div>
-                                                                                        <audio controls src={file.url} className="h-10" />
+                                                                                        <audio controls src={file.url} className="h-11 flex-1" />
                                                                                     </div>
                                                                                 ) : (
                                                                                     <a
                                                                                         href={file.url}
                                                                                         target="_blank"
                                                                                         rel="noopener noreferrer"
-                                                                                        className="flex items-center gap-3 p-3 bg-black/20 rounded-xl hover:bg-black/30 transition-colors"
+                                                                                        className="flex items-center gap-3 p-3.5 bg-black/20 rounded-xl hover:bg-black/30 transition-all"
                                                                                     >
-                                                                                        <FileText size={20} />
+                                                                                        <FileText size={22} className="text-burgundy-400" />
                                                                                         <div className="flex-1 min-w-0">
                                                                                             <div className="text-sm font-medium truncate">{file.file_name}</div>
                                                                                             <div className="text-xs text-gray-400">
@@ -479,7 +493,7 @@ export default function Index({ auth, channels = [], initialChannelSlug = null }
                                                             </div>
                                                             <div className="flex items-center gap-2">
                                                                 {message.reactions?.length > 0 && (
-                                                                    <div className="flex gap-1">
+                                                                    <div className="flex gap-1.5">
                                                                         {message.reactions.reduce((acc, curr) => {
                                                                             const existing = acc.find(r => r.emoji === curr.emoji);
                                                                             if (existing) {
@@ -492,7 +506,7 @@ export default function Index({ auth, channels = [], initialChannelSlug = null }
                                                                             <button
                                                                                 key={reaction.emoji}
                                                                                 onClick={() => toggleReaction(message.id, reaction.emoji)}
-                                                                                className={`px-2 py-0.5 rounded-full text-xs ${reaction.isMe ? 'bg-burgundy-500/30 text-burgundy-400' : 'bg-white/5 text-gray-300'}`}
+                                                                                className={`px-2.5 py-1 rounded-full text-xs font-medium shadow-sm ${reaction.isMe ? 'bg-burgundy-500/30 text-burgundy-400 border border-burgundy-500/20' : 'bg-white/5 text-gray-300 border border-white/10'}`}
                                                                             >
                                                                                 {reaction.emoji} {reaction.count}
                                                                             </button>
@@ -509,7 +523,12 @@ export default function Index({ auth, channels = [], initialChannelSlug = null }
                                             );
                                         })}
                                         {typingUsers.length > 0 && (
-                                            <div className="text-xs text-gray-500 italic">
+                                            <div className="text-sm text-gray-400 italic flex items-center gap-2 ml-12">
+                                                <div className="flex gap-1">
+                                                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                                                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                                                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"></span>
+                                                </div>
                                                 {typingUsers.length === 1
                                                     ? `${typingUsers[0].name} is typing...`
                                                     : `${typingUsers.length} people are typing...`
@@ -522,18 +541,18 @@ export default function Index({ auth, channels = [], initialChannelSlug = null }
                             </div>
 
                             {/* Input Area */}
-                            <div className="chat-input-area p-4 border-t border-white/5 bg-[#16161d]">
+                            <div className="chat-input-area p-4 border-t border-white/5 bg-[#16213e]">
                                 <form onSubmit={handleSendMessage} className="space-y-3">
                                     {data.attachments.length > 0 && (
                                         <div className="flex flex-wrap gap-2">
                                             {data.attachments.map((file, idx) => (
-                                                <div key={idx} className="flex items-center gap-2 bg-black/20 rounded-xl p-2 pl-3">
-                                                    <FileText size={14} />
-                                                    <span className="text-sm text-gray-300 truncate max-w-[150px]">{file.name}</span>
+                                                <div key={idx} className="flex items-center gap-2 bg-black/30 border border-white/10 rounded-xl px-3 py-2">
+                                                    <FileText size={14} className="text-gray-400" />
+                                                    <span className="text-sm text-gray-300 truncate max-w-[200px]">{file.name}</span>
                                                     <button
                                                         type="button"
                                                         onClick={() => removeAttachment(idx)}
-                                                        className="p-1 hover:bg-red-500/20 rounded text-gray-400 hover:text-red-400"
+                                                        className="p-1 hover:bg-red-500/20 rounded text-gray-400 hover:text-red-400 transition-colors"
                                                     >
                                                         <X size={14} />
                                                     </button>
@@ -542,93 +561,110 @@ export default function Index({ auth, channels = [], initialChannelSlug = null }
                                         </div>
                                     )}
 
-                                    <div className="flex items-end gap-3">
-                                        <div className="flex-1 bg-[#252532] rounded-2xl p-2 flex items-end gap-2">
-                                            <div className="flex gap-1">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => fileInputRef.current?.click()}
-                                                    className="p-2 hover:bg-white/5 rounded-xl text-gray-400 hover:text-white transition-colors"
-                                                    title="Attach File"
-                                                >
-                                                    <Paperclip size={20} />
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => {
-                                                        const input = document.createElement('input');
-                                                        input.type = 'file';
-                                                        input.accept = 'image/*';
-                                                        input.multiple = true;
-                                                        input.onchange = (e) => {
-                                                            const files = Array.from(e.target.files);
-                                                            setData('attachments', [...data.attachments, ...files]);
-                                                        };
-                                                        input.click();
-                                                    }}
-                                                    className="p-2 hover:bg-white/5 rounded-xl text-gray-400 hover:text-white transition-colors"
-                                                    title="Add Image"
-                                                >
-                                                    <Image size={20} />
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => alert('Emoji picker coming soon!')}
-                                                    className="p-2 hover:bg-white/5 rounded-xl text-gray-400 hover:text-white transition-colors"
-                                                    title="Add Emoji"
-                                                >
-                                                    <Smile size={20} />
-                                                </button>
-                                                {!isRecording ? (
+                                    {isRecording ? (
+                                        <div className="flex items-center gap-3 bg-gradient-to-r from-red-500/20 to-red-600/10 border border-red-500/30 rounded-2xl p-4">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse shadow-lg shadow-red-500/30"></div>
+                                                <span className="text-red-400 font-medium">Recording</span>
+                                                <span className="text-red-300 font-mono text-lg">{formatTime(recordingTime)}</span>
+                                            </div>
+                                            <div className="flex-1"></div>
+                                            <button
+                                                type="button"
+                                                onClick={cancelRecording}
+                                                className="px-4 py-2 bg-gray-700/50 hover:bg-gray-700 text-gray-300 rounded-xl text-sm font-medium transition-colors"
+                                            >
+                                                Cancel
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={stopRecording}
+                                                className="px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white rounded-xl text-sm font-medium transition-all shadow-lg shadow-red-500/25 flex items-center gap-2"
+                                            >
+                                                <StopCircle size={16} />
+                                                Stop
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-end gap-3">
+                                            <div className="flex-1 bg-[#2a2a45] rounded-2xl p-2.5 flex items-end gap-1.5 border border-white/5">
+                                                <div className="flex gap-1">
                                                     <button
                                                         type="button"
-                                                        onMouseDown={startRecording}
-                                                        onMouseUp={stopRecording}
-                                                        onTouchStart={startRecording}
-                                                        onTouchEnd={stopRecording}
-                                                        className="p-2 hover:bg-white/5 rounded-xl text-gray-400 hover:text-white transition-colors"
-                                                        title="Voice Message (Hold to record)"
+                                                        onClick={() => fileInputRef.current?.click()}
+                                                        className="p-2.5 hover:bg-white/5 rounded-xl text-gray-400 hover:text-white transition-colors"
+                                                        title="Attach File"
                                                     >
-                                                        <Mic size={20} />
+                                                        <Paperclip size={18} />
                                                     </button>
-                                                ) : (
-                                                    <div className="flex items-center gap-2 px-3 py-2 bg-red-500/20 text-red-400 rounded-xl animate-pulse">
-                                                        <Mic size={20} />
-                                                        <span className="text-sm font-medium">Recording {formatTime(recordingTime)}</span>
-                                                    </div>
-                                                )}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            const input = document.createElement('input');
+                                                            input.type = 'file';
+                                                            input.accept = 'image/*';
+                                                            input.multiple = true;
+                                                            input.onchange = (e) => {
+                                                                const files = Array.from(e.target.files);
+                                                                setData('attachments', [...data.attachments, ...files]);
+                                                            };
+                                                            input.click();
+                                                        }}
+                                                        className="p-2.5 hover:bg-white/5 rounded-xl text-gray-400 hover:text-white transition-colors"
+                                                        title="Add Image"
+                                                    >
+                                                        <Image size={18} />
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => alert('Emoji picker coming soon!')}
+                                                        className="p-2.5 hover:bg-white/5 rounded-xl text-gray-400 hover:text-white transition-colors"
+                                                        title="Add Emoji"
+                                                    >
+                                                        <Smile size={18} />
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={startRecording}
+                                                        className="p-2.5 hover:bg-white/5 rounded-xl text-gray-400 hover:text-white transition-colors"
+                                                        title="Voice Message"
+                                                    >
+                                                        <Mic size={18} />
+                                                    </button>
+                                                </div>
+                                                <textarea
+                                                    rows="1"
+                                                    value={data.content}
+                                                    onChange={e => {
+                                                        setData('content', e.target.value);
+                                                        if (window.Echo) {
+                                                            window.Echo.join(`communication.channel.${selectedChannel.id}`)
+                                                                .whisper('typing', {
+                                                                    id: auth.user.id,
+                                                                    name: auth.user.name
+                                                                });
+                                                        }
+                                                    }}
+                                                    placeholder="Type your message..."
+                                                    className="flex-1 bg-transparent text-white placeholder-gray-500 resize-none outline-none text-sm py-2 px-2"
+                                                    style={{ minHeight: '24px', maxHeight: '120px' }}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter' && !e.shiftKey) {
+                                                            e.preventDefault();
+                                                            handleSendMessage(e);
+                                                        }
+                                                    }}
+                                                />
                                             </div>
-                                            <textarea
-                                                rows="1"
-                                                value={data.content}
-                                                onChange={e => {
-                                                    setData('content', e.target.value);
-                                                    if (window.Echo) {
-                                                        window.Echo.join(`communication.channel.${selectedChannel.id}`)
-                                                            .whisper('typing', {
-                                                                id: auth.user.id,
-                                                                name: auth.user.name
-                                                            });
-                                                    }
-                                                }}
-                                                placeholder="Type your message..."
-                                                className="flex-1 bg-transparent text-white placeholder-gray-500 resize-none outline-none text-sm py-2"
-                                                onKeyDown={(e) => {
-                                                    if (e.key === 'Enter' && !e.shiftKey) {
-                                                        e.preventDefault();
-                                                        handleSendMessage(e);
-                                                    }
-                                                }}
-                                            />
+                                            <button
+                                                type="submit"
+                                                disabled={processing || (!data.content && data.attachments.length === 0)}
+                                                className="p-3.5 bg-gradient-to-r from-burgundy-600 to-burgundy-700 hover:from-burgundy-500 hover:to-burgundy-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-2xl text-white transition-all shadow-lg shadow-burgundy-500/25"
+                                            >
+                                                <Send size={20} />
+                                            </button>
                                         </div>
-                                        <button
-                                            type="submit"
-                                            disabled={processing || (!data.content && data.attachments.length === 0)}
-                                            className="p-3 bg-burgundy-600 hover:bg-burgundy-500 disabled:opacity-50 rounded-2xl text-white transition-colors"
-                                        >
-                                            <Send size={20} />
-                                        </button>
-                                    </div>
+                                    )}
                                     <input
                                         type="file"
                                         multiple
@@ -640,26 +676,26 @@ export default function Index({ auth, channels = [], initialChannelSlug = null }
                             </div>
                         </>
                     ) : (
-                        <div className="chat-empty-state flex-1 flex items-center justify-center">
-                            <div className="text-center">
-                                <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-burgundy-600/20 to-burgundy-900/20 flex items-center justify-center">
-                                    <MessageSquare size={48} className="text-burgundy-400" />
+                        <div className="chat-empty-state flex-1 flex items-center justify-center p-10">
+                            <div className="text-center max-w-md">
+                                <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-gradient-to-br from-burgundy-600/20 to-burgundy-800/20 flex items-center justify-center shadow-inner">
+                                    <MessageSquare size={56} className="text-burgundy-400" />
                                 </div>
-                                <h3 className="text-xl font-bold text-white mb-2">Select a Conversation</h3>
-                                <p className="text-gray-400 mb-4">Choose a channel from the sidebar or start a new chat</p>
-                                <div className="flex gap-3 justify-center">
+                                <h3 className="text-2xl font-bold text-white mb-3">Select a Conversation</h3>
+                                <p className="text-gray-400 mb-8 text-base">Choose a channel from the sidebar or start a new chat</p>
+                                <div className="flex gap-4 justify-center flex-wrap">
                                     <button
                                         onClick={() => setShowUserSearch(true)}
-                                        className="px-4 py-2 bg-burgundy-600 hover:bg-burgundy-500 text-white rounded-xl font-medium transition-colors"
+                                        className="px-6 py-3 bg-gradient-to-r from-burgundy-600 to-burgundy-700 hover:from-burgundy-500 hover:to-burgundy-600 text-white rounded-2xl font-medium transition-all shadow-lg shadow-burgundy-500/25 flex items-center gap-2"
                                     >
-                                        <User size={16} className="inline mr-2" />
+                                        <User size={18} />
                                         Start Private Chat
                                     </button>
                                     <button
                                         onClick={() => setShowCreateModal(true)}
-                                        className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-xl font-medium transition-colors"
+                                        className="px-6 py-3 bg-white/5 hover:bg-white/10 text-white rounded-2xl font-medium transition-all border border-white/10 flex items-center gap-2"
                                     >
-                                        <Users size={16} className="inline mr-2" />
+                                        <Users size={18} />
                                         Create Group
                                     </button>
                                 </div>
