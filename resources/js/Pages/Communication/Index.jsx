@@ -25,6 +25,7 @@ export default function Index({ auth, channels = [], initialChannelSlug = null }
     const [searching, setSearching] = useState(false);
     const [isRecording, setIsRecording] = useState(false);
     const [recordingTime, setRecordingTime] = useState(0);
+    const [showReactionPicker, setShowReactionPicker] = useState(null); // track which message's picker to show
     const mediaRecorderRef = useRef(null);
     const chunksRef = useRef([]);
     const timerRef = useRef(null);
@@ -511,7 +512,7 @@ export default function Index({ auth, channels = [], initialChannelSlug = null }
                                                                                     >
                                                                                         <FileText size={20} />
                                                                                         <span className="filename">{file.file_name}</span>
-                                                                                    </a>
+                                                                                    </a>)
                                                                                 )}
                                                                             </div>
                                                                         ))}
@@ -540,20 +541,29 @@ export default function Index({ auth, channels = [], initialChannelSlug = null }
                                                                     </button>
                                                                 ))}
 
-                                                                <div className="add-reaction">
-                                                                    <button className="add-btn">
+                                                                <div className="add-reaction" style={{ position: 'relative' }}>
+                                                                    <button
+                                                                        className="add-btn"
+                                                                        onClick={() => setShowReactionPicker(showReactionPicker === message.id ? null : message.id)}
+                                                                        style={{ opacity: 1 }}
+                                                                    >
                                                                         <Smile size={12} />
                                                                     </button>
-                                                                    <div className="emoji-picker">
-                                                                        {['👍', '❤️', '🙏', '🎉', '🔥'].map(emoji => (
-                                                                            <button
-                                                                                key={emoji}
-                                                                                onClick={() => toggleReaction(message.id, emoji)}
-                                                                            >
-                                                                                {emoji}
-                                                                            </button>
-                                                                        ))}
-                                                                    </div>
+                                                                    {showReactionPicker === message.id && (
+                                                                        <div className="communication-reaction-picker" style={{ position: 'absolute', bottom: '100%', left: 0, marginBottom: '8px' }}>
+                                                                            {['👍', '❤️', '🙏', '🎉', '🔥', '😂', '😮', '😢', '😡'].map(emoji => (
+                                                                                <button
+                                                                                    key={emoji}
+                                                                                    onClick={() => {
+                                                                                        toggleReaction(message.id, emoji);
+                                                                                        setShowReactionPicker(null);
+                                                                                    }}
+                                                                                >
+                                                                                    {emoji}
+                                                                                </button>
+                                                                            ))}
+                                                                        </div>
+                                                                    )}
                                                                 </div>
                                                             </div>
 
