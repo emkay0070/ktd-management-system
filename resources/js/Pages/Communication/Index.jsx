@@ -163,12 +163,21 @@ export default function Index({ auth, channels = [], initialChannelSlug = null }
             formData.append('type', data.type);
             data.attachments.forEach((file) => {
                 formData.append('attachments[]', file);
+                console.log('Attaching file:', file.name, file.type, file.size);
             });
+
+            // Log form data contents
+            console.log('Sending form data:');
+            for (let [key, value] of formData.entries()) {
+                console.log(key, value);
+            }
 
             const response = await axios.post(
                 route('communication.messages.store', selectedChannel.slug),
                 formData
             );
+
+            console.log('Response:', response.data);
 
             // Add the new message to the messages array immediately
             if (response.data) {
@@ -178,6 +187,10 @@ export default function Index({ auth, channels = [], initialChannelSlug = null }
             reset();
         } catch (error) {
             console.error('Failed to send message:', error);
+            if (error.response) {
+                console.error('Error response data:', error.response.data);
+                console.error('Error response status:', error.response.status);
+            }
         }
     };
 
